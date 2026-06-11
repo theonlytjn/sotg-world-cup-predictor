@@ -264,3 +264,26 @@ create policy "award predictions update own" on public.award_predictions
         and (ac.deadline is null or ac.deadline > now())
     )
   );
+
+-- ============================================================
+--  Phase 2 Slice 2: Players
+--  Populated by: npm run seed:players
+-- ============================================================
+
+create table if not exists public.players (
+  id           serial primary key,
+  external_id  integer unique,          -- football-data.org player id
+  name         text not null,
+  position     text,                    -- Goalkeeper | Defence | Midfield | Offence
+  nationality  text,
+  shirt_number integer,
+  team_id      integer references public.teams (id)
+);
+
+create index if not exists players_team_idx on public.players (team_id);
+
+alter table public.players enable row level security;
+
+drop policy if exists "players read all" on public.players;
+create policy "players read all" on public.players
+  for select using (true);

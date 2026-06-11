@@ -5,14 +5,30 @@ import { createClient } from '@/lib/supabase/client';
 import type { AwardCategory, AwardPrediction } from '@/lib/types';
 
 type Team = { id: number; name: string; tla: string | null };
+type Player = { id: number; name: string; position: string | null; team_id: number | null };
 
 const CONFEDERATIONS = ['UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'];
+
+const POS_ORDER: Record<string, number> = {
+  Goalkeeper: 0,
+  Defence: 1,
+  Midfield: 2,
+  Offence: 3,
+};
+
+const POS_ABBR: Record<string, string> = {
+  Goalkeeper: 'GK',
+  Defence: 'DEF',
+  Midfield: 'MID',
+  Offence: 'FWD',
+};
 
 export default function AwardsPage() {
   const supabase = useMemo(() => createClient(), []);
   const [userId, setUserId] = useState<string | null>(null);
   const [categories, setCategories] = useState<AwardCategory[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [preds, setPreds] = useState<Record<number, AwardPrediction>>({});
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +37,7 @@ export default function AwardsPage() {
     if (!u.user) return;
     setUserId(u.user.id);
 
-    const [{ data: cats }, { data: ts }, { data: ap }] = await Promise.all([
+    const [{ data: cats }, { data: ts }, { data: ps }, { data: ap }] = await Promise.all([
       supabase
         .from('award_categories')
         .select('*')
@@ -31,6 +47,11 @@ export default function AwardsPage() {
         .select('id, name, tla')
         .order('name', { ascending: true }),
       supabase
+        .from('players')
+        .select('id, name, position, team_id')
+        .order('team_id', { ascending: true })
+        .order('name', { ascending: true }),
+      supabase
         .from('award_predictions')
         .select('*')
         .eq('user_id', u.user.id),
@@ -38,6 +59,7 @@ export default function AwardsPage() {
 
     setCategories((cats as AwardCategory[]) ?? []);
     setTeams((ts as Team[]) ?? []);
+    setPlayers((ps as Player[]) ?? []);
     const map: Record<number, AwardPrediction> = {};
     for (const p of (ap as AwardPrediction[]) ?? []) map[p.category_id] = p;
     setPreds(map);
@@ -45,6 +67,36 @@ export default function AwardsPage() {
   }, [supabase]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Group players by team for optgroup selects
+  const playersByTeam = useMemo(() => {
+    const teamMap = new Map<number, Team>();
+    for (const t of teams) teamMap.set(t.id, t);
+
+    const groups = new Map<number, { team: Team; players: Player[] }>();
+    for (const p of players) {
+      if (p.team_id == null) continue;
+      if (!groups.has(p.team_id)) {
+        const team = teamMap.get(p.team_id);
+        if (!team) continue;
+        groups.set(p.team_id, { team, players: [] });
+      }
+      groups.get(p.team_id)!.players.push(p);
+    }
+
+    // Sort players within each team by position order, then name
+    for (const g of groups.values()) {
+      g.players.sort((a, b) => {
+        const pa = POS_ORDER[a.position ?? ''] ?? 99;
+        const pb = POS_ORDER[b.position ?? ''] ?? 99;
+        return pa !== pb ? pa - pb : a.name.localeCompare(b.name);
+      });
+    }
+
+    return [...groups.values()].sort((a, b) =>
+      (a.team.tla ?? a.team.name).localeCompare(b.team.tla ?? b.team.name)
+    );
+  }, [players, teams]);
 
   if (loading) {
     return <p className="py-20 text-center font-mono text-sm text-chalk/40">Loading…</p>;
@@ -63,6 +115,7 @@ export default function AwardsPage() {
             key={cat.id}
             category={cat}
             teams={teams}
+            playersByTeam={playersByTeam}
             pred={preds[cat.id]}
             userId={userId!}
             supabase={supabase}
@@ -88,9 +141,12 @@ export default function AwardsPage() {
   );
 }
 
+type TeamGroup = { team: Team; players: Player[] };
+
 function CategoryRow({
   category,
   teams,
+  playersByTeam,
   pred,
   userId,
   supabase,
@@ -98,6 +154,7 @@ function CategoryRow({
 }: {
   category: AwardCategory;
   teams: Team[];
+  playersByTeam: TeamGroup[];
   pred?: AwardPrediction;
   userId: string;
   supabase: ReturnType<typeof createClient>;
@@ -160,6 +217,7 @@ function CategoryRow({
           disabled={locked}
           kind={category.pick_kind}
           teams={teams}
+          playersByTeam={playersByTeam}
         />
         <PickInput
           label="2nd choice"
@@ -168,6 +226,7 @@ function CategoryRow({
           disabled={locked}
           kind={category.pick_kind}
           teams={teams}
+          playersByTeam={playersByTeam}
         />
       </div>
 
@@ -194,6 +253,7 @@ function PickInput({
   disabled,
   kind,
   teams,
+  playersByTeam,
 }: {
   label: string;
   value: string;
@@ -201,6 +261,7 @@ function PickInput({
   disabled: boolean;
   kind: AwardCategory['pick_kind'];
   teams: Team[];
+  playersByTeam: TeamGroup[];
 }) {
   const base =
     'w-full rounded-xl border border-white/15 bg-pitch-800 px-3 py-2.5 font-mono text-sm text-chalk outline-none focus:border-lime/70 disabled:opacity-60';
@@ -208,13 +269,9 @@ function PickInput({
   return (
     <div>
       <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-chalk/40">{label}</p>
+
       {kind === 'team' && (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          className={base}
-        >
+        <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={base}>
           <option value="">— pick a team —</option>
           {teams.map((t) => (
             <option key={t.id} value={String(t.id)}>
@@ -223,29 +280,41 @@ function PickInput({
           ))}
         </select>
       )}
-      {kind === 'confederation' && (
-        <select
+
+      {kind === 'player' && playersByTeam.length > 0 && (
+        <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={base}>
+          <option value="">— pick a player —</option>
+          {playersByTeam.map(({ team, players }) => (
+            <optgroup key={team.id} label={team.tla ?? team.name}>
+              {players.map((p) => (
+                <option key={p.id} value={String(p.id)}>
+                  {p.name}
+                  {p.position ? ` · ${POS_ABBR[p.position] ?? p.position}` : ''}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      )}
+
+      {kind === 'player' && playersByTeam.length === 0 && (
+        <input
+          type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
+          placeholder="Player name (run seed:players to load squads)"
           className={base}
-        >
+        />
+      )}
+
+      {kind === 'confederation' && (
+        <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={base}>
           <option value="">— pick a confederation —</option>
           {CONFEDERATIONS.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
-      )}
-      {kind === 'player' && (
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={() => { /* save handled by button */ }}
-          disabled={disabled}
-          placeholder="Player name"
-          className={base}
-        />
       )}
     </div>
   );

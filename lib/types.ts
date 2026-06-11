@@ -54,6 +54,16 @@ export interface LeaderboardRow {
   award_points: number;
 }
 
+export interface Player {
+  id: number;
+  external_id: number | null;
+  name: string;
+  position: string | null;
+  nationality: string | null;
+  shirt_number: number | null;
+  team_id: number | null;
+}
+
 export interface AwardCategory {
   id: number;
   slug: string;
