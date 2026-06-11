@@ -112,14 +112,15 @@ create policy "predictions read" on public.match_predictions
     )
   );
 
---   * You can insert/update only your own rows, and only BEFORE kickoff.
+--   * You can insert/update only your own rows, and only >15 min before kickoff.
 drop policy if exists "predictions insert own" on public.match_predictions;
 create policy "predictions insert own" on public.match_predictions
   for insert with check (
     auth.uid() = user_id
     and exists (
       select 1 from public.fixtures f
-      where f.id = fixture_id and f.kickoff > now()
+      where f.id = fixture_id
+        and f.kickoff > now() + interval '15 minutes'
     )
   );
 
@@ -130,7 +131,8 @@ create policy "predictions update own" on public.match_predictions
     auth.uid() = user_id
     and exists (
       select 1 from public.fixtures f
-      where f.id = fixture_id and f.kickoff > now()
+      where f.id = fixture_id
+        and f.kickoff > now() + interval '15 minutes'
     )
   );
 
@@ -441,4 +443,34 @@ alter table public.scoring_rules enable row level security;
 
 drop policy if exists "scoring rules read all" on public.scoring_rules;
 create policy "scoring rules read all" on public.scoring_rules
+  for select using (true);
+
+-- ============================================================
+--  FIXTURES — Tier 1 extras
+-- ============================================================
+alter table public.fixtures add column if not exists goals jsonb;
+
+-- ============================================================
+--  GROUP STANDINGS  (populated by /api/cron/results each run)
+-- ============================================================
+create table if not exists public.group_standings (
+  group_label   text    not null,
+  team_id       integer not null references public.teams(id),
+  position      integer not null,
+  played        integer not null default 0,
+  won           integer not null default 0,
+  drawn         integer not null default 0,
+  lost          integer not null default 0,
+  goals_for     integer not null default 0,
+  goals_against integer not null default 0,
+  goal_diff     integer not null default 0,
+  points        integer not null default 0,
+  updated_at    timestamptz not null default now(),
+  primary key (group_label, team_id)
+);
+
+alter table public.group_standings enable row level security;
+
+drop policy if exists "group standings read" on public.group_standings;
+create policy "group standings read" on public.group_standings
   for select using (true);

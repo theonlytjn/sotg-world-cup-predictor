@@ -20,6 +20,14 @@ type Fixture = {
 type Pred = { fixture_id: number; home_pred: number; away_pred: number; points: number | null };
 
 const LIVE = new Set(['IN_PLAY', 'PAUSED']);
+const LOCK_BEFORE_MS = 15 * 60_000; // predictions lock 15 min before kickoff
+
+function getLockStatus(kickoff: string): { locked: boolean; locksInMin: number | null } {
+  const lockAt = new Date(kickoff).getTime() - LOCK_BEFORE_MS;
+  const now = Date.now();
+  if (lockAt <= now) return { locked: true, locksInMin: null };
+  return { locked: false, locksInMin: Math.ceil((lockAt - now) / 60_000) };
+}
 
 type DateGroup = { dateKey: string; label: string; fixtures: Fixture[] };
 type MatchdayGroup = {
@@ -235,9 +243,10 @@ function FixtureRow({
   supabase: ReturnType<typeof createClient>;
   onSaved: (p: Pred) => void;
 }) {
-  const locked = new Date(fixture.kickoff).getTime() <= Date.now();
+  const { locked, locksInMin } = getLockStatus(fixture.kickoff);
   const finished = fixture.status === 'FINISHED';
   const live = LIVE.has(fixture.status);
+  const closingWarning = !locked && locksInMin !== null && locksInMin <= 30;
 
   const [home, setHome] = useState<string>(pred ? String(pred.home_pred) : '');
   const [away, setAway] = useState<string>(pred ? String(pred.away_pred) : '');
@@ -305,20 +314,28 @@ function FixtureRow({
 
       {/* Bottom bar: action + result */}
       <div className="mt-3 flex items-center justify-between">
-        {!locked ? (
-          <button
-            onClick={save}
-            disabled={home === '' || away === '' || state === 'saving'}
-            className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-display text-xs uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
-          >
-            {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
-          </button>
-        ) : (
-          <span className="flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-chalk/30">
-            <HugeiconsIcon icon={LockIcon} size={12} color="currentColor" strokeWidth={2} />
-            Locked
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {!locked ? (
+            <button
+              onClick={save}
+              disabled={home === '' || away === '' || state === 'saving'}
+              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-display text-xs uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+            >
+              {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
+            </button>
+          ) : (
+            <span className="flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-chalk/30">
+              <HugeiconsIcon icon={LockIcon} size={12} color="currentColor" strokeWidth={2} />
+              Locked
+            </span>
+          )}
+          {closingWarning && (
+            <span className="flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 font-mono text-[10px] text-gold">
+              <HugeiconsIcon icon={LockIcon} size={10} color="currentColor" strokeWidth={2} />
+              Locks in {locksInMin}m
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2 font-mono text-xs">
           {finished && (

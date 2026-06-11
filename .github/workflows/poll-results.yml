@@ -1,16 +1,14 @@
-# Polls the results endpoint every 15 min so scores update during matches.
-# Vercel's Hobby plan only allows ONCE-A-DAY crons, so we drive frequent
-# polling from GitHub Actions instead (free).
+# Polls the results endpoint every 5 min (Tier 1 football-data.org).
+# Also pulls goal scorers and group standings on each run.
+# Vercel Hobby only allows once-daily crons, so GitHub Actions drives this.
 #
-# Set two repo secrets (Settings -> Secrets and variables -> Actions):
+# Repo secrets needed (Settings → Secrets and variables → Actions):
 #   APP_URL     = https://your-app.vercel.app
-#   CRON_SECRET = the same value you put in Vercel env
-#
-# Tip: you can disable this workflow outside tournament dates to save minutes.
+#   CRON_SECRET = same value as in Vercel env
 name: Poll World Cup results
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch: {}
 
 jobs:
