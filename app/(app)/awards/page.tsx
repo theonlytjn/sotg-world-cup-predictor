@@ -191,7 +191,7 @@ export default function AwardsPage() {
               <span className="h-px flex-1 bg-white/10" />
             </div>
             {description && <p className="mb-4 text-sm text-chalk/55">{description}</p>}
-            <div className={isMain ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'space-y-3'}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {cats.map((cat) => (
                 <CategoryRow
                   key={cat.id}
