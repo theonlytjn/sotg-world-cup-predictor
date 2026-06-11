@@ -395,3 +395,28 @@ create policy "poll responses update own" on public.poll_responses
         and pq.opens_at <= now()
     )
   );
+
+-- ============================================================
+--  Phase 3 Step 2: Admin function + forced nicknames
+-- ============================================================
+
+-- nickname_set flag — false until user completes onboarding screen
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS nickname_set boolean NOT NULL DEFAULT false;
+
+-- nicknames must be unique on the leaderboard
+ALTER TABLE public.profiles
+  DROP CONSTRAINT IF EXISTS profiles_display_name_unique;
+ALTER TABLE public.profiles
+  ADD CONSTRAINT profiles_display_name_unique UNIQUE (display_name);
+
+-- is_admin() — returns true for the single admin email; use in RLS policies
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT coalesce(auth.jwt() ->> 'email', '') = 'tony@theonlytjn.com'
+$$;
