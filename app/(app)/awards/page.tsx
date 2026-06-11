@@ -4,33 +4,33 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { AwardCategory, AwardPrediction } from '@/lib/types';
 
-type Team = { id: number; name: string; tla: string | null };
+type Team = { id: number; name: string; tla: string | null; confederation: string | null };
 type Player = { id: number; name: string; position: string | null; team_id: number | null };
+type TeamGroup = { team: Team; players: Player[] };
 
 const CONFEDERATIONS = ['UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'];
 
 const POS_ORDER: Record<string, number> = {
-  Goalkeeper: 0,
-  Defence: 1,
-  Midfield: 2,
-  Offence: 3,
+  Goalkeeper: 0, Defence: 1, Midfield: 2, Offence: 3,
+};
+const POS_ABBR: Record<string, string> = {
+  Goalkeeper: 'GK', Defence: 'DEF', Midfield: 'MID', Offence: 'FWD',
 };
 
-const POS_ABBR: Record<string, string> = {
-  Goalkeeper: 'GK',
-  Defence: 'DEF',
-  Midfield: 'MID',
-  Offence: 'FWD',
-};
+const SECTIONS: { key: AwardCategory['section']; label: string }[] = [
+  { key: 'main',     label: 'Awards' },
+  { key: 'specials', label: 'SOTG Specials' },
+  { key: 'xtra',     label: 'SOTG Xtra' },
+];
 
 export default function AwardsPage() {
   const supabase = useMemo(() => createClient(), []);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [userId, setUserId]       = useState<string | null>(null);
   const [categories, setCategories] = useState<AwardCategory[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [preds, setPreds] = useState<Record<number, AwardPrediction>>({});
-  const [loading, setLoading] = useState(true);
+  const [teams, setTeams]         = useState<Team[]>([]);
+  const [players, setPlayers]     = useState<Player[]>([]);
+  const [preds, setPreds]         = useState<Record<number, AwardPrediction>>({});
+  const [loading, setLoading]     = useState(true);
 
   const load = useCallback(async () => {
     const { data: u } = await supabase.auth.getUser();
@@ -38,23 +38,11 @@ export default function AwardsPage() {
     setUserId(u.user.id);
 
     const [{ data: cats }, { data: ts }, { data: ps }, { data: ap }] = await Promise.all([
-      supabase
-        .from('award_categories')
-        .select('*')
-        .order('sort_order', { ascending: true }),
-      supabase
-        .from('teams')
-        .select('id, name, tla')
-        .order('name', { ascending: true }),
-      supabase
-        .from('players')
-        .select('id, name, position, team_id')
-        .order('team_id', { ascending: true })
-        .order('name', { ascending: true }),
-      supabase
-        .from('award_predictions')
-        .select('*')
-        .eq('user_id', u.user.id),
+      supabase.from('award_categories').select('*').order('sort_order', { ascending: true }),
+      supabase.from('teams').select('id, name, tla, confederation').order('name', { ascending: true }),
+      supabase.from('players').select('id, name, position, team_id')
+        .order('team_id', { ascending: true }).order('name', { ascending: true }),
+      supabase.from('award_predictions').select('*').eq('user_id', u.user.id),
     ]);
 
     setCategories((cats as AwardCategory[]) ?? []);
@@ -68,12 +56,9 @@ export default function AwardsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Group players by team for optgroup selects
-  const playersByTeam = useMemo(() => {
-    const teamMap = new Map<number, Team>();
-    for (const t of teams) teamMap.set(t.id, t);
-
-    const groups = new Map<number, { team: Team; players: Player[] }>();
+  const playersByTeam = useMemo((): TeamGroup[] => {
+    const teamMap = new Map(teams.map((t) => [t.id, t]));
+    const groups = new Map<number, TeamGroup>();
     for (const p of players) {
       if (p.team_id == null) continue;
       if (!groups.has(p.team_id)) {
@@ -83,8 +68,6 @@ export default function AwardsPage() {
       }
       groups.get(p.team_id)!.players.push(p);
     }
-
-    // Sort players within each team by position order, then name
     for (const g of groups.values()) {
       g.players.sort((a, b) => {
         const pa = POS_ORDER[a.position ?? ''] ?? 99;
@@ -92,11 +75,19 @@ export default function AwardsPage() {
         return pa !== pb ? pa - pb : a.name.localeCompare(b.name);
       });
     }
-
     return [...groups.values()].sort((a, b) =>
       (a.team.tla ?? a.team.name).localeCompare(b.team.tla ?? b.team.name)
     );
   }, [players, teams]);
+
+  const bySection = useMemo(() => {
+    const map = new Map<string, AwardCategory[]>();
+    for (const cat of categories) {
+      if (!map.has(cat.section)) map.set(cat.section, []);
+      map.get(cat.section)!.push(cat);
+    }
+    return map;
+  }, [categories]);
 
   if (loading) {
     return <p className="py-20 text-center font-mono text-sm text-chalk/40">Loading…</p>;
@@ -109,39 +100,60 @@ export default function AwardsPage() {
         Two picks per category — your first choice scores more. Locks at tournament start.
       </p>
 
-      <div className="mt-6 space-y-3">
-        {categories.map((cat) => (
-          <CategoryRow
-            key={cat.id}
-            category={cat}
-            teams={teams}
-            playersByTeam={playersByTeam}
-            pred={preds[cat.id]}
-            userId={userId!}
-            supabase={supabase}
-            onSaved={(p) => setPreds((prev) => ({ ...prev, [cat.id]: p }))}
-          />
-        ))}
-      </div>
-
-      <div className="mt-8 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
-        <p className="font-display text-sm uppercase tracking-wide text-chalk/50">Points breakdown</p>
-        <div className="mt-3 grid gap-1.5">
-          {categories.map((cat) => (
-            <div key={cat.id} className="flex items-center justify-between font-mono text-xs text-chalk/60">
-              <span>{cat.label}</span>
-              <span className="text-lime">
-                {cat.pts_pick_1}<span className="text-chalk/30"> / </span>{cat.pts_pick_2}
-              </span>
+      {SECTIONS.map(({ key, label }) => {
+        const cats = bySection.get(key);
+        if (!cats?.length) return null;
+        return (
+          <section key={key} className="mt-8">
+            <div className="mb-3 flex items-center gap-3">
+              <h2 className="font-display text-2xl uppercase text-lime">{label}</h2>
+              <span className="h-px flex-1 bg-white/10" />
             </div>
-          ))}
+            <div className="space-y-3">
+              {cats.map((cat) => (
+                <CategoryRow
+                  key={cat.id}
+                  category={cat}
+                  teams={teams}
+                  playersByTeam={playersByTeam}
+                  pred={preds[cat.id]}
+                  userId={userId!}
+                  supabase={supabase}
+                  onSaved={(p) => setPreds((prev) => ({ ...prev, [cat.id]: p }))}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      <div className="mt-10 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
+        <p className="font-display text-sm uppercase tracking-wide text-chalk/50">Points breakdown</p>
+        <div className="mt-3 space-y-3">
+          {SECTIONS.map(({ key, label }) => {
+            const cats = bySection.get(key);
+            if (!cats?.length) return null;
+            return (
+              <div key={key}>
+                <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-chalk/30">{label}</p>
+                <div className="grid gap-1">
+                  {cats.map((cat) => (
+                    <div key={cat.id} className="flex items-center justify-between font-mono text-xs text-chalk/60">
+                      <span>{cat.label}</span>
+                      <span className="text-lime">
+                        {cat.pts_pick_1}<span className="text-chalk/30"> / </span>{cat.pts_pick_2}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
-
-type TeamGroup = { team: Team; players: Player[] };
 
 function CategoryRow({
   category,
@@ -160,12 +172,18 @@ function CategoryRow({
   supabase: ReturnType<typeof createClient>;
   onSaved: (p: AwardPrediction) => void;
 }) {
-  const locked =
-    category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
-
+  const locked = category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
   const [pick1, setPick1] = useState(pred?.pick_1 ?? '');
   const [pick2, setPick2] = useState(pred?.pick_2 ?? '');
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Filter teams by confederation when meta specifies one; fall back to all teams
+  const filteredTeams = useMemo(() => {
+    const conf = category.meta?.confederation;
+    if (!conf) return teams;
+    const subset = teams.filter((t) => t.confederation === conf);
+    return subset.length > 0 ? subset : teams;
+  }, [teams, category.meta]);
 
   async function save() {
     if (!pick1 && !pick2) return;
@@ -210,24 +228,10 @@ function CategoryRow({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <PickInput
-          label="1st choice"
-          value={pick1}
-          onChange={setPick1}
-          disabled={locked}
-          kind={category.pick_kind}
-          teams={teams}
-          playersByTeam={playersByTeam}
-        />
-        <PickInput
-          label="2nd choice"
-          value={pick2}
-          onChange={setPick2}
-          disabled={locked}
-          kind={category.pick_kind}
-          teams={teams}
-          playersByTeam={playersByTeam}
-        />
+        <PickInput label="1st choice" value={pick1} onChange={setPick1} disabled={locked}
+          kind={category.pick_kind} teams={filteredTeams} playersByTeam={playersByTeam} />
+        <PickInput label="2nd choice" value={pick2} onChange={setPick2} disabled={locked}
+          kind={category.pick_kind} teams={filteredTeams} playersByTeam={playersByTeam} />
       </div>
 
       {!locked && (
@@ -247,13 +251,7 @@ function CategoryRow({
 }
 
 function PickInput({
-  label,
-  value,
-  onChange,
-  disabled,
-  kind,
-  teams,
-  playersByTeam,
+  label, value, onChange, disabled, kind, teams, playersByTeam,
 }: {
   label: string;
   value: string;
@@ -288,8 +286,7 @@ function PickInput({
             <optgroup key={team.id} label={team.tla ?? team.name}>
               {players.map((p) => (
                 <option key={p.id} value={String(p.id)}>
-                  {p.name}
-                  {p.position ? ` · ${POS_ABBR[p.position] ?? p.position}` : ''}
+                  {p.name}{p.position ? ` · ${POS_ABBR[p.position] ?? p.position}` : ''}
                 </option>
               ))}
             </optgroup>

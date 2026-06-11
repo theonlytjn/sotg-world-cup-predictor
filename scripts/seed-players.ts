@@ -33,7 +33,20 @@ type FDPlayer = {
 type FDTeamWithSquad = {
   id: number;
   name: string;
+  area: { parentArea?: string } | null;
   squad: FDPlayer[] | null;
+};
+
+// Map FD parentArea strings to the confederation codes used in the app
+const PARENT_AREA_TO_CONF: Record<string, string> = {
+  'Europe': 'UEFA',
+  'South America': 'CONMEBOL',
+  'North America': 'CONCACAF',
+  'Central America': 'CONCACAF',
+  'Caribbean': 'CONCACAF',
+  'Africa': 'CAF',
+  'Asia': 'AFC',
+  'Oceania': 'OFC',
 };
 
 async function main() {
@@ -59,6 +72,27 @@ async function main() {
   const idByExternal = new Map<number, number>();
   for (const t of dbTeams ?? []) {
     if (t.external_id != null) idByExternal.set(t.external_id, t.id);
+  }
+
+  // Update confederation on teams where parentArea is available
+  const confUpdates: { id: number; confederation: string }[] = [];
+  for (const team of fdTeams) {
+    const teamId = idByExternal.get(team.id);
+    if (!teamId) continue;
+    const conf = PARENT_AREA_TO_CONF[team.area?.parentArea ?? ''];
+    if (conf) confUpdates.push({ id: teamId, confederation: conf });
+  }
+  if (confUpdates.length > 0) {
+    console.log(`Updating confederation for ${confUpdates.length} teams ...`);
+    for (const u of confUpdates) {
+      const { error } = await db
+        .from('teams')
+        .update({ confederation: u.confederation })
+        .eq('id', u.id);
+      if (error) console.warn(`  ⚠ Could not update team ${u.id}: ${error.message}`);
+    }
+  } else {
+    console.log('No parentArea data returned — confederation not set (free tier may not include it).');
   }
 
   // Build player rows
@@ -100,7 +134,7 @@ async function main() {
     .upsert(playerRows, { onConflict: 'external_id' });
   if (error) throw error;
 
-  console.log('Done. Players seeded.');
+  console.log('Done. Players + confederation data seeded.');
 }
 
 main().catch((e) => {

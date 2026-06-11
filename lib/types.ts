@@ -15,6 +15,7 @@ export interface Team {
   tla: string | null;
   crest: string | null;
   group_label: string | null;
+  confederation: string | null;
 }
 
 export interface Fixture {
@@ -69,10 +70,12 @@ export interface AwardCategory {
   slug: string;
   label: string;
   pick_kind: 'team' | 'player' | 'confederation';
+  section: 'main' | 'specials' | 'xtra';
   deadline: string | null;
   pts_pick_1: number;
   pts_pick_2: number;
   sort_order: number;
+  meta: { confederation?: string } | null;
 }
 
 export interface AwardPrediction {

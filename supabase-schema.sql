@@ -287,3 +287,35 @@ alter table public.players enable row level security;
 drop policy if exists "players read all" on public.players;
 create policy "players read all" on public.players
   for select using (true);
+
+-- ============================================================
+--  Phase 2 Slice 3: SOTG Specials + SOTG Xtra
+-- ============================================================
+
+-- Extend teams with confederation (set by npm run seed:players)
+alter table public.teams
+  add column if not exists confederation text;
+
+-- Extend award_categories with section grouping and optional filter metadata
+alter table public.award_categories
+  add column if not exists section text not null default 'main',
+  add column if not exists meta    jsonb;
+
+-- SOTG Specials
+insert into public.award_categories
+  (slug, label, pick_kind, pts_pick_1, pts_pick_2, sort_order, section)
+values
+  ('team_of_tournament', 'Team of the Tournament', 'team',   10, 7, 6, 'specials'),
+  ('top_assists',        'Top Assists',             'player', 10, 7, 7, 'specials')
+on conflict (slug) do nothing;
+
+-- SOTG Xtra — best nation per confederation
+insert into public.award_categories
+  (slug, label, pick_kind, pts_pick_1, pts_pick_2, sort_order, section, meta)
+values
+  ('best_african_nation',        'Best African Nation',        'team', 8, 5, 8,  'xtra', '{"confederation":"CAF"}'),
+  ('best_asian_nation',          'Best Asian Nation',          'team', 8, 5, 9,  'xtra', '{"confederation":"AFC"}'),
+  ('best_south_american_nation', 'Best South American Nation', 'team', 8, 5, 10, 'xtra', '{"confederation":"CONMEBOL"}'),
+  ('best_north_american_nation', 'Best North American Nation', 'team', 8, 5, 11, 'xtra', '{"confederation":"CONCACAF"}'),
+  ('best_european_nation',       'Best European Nation',       'team', 8, 5, 12, 'xtra', '{"confederation":"UEFA"}')
+on conflict (slug) do nothing;
