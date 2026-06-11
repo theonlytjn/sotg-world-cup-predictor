@@ -1,0 +1,24 @@
+# Polls the results endpoint every 15 min so scores update during matches.
+# Vercel's Hobby plan only allows ONCE-A-DAY crons, so we drive frequent
+# polling from GitHub Actions instead (free).
+#
+# Set two repo secrets (Settings -> Secrets and variables -> Actions):
+#   APP_URL     = https://your-app.vercel.app
+#   CRON_SECRET = the same value you put in Vercel env
+#
+# Tip: you can disable this workflow outside tournament dates to save minutes.
+name: Poll World Cup results
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit the results endpoint
+        run: |
+          curl -sS -m 60 \
+            "${{ secrets.APP_URL }}/api/cron/results?secret=${{ secrets.CRON_SECRET }}" \
+            && echo "" && echo "poll complete"
