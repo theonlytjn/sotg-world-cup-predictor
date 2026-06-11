@@ -26,6 +26,7 @@ const config: Config = {
           dim: '#9fcc2f',
         },
         flame: '#ff5c38',
+        gold: '#ffd24a',
       },
       boxShadow: {
         card: '0 1px 0 rgba(255,255,255,0.04), 0 12px 40px -12px rgba(0,0,0,0.6)',

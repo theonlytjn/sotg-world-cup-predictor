@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import AwardPanel from './_components/AwardPanel';
 import FixturePanel from './_components/FixturePanel';
+import ManualPredictionsPanel from './_components/ManualPredictionsPanel';
 import PollPanel from './_components/PollPanel';
 import ScoringPanel from './_components/ScoringPanel';
 import type { AwardCategory, PollQuestion } from '@/lib/types';
@@ -26,6 +27,7 @@ export default async function AdminPage() {
     { data: fixtures },
     { data: pollQuestions },
     { data: scoringRules },
+    { data: profiles },
   ] = await Promise.all([
     db.from('award_categories').select('*').order('sort_order'),
     db.from('award_results').select('*'),
@@ -38,6 +40,7 @@ export default async function AdminPage() {
     `).order('kickoff'),
     db.from('poll_questions').select('*').order('sort_order'),
     db.from('scoring_rules').select('key, label, description, points').order('key'),
+    db.from('profiles').select('id, display_name, username').order('display_name'),
   ]);
 
   const resultsByCategory: Record<number, string> = {};
@@ -73,6 +76,13 @@ export default async function AdminPage() {
       <div className="mt-12">
         <FixturePanel
           fixtures={(fixtures as unknown as Parameters<typeof FixturePanel>[0]['fixtures']) ?? []}
+        />
+      </div>
+
+      <div className="mt-12">
+        <ManualPredictionsPanel
+          profiles={(profiles as { id: string; display_name: string; username: string | null }[]) ?? []}
+          fixtures={(fixtures as unknown as Parameters<typeof ManualPredictionsPanel>[0]['fixtures']) ?? []}
         />
       </div>
     </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { LockIcon } from '@hugeicons-pro/core-stroke-rounded';
 import { createClient } from '@/lib/supabase/client';
 import type { PollQuestion } from '@/lib/types';
 
@@ -94,7 +96,7 @@ export default function PollPage() {
   if (!anyOpen) {
     return (
       <div className="flex flex-col items-center py-24 text-center">
-        <p className="font-mono text-5xl">🔒</p>
+        <span className="text-chalk/40"><HugeiconsIcon icon={LockIcon} size={48} color="currentColor" strokeWidth={1.5} /></span>
         <h1 className="mt-4 font-display text-4xl uppercase text-chalk">Opinion Poll</h1>
         <p className="mt-3 max-w-sm text-chalk/55">
           The poll opens after the final whistle. Come back once the trophy has been lifted.

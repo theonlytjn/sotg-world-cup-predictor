@@ -3,15 +3,25 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  DartIcon,
+  AwardIcon,
+  UserIcon,
+  Calendar1Icon,
+  BookOpenIcon,
+  BarChartIcon,
+  Logout01Icon,
+} from '@hugeicons-pro/core-stroke-rounded';
 
 const tabs = [
-  { href: '/predict', label: 'Predict' },
-  { href: '/awards', label: 'Awards' },
-  { href: '/poll', label: 'Poll' },
-  { href: '/fixtures', label: 'Fixtures' },
-  { href: '/rules', label: 'Rules' },
-  { href: '/leaderboard', label: 'Table' },
-  { href: '/me', label: 'Me' },
+  { href: '/predict',     label: 'Predict',  icon: DartIcon },
+  { href: '/awards',      label: 'Awards',   icon: AwardIcon },
+  { href: '/poll',        label: 'Poll',     icon: UserIcon },
+  { href: '/fixtures',    label: 'Fixtures', icon: Calendar1Icon },
+  { href: '/rules',       label: 'Rules',    icon: BookOpenIcon },
+  { href: '/leaderboard', label: 'Table',    icon: BarChartIcon },
+  { href: '/me',          label: 'Me',       icon: UserIcon },
 ];
 
 export default function Nav() {
@@ -38,21 +48,22 @@ export default function Nav() {
               <Link
                 key={t.href}
                 href={t.href}
-                className={`rounded-full px-3 py-1.5 font-display text-sm uppercase tracking-wide transition ${
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-display text-sm uppercase tracking-wide transition ${
                   active ? 'bg-lime text-pitch-950' : 'text-chalk/60 hover:text-chalk'
                 }`}
               >
+                <HugeiconsIcon icon={t.icon} size={14} color="currentColor" strokeWidth={2} />
                 {t.label}
               </Link>
             );
           })}
           <button
             onClick={signOut}
-            className="ml-1 rounded-full px-2 py-1.5 text-chalk/40 transition hover:text-flame"
+            className="ml-1 rounded-full p-1.5 text-chalk/40 transition hover:text-flame"
             title="Sign out"
             aria-label="Sign out"
           >
-            ⏏
+            <HugeiconsIcon icon={Logout01Icon} size={16} color="currentColor" strokeWidth={1.5} />
           </button>
         </nav>
       </div>

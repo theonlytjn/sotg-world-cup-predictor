@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import { Anton, Hanken_Grotesk, IBM_Plex_Mono } from 'next/font/google';
+import { Rubik, Manrope } from 'next/font/google';
 import './globals.css';
+import 'aos/dist/aos.css';
+import AosInit from '@/components/AosInit';
 
-const display = Anton({ subsets: ['latin'], weight: '400', variable: '--font-display' });
-const body = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-body' });
-const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '600'], variable: '--font-mono' });
+const display = Rubik({ subsets: ['latin'], weight: ['500', '600', '700', '800'], variable: '--font-display' });
+const body = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-body' });
 
 export const metadata: Metadata = {
   title: 'SOTG World Cup 2026 Predictor',
@@ -19,8 +20,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
+      <body>
+        <AosInit />
+        {children}
+      </body>
     </html>
   );
 }
