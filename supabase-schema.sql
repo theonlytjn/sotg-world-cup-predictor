@@ -319,3 +319,79 @@ values
   ('best_north_american_nation', 'Best North American Nation', 'team', 8, 5, 11, 'xtra', '{"confederation":"CONCACAF"}'),
   ('best_european_nation',       'Best European Nation',       'team', 8, 5, 12, 'xtra', '{"confederation":"UEFA"}')
 on conflict (slug) do nothing;
+
+-- ============================================================
+--  Phase 2 Slice 5: Post-tournament Opinion Poll
+-- ============================================================
+
+create table if not exists public.poll_questions (
+  id         serial primary key,
+  slug       text unique not null,
+  label      text not null,
+  pick_kind  text not null check (pick_kind in ('team', 'player')),
+  opens_at   timestamptz,             -- null = locked; past = open
+  sort_order integer not null default 0
+);
+
+insert into public.poll_questions (slug, label, pick_kind, sort_order)
+values
+  ('best_team',    'Best Team of the Tournament', 'team',   1),
+  ('worst_team',   'Most Disappointing Team',      'team',   2),
+  ('best_player',  'Player of the Tournament',     'player', 3),
+  ('worst_player', 'Biggest Flop',                 'player', 4)
+on conflict (slug) do nothing;
+
+create table if not exists public.poll_responses (
+  id          serial primary key,
+  user_id     uuid not null references public.profiles (id) on delete cascade,
+  question_id integer not null references public.poll_questions (id),
+  pick        text not null,
+  updated_at  timestamptz not null default now(),
+  unique (user_id, question_id)
+);
+
+create index if not exists pr_question_idx on public.poll_responses (question_id);
+
+alter table public.poll_questions  enable row level security;
+alter table public.poll_responses  enable row level security;
+
+drop policy if exists "poll questions read all" on public.poll_questions;
+create policy "poll questions read all" on public.poll_questions
+  for select using (true);
+
+drop policy if exists "poll responses read" on public.poll_responses;
+create policy "poll responses read" on public.poll_responses
+  for select using (
+    auth.uid() = user_id
+    or exists (
+      select 1 from public.poll_questions pq
+      where pq.id = question_id
+        and pq.opens_at is not null
+        and pq.opens_at <= now()
+    )
+  );
+
+drop policy if exists "poll responses insert own" on public.poll_responses;
+create policy "poll responses insert own" on public.poll_responses
+  for insert with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from public.poll_questions pq
+      where pq.id = question_id
+        and pq.opens_at is not null
+        and pq.opens_at <= now()
+    )
+  );
+
+drop policy if exists "poll responses update own" on public.poll_responses;
+create policy "poll responses update own" on public.poll_responses
+  for update using (auth.uid() = user_id)
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from public.poll_questions pq
+      where pq.id = question_id
+        and pq.opens_at is not null
+        and pq.opens_at <= now()
+    )
+  );

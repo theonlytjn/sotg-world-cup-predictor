@@ -92,3 +92,20 @@ export interface AwardResult {
   result: string;
   set_at: string;
 }
+
+export interface PollQuestion {
+  id: number;
+  slug: string;
+  label: string;
+  pick_kind: 'team' | 'player';
+  opens_at: string | null;
+  sort_order: number;
+}
+
+export interface PollResponse {
+  id: number;
+  user_id: string;
+  question_id: number;
+  pick: string;
+  updated_at: string;
+}

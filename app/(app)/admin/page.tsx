@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import AwardPanel from './_components/AwardPanel';
 import FixturePanel from './_components/FixturePanel';
-import type { AwardCategory } from '@/lib/types';
+import PollPanel from './_components/PollPanel';
+import type { AwardCategory, PollQuestion } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,7 @@ export default async function AdminPage() {
     { data: teams },
     { data: players },
     { data: fixtures },
+    { data: pollQuestions },
   ] = await Promise.all([
     db.from('award_categories').select('*').order('sort_order'),
     db.from('award_results').select('*'),
@@ -32,6 +34,7 @@ export default async function AdminPage() {
       home_team:teams!fixtures_home_team_id_fkey (id, name, tla),
       away_team:teams!fixtures_away_team_id_fkey (id, name, tla)
     `).order('kickoff'),
+    db.from('poll_questions').select('*').order('sort_order'),
   ]);
 
   const resultsByCategory: Record<number, string> = {};
@@ -55,6 +58,10 @@ export default async function AdminPage() {
         teams={(teams as { id: number; name: string; tla: string | null; confederation: string | null }[]) ?? []}
         players={(players as { id: number; name: string; position: string | null; team_id: number | null }[]) ?? []}
       />
+
+      <div className="mt-12">
+        <PollPanel questions={(pollQuestions as PollQuestion[]) ?? []} />
+      </div>
 
       <div className="mt-12">
         <FixturePanel
