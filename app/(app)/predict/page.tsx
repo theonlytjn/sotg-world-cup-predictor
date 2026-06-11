@@ -52,6 +52,7 @@ export default function PredictPage() {
   const [preds, setPreds] = useState<Record<number, Pred>>({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<number | null>(null);
+  const [activeDay, setActiveDay] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data: u } = await supabase.auth.getUser();
@@ -111,7 +112,7 @@ export default function PredictPage() {
       });
   }, [fixtures]);
 
-  // Auto-select: live matchday → nearest upcoming → last
+  // Auto-select matchday: live → nearest upcoming → last
   useEffect(() => {
     if (activeTab !== null || matchdayGroups.length === 0) return;
     const now = Date.now();
@@ -119,15 +120,40 @@ export default function PredictPage() {
       if (mg.liveCount > 0) { setActiveTab(mg.matchday); return; }
     }
     for (const mg of matchdayGroups) {
-      const hasUpcoming = mg.dateGroups.some((dg) =>
-        dg.fixtures.some((f) => new Date(f.kickoff).getTime() > now)
-      );
-      if (hasUpcoming) { setActiveTab(mg.matchday); return; }
+      if (mg.dateGroups.some((dg) => dg.fixtures.some((f) => new Date(f.kickoff).getTime() > now))) {
+        setActiveTab(mg.matchday); return;
+      }
     }
     setActiveTab(matchdayGroups.at(-1)!.matchday);
   }, [matchdayGroups, activeTab]);
 
   const activeGroup = matchdayGroups.find((mg) => mg.matchday === activeTab);
+
+  // Reset active day whenever matchday changes
+  useEffect(() => {
+    if (!activeGroup) return;
+    const days = activeGroup.dateGroups;
+    if (!days.length) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const todayHere = days.find((d) => d.dateKey === today);
+    if (todayHere) { setActiveDay(today); return; }
+    const upcoming = days.find((d) => d.dateKey >= today);
+    setActiveDay(upcoming ? upcoming.dateKey : days.at(-1)!.dateKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const activeDayGroup = activeGroup?.dateGroups.find((d) => d.dateKey === activeDay);
+  const activeDayIdx = activeGroup?.dateGroups.findIndex((d) => d.dateKey === activeDay) ?? 0;
+  const totalDays = activeGroup?.dateGroups.length ?? 0;
+
+  function prevDay() {
+    if (!activeGroup || activeDayIdx <= 0) return;
+    setActiveDay(activeGroup.dateGroups[activeDayIdx - 1].dateKey);
+  }
+  function nextDay() {
+    if (!activeGroup || activeDayIdx >= totalDays - 1) return;
+    setActiveDay(activeGroup.dateGroups[activeDayIdx + 1].dateKey);
+  }
 
   if (loading) {
     return <p className="py-20 text-center font-mono text-sm text-chalk/40">Loading fixtures…</p>;
@@ -159,8 +185,8 @@ export default function PredictPage() {
         Call the scoreline for every group game. Locks at kickoff — no edits after.
       </p>
 
-      {/* Matchday tab strip */}
-      <div className="mt-6 flex flex-wrap gap-2">
+      {/* Evenly-spaced matchday tabs */}
+      <div className="mt-6 flex w-full border-b border-white/10">
         {matchdayGroups.map((mg) => {
           const active = mg.matchday === activeTab;
           const done = mg.finishedCount === mg.totalCount;
@@ -169,65 +195,98 @@ export default function PredictPage() {
             <button
               key={mg.matchday}
               onClick={() => setActiveTab(mg.matchday)}
-              className={`group relative flex flex-col rounded-2xl border px-5 pt-3.5 pb-3 text-left transition-colors ${
-                active
-                  ? 'border-lime/40 bg-lime/8'
-                  : 'border-white/10 bg-pitch-900/60 hover:border-white/20'
-              }`}
+              className={[
+                'flex flex-1 flex-col items-center pb-4 pt-3 transition-colors relative',
+                active ? 'text-lime' : 'text-chalk/50 hover:text-chalk',
+              ].join(' ')}
             >
-              <span className={`font-display text-[10px] uppercase tracking-[0.2em] ${active ? 'text-lime' : 'text-chalk/40'}`}>
-                Matchday
-              </span>
-              <span className={`font-display text-3xl leading-none mt-1 ${active ? 'text-lime' : 'text-chalk'}`}>
-                {mg.matchday}
-              </span>
-              <span className="mt-2 font-mono text-[10px]">
+              <span className="font-display text-[10px] uppercase tracking-[0.2em]">Matchday</span>
+              <span className="font-display text-3xl">{mg.matchday}</span>
+              <span className="mt-1 font-mono text-[10px]">
                 {mg.liveCount > 0 ? (
-                  <span className="flex items-center gap-1.5 text-flame">
+                  <span className="flex items-center gap-1 text-flame">
                     <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
                     {mg.liveCount} live
                   </span>
                 ) : done ? (
-                  <span className="text-chalk/25">All done</span>
+                  <span className="text-chalk/25">Done</span>
                 ) : (
-                  <span className="text-chalk/35">{upcoming} to play</span>
+                  <span className="text-chalk/35">{upcoming} left</span>
                 )}
               </span>
+              {active && (
+                <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-lime" />
+              )}
             </button>
           );
         })}
       </div>
 
-      {/* Active matchday content */}
+      {/* Day cycler */}
       {activeGroup && (
-        <div className="mt-8">
-          {activeGroup.dateGroups.map((dg) => (
-            <section key={dg.dateKey} className="mb-10">
-              {/* Date header */}
-              <div className="mb-4 flex items-center gap-4">
-                <h2 className="font-display text-base uppercase tracking-widest text-chalk/60">
-                  {dg.label}
-                </h2>
-                <span className="h-px flex-1 bg-white/8" />
-                <span className="font-mono text-[10px] uppercase tracking-widest text-chalk/25">
-                  {dg.fixtures.length} {dg.fixtures.length === 1 ? 'match' : 'matches'}
-                </span>
-              </div>
+        <div className="mt-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={prevDay}
+              disabled={activeDayIdx <= 0}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk/50 transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
+              aria-label="Previous day"
+            >
+              ←
+            </button>
+            <div className="flex-1 text-center">
+              <p className="font-display text-base uppercase tracking-widest text-chalk">
+                {activeDayGroup?.label ?? '—'}
+              </p>
+              <p className="font-mono text-xs text-chalk/35">
+                {activeDayGroup?.fixtures.length ?? 0} matches
+                {totalDays > 1 && (
+                  <span className="ml-2 text-chalk/25">
+                    Day {activeDayIdx + 1} of {totalDays}
+                  </span>
+                )}
+              </p>
+            </div>
+            <button
+              onClick={nextDay}
+              disabled={activeDayIdx >= totalDays - 1}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk/50 transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
+              aria-label="Next day"
+            >
+              →
+            </button>
+          </div>
 
-              <div className="space-y-2.5">
-                {dg.fixtures.map((f) => (
-                  <FixtureRow
-                    key={f.id}
-                    fixture={f}
-                    pred={preds[f.id]}
-                    userId={userId!}
-                    supabase={supabase}
-                    onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+          {/* Dot indicators */}
+          {totalDays > 1 && (
+            <div className="mt-3 flex justify-center gap-1.5">
+              {activeGroup.dateGroups.map((dg, i) => (
+                <button
+                  key={dg.dateKey}
+                  onClick={() => setActiveDay(dg.dateKey)}
+                  className={[
+                    'h-1.5 rounded-full transition-all',
+                    i === activeDayIdx ? 'w-6 bg-lime' : 'w-1.5 bg-white/20 hover:bg-white/40',
+                  ].join(' ')}
+                  aria-label={dg.label}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Fixtures for the active day */}
+          <div className="mt-6 space-y-2.5">
+            {activeDayGroup?.fixtures.map((f) => (
+              <FixtureRow
+                key={f.id}
+                fixture={f}
+                pred={preds[f.id]}
+                userId={userId!}
+                supabase={supabase}
+                onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

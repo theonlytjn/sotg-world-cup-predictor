@@ -30,14 +30,14 @@ body {
   min-height: 100dvh;
 }
 
-/* Boldonse needs explicit line-height — its natural metrics are very tight */
+/* Boldonse — zero tracking, generous line-height so descenders never clip */
 .font-display {
   letter-spacing: 0;
-  line-height: 1.15;
+  line-height: 2;
 }
 
-/* Balanced button text — Boldonse sits high inside its line-box */
-button, a {
+body {
+  font-size: 1.0625rem; /* 17px base — Satoshi reads best slightly larger */
   -webkit-font-smoothing: antialiased;
 }
 

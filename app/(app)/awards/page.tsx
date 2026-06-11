@@ -18,8 +18,8 @@ const POS_ABBR: Record<string, string> = {
   Goalkeeper: 'GK', Defence: 'DEF', Midfield: 'MID', Offence: 'FWD',
 };
 
-const SECTIONS: { key: AwardCategory['section']; label: string }[] = [
-  { key: 'main',     label: 'Awards' },
+const SECTIONS: { key: AwardCategory['section']; label: string; description?: string }[] = [
+  { key: 'main',     label: 'FIFA Awards', description: 'The five official post-tournament awards from the FIFA Technical Study Group.' },
   { key: 'specials', label: 'SOTG Specials' },
   { key: 'xtra',     label: 'SOTG Xtra' },
 ];
@@ -140,16 +140,18 @@ export default function AwardsPage() {
         Two picks per category — your first choice scores more. Locks at tournament start.
       </p>
 
-      {SECTIONS.map(({ key, label }) => {
+      {SECTIONS.map(({ key, label, description }) => {
         const cats = bySection.get(key);
         if (!cats?.length) return null;
+        const isMain = key === 'main';
         return (
           <section key={key} className="mt-8">
-            <div className="mb-3 flex items-center gap-3">
+            <div className="mb-1 flex items-center gap-3">
               <h2 className="font-display text-2xl uppercase text-lime">{label}</h2>
               <span className="h-px flex-1 bg-white/10" />
             </div>
-            <div className="space-y-3">
+            {description && <p className="mb-4 text-sm text-chalk/55">{description}</p>}
+            <div className={isMain ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'space-y-3'}>
               {cats.map((cat) => (
                 <CategoryRow
                   key={cat.id}
@@ -263,29 +265,29 @@ function CategoryRow({
   const confLabel = (category.meta?.confederation as string | undefined);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-4 shadow-card">
-      <div className="mb-3 flex items-center justify-between">
-        <div>
-          <p className="font-display text-lg uppercase tracking-wide text-chalk">{category.label}</p>
-          <div className="flex items-center gap-2">
-            <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
-              {category.pts_pick_1}pts 1st · {category.pts_pick_2}pts 2nd
-            </p>
-            {confLabel && (
-              <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
-                {confLabel} only
-              </span>
-            )}
-          </div>
+    <div className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5 shadow-card">
+      <div className="mb-4">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>
+          {settled && (
+            <span className="shrink-0 rounded-full bg-lime/20 px-3 py-1 font-display text-sm uppercase text-lime">
+              +{pred!.points}
+            </span>
+          )}
+          {locked && !settled && (
+            <span className="shrink-0 font-mono text-xs uppercase tracking-widest text-chalk/40">Locked</span>
+          )}
         </div>
-        {settled && (
-          <span className="rounded-full bg-lime/20 px-3 py-1 font-display text-sm uppercase text-lime">
-            +{pred!.points}
-          </span>
-        )}
-        {locked && !settled && (
-          <span className="font-mono text-xs uppercase tracking-widest text-chalk/40">Locked</span>
-        )}
+        <div className="flex items-center gap-2">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
+            {category.pts_pick_1}pts · {category.pts_pick_2}pts
+          </p>
+          {confLabel && (
+            <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
+              {confLabel} only
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
