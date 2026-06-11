@@ -12,6 +12,7 @@ import {
   Calendar1Icon,
   BookOpenIcon,
   BarChartIcon,
+  FootballIcon,
   Logout01Icon,
   Settings01Icon,
 } from '@hugeicons-pro/core-stroke-rounded';
@@ -19,13 +20,13 @@ import {
 const ADMIN_EMAIL = 'tony@theonlytjn.com';
 
 const tabs = [
-  { href: '/predict',     label: 'Predict',  icon: DartIcon },
-  { href: '/awards',      label: 'Awards',   icon: AwardIcon },
-  { href: '/poll',        label: 'Poll',     icon: UserIcon },
-  { href: '/fixtures',    label: 'Fixtures', icon: Calendar1Icon },
-  { href: '/rules',       label: 'Rules',    icon: BookOpenIcon },
-  { href: '/leaderboard', label: 'Table',    icon: BarChartIcon },
-  { href: '/me',          label: 'Me',       icon: UserIcon },
+  { href: '/predict',     label: 'Predict',    icon: DartIcon },
+  { href: '/awards',      label: 'Awards',     icon: AwardIcon },
+  { href: '/tournament',  label: 'World Cup',  icon: FootballIcon },
+  { href: '/fixtures',    label: 'Fixtures',   icon: Calendar1Icon },
+  { href: '/leaderboard', label: 'Table',      icon: BarChartIcon },
+  { href: '/rules',       label: 'Rules',      icon: BookOpenIcon },
+  { href: '/me',          label: 'Me',         icon: UserIcon },
 ];
 
 export default function Nav({ userEmail }: { userEmail: string }) {

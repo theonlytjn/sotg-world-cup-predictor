@@ -37,9 +37,22 @@ body {
 }
 
 body {
-  font-size: 1.0625rem; /* 17px base — Satoshi reads best slightly larger */
+  font-size: 1.125rem; /* 18px base */
   -webkit-font-smoothing: antialiased;
 }
+
+/* ── Legibility overrides ──────────────────────────────────────────────────
+   Tailwind's opacity modifiers generate very low-contrast grey on our dark
+   pitch background. Override each level upward so secondary/tertiary text
+   is comfortably readable without changing every component file. */
+.text-chalk\/12 { color: rgb(244 246 242 / 0.30); }
+.text-chalk\/25 { color: rgb(244 246 242 / 0.48); }
+.text-chalk\/30 { color: rgb(244 246 242 / 0.55); }
+.text-chalk\/35 { color: rgb(244 246 242 / 0.62); }
+.text-chalk\/40 { color: rgb(244 246 242 / 0.68); }
+.text-chalk\/50 { color: rgb(244 246 242 / 0.76); }
+.text-chalk\/55 { color: rgb(244 246 242 / 0.80); }
+.text-chalk\/60 { color: rgb(244 246 242 / 0.85); }
 
 /* number inputs without spinners — cleaner score boxes */
 input[type='number']::-webkit-outer-spin-button,
