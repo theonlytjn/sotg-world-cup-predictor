@@ -46,8 +46,8 @@ export default async function Home() {
           </span>
 
           <h1
-            className="mt-5 font-display font-black uppercase leading-[0.98] text-chalk"
-            style={{ fontSize: 'clamp(44px, 7vw, 92px)', letterSpacing: '-0.01em' }}
+            className="mt-5 font-display uppercase leading-[1.05] text-chalk"
+            style={{ fontSize: 'clamp(44px, 7vw, 88px)' }}
           >
             Predict<br />every game.<br />
             <span className="text-lime">Own the table.</span>
@@ -96,7 +96,7 @@ export default async function Home() {
       {/* ── HOW IT WORKS ─────────────────────────────────── */}
       <section className="max-w-[1200px] mx-auto px-6 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-xs tracking-[0.3em] uppercase text-lime mb-3.5">How it works</p>
-        <h2 className="font-display font-black uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
+        <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Three taps to glory
         </h2>
         <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -127,7 +127,7 @@ export default async function Home() {
                 </div>
                 <span className="font-display font-black text-[46px] leading-none text-chalk/12">{n}</span>
               </div>
-              <h3 className="font-display font-black text-xl uppercase text-chalk mb-2">{title}</h3>
+              <h3 className="font-display text-xl uppercase text-chalk mb-2">{title}</h3>
               <p className="text-chalk/60 text-[15px]">{body}</p>
             </div>
           ))}
@@ -137,7 +137,7 @@ export default async function Home() {
       {/* ── SCORING ──────────────────────────────────────── */}
       <section className="max-w-[1200px] mx-auto px-6 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-xs tracking-[0.3em] uppercase text-lime mb-3.5">The points</p>
-        <h2 className="font-display font-black uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
+        <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Simple, brutal scoring
         </h2>
         <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -145,7 +145,7 @@ export default async function Home() {
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
               {exactPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
             </div>
-            <h3 className="font-display font-black text-xl uppercase text-chalk mt-3.5 mb-1.5">
+            <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">
               {rulesMap['match_exact']?.label ?? 'Exact score'}
             </h3>
             <p className="text-chalk/60 text-sm">
@@ -156,7 +156,7 @@ export default async function Home() {
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
               {resultPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> {resultPts === 1 ? 'pt' : 'pts'}</span>
             </div>
-            <h3 className="font-display font-black text-xl uppercase text-chalk mt-3.5 mb-1.5">
+            <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">
               {rulesMap['match_result']?.label ?? 'Correct result'}
             </h3>
             <p className="text-chalk/60 text-sm">
@@ -167,7 +167,7 @@ export default async function Home() {
             <div className="font-display font-black text-flame" style={{ fontSize: 64, lineHeight: 1 }}>
               0<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
             </div>
-            <h3 className="font-display font-black text-xl uppercase text-chalk mt-3.5 mb-1.5">Miss</h3>
+            <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">Miss</h3>
             <p className="text-chalk/60 text-sm">Wrong result. There&apos;s always the next matchday.</p>
           </div>
         </div>
@@ -181,7 +181,7 @@ export default async function Home() {
       {/* ── LEADERBOARD TEASER ───────────────────────────── */}
       <section className="max-w-[1200px] mx-auto px-6 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-xs tracking-[0.3em] uppercase text-lime mb-3.5">The race</p>
-        <h2 className="font-display font-black uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
+        <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Where will you land?
         </h2>
         <div className="mt-9 bg-pitch-900 border border-white/8 rounded-[26px] p-7 max-w-xl">
@@ -209,22 +209,33 @@ export default async function Home() {
       </section>
 
       {/* ── FINAL CTA ────────────────────────────────────── */}
-      <div className="mx-6 mb-16 rounded-[32px] bg-gradient-to-br from-lime to-lime-dim text-pitch-950 text-center py-16 px-7" data-aos="fade-up">
-        <h2
-          className="font-display font-black uppercase text-pitch-950"
-          style={{ fontSize: 'clamp(32px, 5vw, 60px)' }}
+      <div className="max-w-[1200px] mx-auto px-6 mb-16" data-aos="fade-up">
+        <div className="rounded-[32px] overflow-hidden relative text-center py-16 px-7"
+          style={{
+            background: 'radial-gradient(ellipse 80% 120% at 50% 110%, #9fcc2f 0%, #c6ff3d 45%, #d8ff6a 100%)',
+          }}
         >
-          The whistle&apos;s gone.<br />Get your picks in.
-        </h2>
-        <p className="mt-3.5 mb-7 mx-auto max-w-[42ch] font-semibold opacity-75">
-          Group stage is live. Sign in, set your nickname, and make your first call before the next kickoff.
-        </p>
-        <Link
-          href={loggedIn ? '/predict' : '/login'}
-          className="inline-flex items-center gap-2 font-display font-bold uppercase tracking-wide text-base rounded-full bg-pitch-950 text-lime px-7 py-3.5 transition hover:-translate-y-0.5"
-        >
-          Start predicting →
-        </Link>
+          {/* decorative blurred circles */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 w-52 h-52 rounded-full bg-pitch-950/20 blur-3xl" />
+          </div>
+          <h2
+            className="relative font-display uppercase text-pitch-950"
+            style={{ fontSize: 'clamp(32px, 5vw, 60px)' }}
+          >
+            The whistle&apos;s gone.<br />Get your picks in.
+          </h2>
+          <p className="relative mt-3.5 mb-7 mx-auto max-w-[42ch] font-semibold text-pitch-950/65">
+            Group stage is live. Sign in, set your nickname, and make your first call before the next kickoff.
+          </p>
+          <Link
+            href={loggedIn ? '/predict' : '/login'}
+            className="relative inline-flex items-center gap-2 font-display uppercase text-base rounded-full bg-pitch-950 text-lime px-7 py-3.5 transition hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            Start predicting →
+          </Link>
+        </div>
       </div>
 
       <footer className="text-center pb-14 pt-6 text-chalk/40 font-display font-semibold text-xs tracking-[0.18em] uppercase">

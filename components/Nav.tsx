@@ -12,7 +12,10 @@ import {
   BookOpenIcon,
   BarChartIcon,
   Logout01Icon,
+  Settings01Icon,
 } from '@hugeicons-pro/core-stroke-rounded';
+
+const ADMIN_EMAIL = 'tony@theonlytjn.com';
 
 const tabs = [
   { href: '/predict',     label: 'Predict',  icon: DartIcon },
@@ -24,7 +27,7 @@ const tabs = [
   { href: '/me',          label: 'Me',       icon: UserIcon },
 ];
 
-export default function Nav() {
+export default function Nav({ userEmail }: { userEmail: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -37,7 +40,7 @@ export default function Nav() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/10 bg-pitch-950/85 backdrop-blur">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-[1920px] items-center justify-between px-6 py-3">
         <Link href="/predict" className="font-display text-lg uppercase tracking-wide text-chalk">
           SOTG <span className="text-lime">’26</span>
         </Link>
@@ -57,6 +60,19 @@ export default function Nav() {
               </Link>
             );
           })}
+          {userEmail === ADMIN_EMAIL && (
+            <Link
+              href="/admin"
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-display text-sm uppercase tracking-wide transition ${
+                pathname === '/admin' || pathname.startsWith('/admin/')
+                  ? 'bg-flame text-chalk'
+                  : 'text-flame/70 hover:text-flame'
+              }`}
+            >
+              <HugeiconsIcon icon={Settings01Icon} size={14} color="currentColor" strokeWidth={2} />
+              Admin
+            </Link>
+          )}
           <button
             onClick={signOut}
             className="ml-1 rounded-full p-1.5 text-chalk/40 transition hover:text-flame"

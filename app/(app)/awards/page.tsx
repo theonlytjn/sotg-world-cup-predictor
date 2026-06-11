@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { AwardCategory, AwardPrediction } from '@/lib/types';
+import SearchableSelect, { type SelectGroup } from '@/components/SearchableSelect';
 
 type Team = { id: number; name: string; tla: string | null; confederation: string | null };
 type Player = { id: number; name: string; position: string | null; team_id: number | null };
 type TeamGroup = { team: Team; players: Player[] };
 
-const CONFEDERATIONS = ['UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'];
+const CONF_ORDER = ['UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'];
 
 const POS_ORDER: Record<string, number> = {
   Goalkeeper: 0, Defence: 1, Midfield: 2, Offence: 3,
@@ -25,12 +26,12 @@ const SECTIONS: { key: AwardCategory['section']; label: string }[] = [
 
 export default function AwardsPage() {
   const supabase = useMemo(() => createClient(), []);
-  const [userId, setUserId]       = useState<string | null>(null);
+  const [userId, setUserId]         = useState<string | null>(null);
   const [categories, setCategories] = useState<AwardCategory[]>([]);
-  const [teams, setTeams]         = useState<Team[]>([]);
-  const [players, setPlayers]     = useState<Player[]>([]);
-  const [preds, setPreds]         = useState<Record<number, AwardPrediction>>({});
-  const [loading, setLoading]     = useState(true);
+  const [teams, setTeams]           = useState<Team[]>([]);
+  const [players, setPlayers]       = useState<Player[]>([]);
+  const [preds, setPreds]           = useState<Record<number, AwardPrediction>>({});
+  const [loading, setLoading]       = useState(true);
 
   const load = useCallback(async () => {
     const { data: u } = await supabase.auth.getUser();
@@ -56,6 +57,7 @@ export default function AwardsPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Players sorted by position, grouped by team
   const playersByTeam = useMemo((): TeamGroup[] => {
     const teamMap = new Map(teams.map((t) => [t.id, t]));
     const groups = new Map<number, TeamGroup>();
@@ -75,10 +77,48 @@ export default function AwardsPage() {
         return pa !== pb ? pa - pb : a.name.localeCompare(b.name);
       });
     }
-    return [...groups.values()].sort((a, b) =>
-      (a.team.tla ?? a.team.name).localeCompare(b.team.tla ?? b.team.name)
-    );
+    return [...groups.values()].sort((a, b) => {
+      const ca = CONF_ORDER.indexOf(a.team.confederation ?? '');
+      const cb = CONF_ORDER.indexOf(b.team.confederation ?? '');
+      if (ca !== cb) return (ca === -1 ? 99 : ca) - (cb === -1 ? 99 : cb);
+      return (a.team.tla ?? a.team.name).localeCompare(b.team.tla ?? b.team.name);
+    });
   }, [players, teams]);
+
+  // Team select groups: confederation → teams
+  const teamGroups = useMemo((): SelectGroup[] => {
+    const byConf = new Map<string, Team[]>();
+    for (const t of teams) {
+      const conf = t.confederation ?? 'Other';
+      if (!byConf.has(conf)) byConf.set(conf, []);
+      byConf.get(conf)!.push(t);
+    }
+    const order = [...CONF_ORDER, 'Other'];
+    return order
+      .filter((c) => byConf.has(c))
+      .map((conf) => ({
+        label: conf,
+        options: byConf.get(conf)!.map((t) => ({
+          value: String(t.id),
+          label: t.name,
+          sublabel: t.tla ?? undefined,
+        })),
+      }));
+  }, [teams]);
+
+  // Player select groups: confederation · team → players
+  const playerGroups = useMemo((): SelectGroup[] => {
+    return playersByTeam.map(({ team, players: ps }) => ({
+      label: team.confederation
+        ? `${team.confederation} · ${team.tla ?? team.name}`
+        : (team.tla ?? team.name),
+      options: ps.map((p) => ({
+        value: String(p.id),
+        label: p.name,
+        sublabel: p.position ? (POS_ABBR[p.position] ?? p.position) : undefined,
+      })),
+    }));
+  }, [playersByTeam]);
 
   const bySection = useMemo(() => {
     const map = new Map<string, AwardCategory[]>();
@@ -115,7 +155,8 @@ export default function AwardsPage() {
                   key={cat.id}
                   category={cat}
                   teams={teams}
-                  playersByTeam={playersByTeam}
+                  teamGroups={teamGroups}
+                  playerGroups={playerGroups}
                   pred={preds[cat.id]}
                   userId={userId!}
                   supabase={supabase}
@@ -158,7 +199,8 @@ export default function AwardsPage() {
 function CategoryRow({
   category,
   teams,
-  playersByTeam,
+  teamGroups,
+  playerGroups,
   pred,
   userId,
   supabase,
@@ -166,7 +208,8 @@ function CategoryRow({
 }: {
   category: AwardCategory;
   teams: Team[];
-  playersByTeam: TeamGroup[];
+  teamGroups: SelectGroup[];
+  playerGroups: SelectGroup[];
   pred?: AwardPrediction;
   userId: string;
   supabase: ReturnType<typeof createClient>;
@@ -177,13 +220,23 @@ function CategoryRow({
   const [pick2, setPick2] = useState(pred?.pick_2 ?? '');
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  // Filter teams by confederation when meta specifies one; fall back to all teams
-  const filteredTeams = useMemo(() => {
-    const conf = category.meta?.confederation;
-    if (!conf) return teams;
-    const subset = teams.filter((t) => t.confederation === conf);
-    return subset.length > 0 ? subset : teams;
-  }, [teams, category.meta]);
+  // For confederation-filtered team questions, narrow down to just that conf's group
+  const filteredTeamGroups = useMemo((): SelectGroup[] => {
+    const conf = category.meta?.confederation as string | undefined;
+    if (!conf) return teamGroups;
+    // Show only the one matching confederation group
+    const match = teamGroups.find((g) => g.label === conf);
+    if (!match) {
+      // confederation not yet set on any team — fall back to all teams with no group labels
+      const flat = teams.filter(() => true).map((t) => ({
+        value: String(t.id),
+        label: t.name,
+        sublabel: t.tla ?? undefined,
+      }));
+      return [{ label: '', options: flat }];
+    }
+    return [{ label: conf, options: match.options }];
+  }, [category.meta, teamGroups, teams]);
 
   async function save() {
     if (!pick1 && !pick2) return;
@@ -207,15 +260,23 @@ function CategoryRow({
   }
 
   const settled = pred?.points !== undefined && pred.points !== null;
+  const confLabel = (category.meta?.confederation as string | undefined);
 
   return (
     <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-4 shadow-card">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="font-display text-lg uppercase tracking-wide text-chalk">{category.label}</p>
-          <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
-            {category.pts_pick_1}pts 1st · {category.pts_pick_2}pts 2nd
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
+              {category.pts_pick_1}pts 1st · {category.pts_pick_2}pts 2nd
+            </p>
+            {confLabel && (
+              <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
+                {confLabel} only
+              </span>
+            )}
+          </div>
         </div>
         {settled && (
           <span className="rounded-full bg-lime/20 px-3 py-1 font-display text-sm uppercase text-lime">
@@ -228,10 +289,24 @@ function CategoryRow({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <PickInput label="1st choice" value={pick1} onChange={setPick1} disabled={locked}
-          kind={category.pick_kind} teams={filteredTeams} playersByTeam={playersByTeam} />
-        <PickInput label="2nd choice" value={pick2} onChange={setPick2} disabled={locked}
-          kind={category.pick_kind} teams={filteredTeams} playersByTeam={playersByTeam} />
+        <PickInput
+          label="1st choice"
+          value={pick1}
+          onChange={setPick1}
+          disabled={locked}
+          kind={category.pick_kind}
+          teamGroups={filteredTeamGroups}
+          playerGroups={playerGroups}
+        />
+        <PickInput
+          label="2nd choice"
+          value={pick2}
+          onChange={setPick2}
+          disabled={locked}
+          kind={category.pick_kind}
+          teamGroups={filteredTeamGroups}
+          playerGroups={playerGroups}
+        />
       </div>
 
       {!locked && (
@@ -251,67 +326,53 @@ function CategoryRow({
 }
 
 function PickInput({
-  label, value, onChange, disabled, kind, teams, playersByTeam,
+  label, value, onChange, disabled, kind, teamGroups, playerGroups,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   disabled: boolean;
   kind: AwardCategory['pick_kind'];
-  teams: Team[];
-  playersByTeam: TeamGroup[];
+  teamGroups: SelectGroup[];
+  playerGroups: SelectGroup[];
 }) {
-  const base =
-    'w-full rounded-xl border border-white/15 bg-pitch-800 px-3 py-2.5 font-mono text-sm text-chalk outline-none focus:border-lime/70 disabled:opacity-60';
+  const CONFEDERATIONS = ['UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'];
 
   return (
     <div>
       <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-chalk/40">{label}</p>
 
       {kind === 'team' && (
-        <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={base}>
-          <option value="">— pick a team —</option>
-          {teams.map((t) => (
-            <option key={t.id} value={String(t.id)}>
-              {t.tla ? `${t.tla} — ${t.name}` : t.name}
-            </option>
-          ))}
-        </select>
-      )}
-
-      {kind === 'player' && playersByTeam.length > 0 && (
-        <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={base}>
-          <option value="">— pick a player —</option>
-          {playersByTeam.map(({ team, players }) => (
-            <optgroup key={team.id} label={team.tla ?? team.name}>
-              {players.map((p) => (
-                <option key={p.id} value={String(p.id)}>
-                  {p.name}{p.position ? ` · ${POS_ABBR[p.position] ?? p.position}` : ''}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-      )}
-
-      {kind === 'player' && playersByTeam.length === 0 && (
-        <input
-          type="text"
+        <SearchableSelect
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           disabled={disabled}
-          placeholder="Player name (run seed:players to load squads)"
-          className={base}
+          placeholder="— pick a team —"
+          groups={teamGroups}
+        />
+      )}
+
+      {kind === 'player' && (
+        <SearchableSelect
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder="— pick a player —"
+          groups={playerGroups}
         />
       )}
 
       {kind === 'confederation' && (
-        <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={base}>
-          <option value="">— pick a confederation —</option>
-          {CONFEDERATIONS.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+        <SearchableSelect
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder="— pick a confederation —"
+          groups={[{
+            label: '',
+            options: CONFEDERATIONS.map((c) => ({ value: c, label: c })),
+          }]}
+        />
       )}
     </div>
   );

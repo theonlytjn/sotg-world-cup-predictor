@@ -14,21 +14,25 @@ body {
   background-color: var(--bg);
   color: #f4f6f2;
   font-family: var(--font-body), sans-serif;
-  /* subtle pitch-stripe texture */
   background-image:
-    radial-gradient(120% 80% at 50% -10%, rgba(198, 255, 61, 0.06), transparent 60%),
+    /* stadium-light lime glow from top */
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(198, 255, 61, 0.18) 0%, transparent 60%),
+    /* subtle warm accent bottom-right */
+    radial-gradient(ellipse 55% 40% at 90% 100%, rgba(198, 255, 61, 0.05) 0%, transparent 55%),
+    /* very fine horizontal pitch lines */
     repeating-linear-gradient(
       180deg,
       transparent 0px,
-      transparent 78px,
-      rgba(255, 255, 255, 0.012) 78px,
-      rgba(255, 255, 255, 0.012) 156px
+      transparent 96px,
+      rgba(255, 255, 255, 0.018) 96px,
+      rgba(255, 255, 255, 0.018) 97px
     );
   min-height: 100dvh;
 }
 
+/* Boldonse is a single-weight display face — don't override its natural tracking */
 .font-display {
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
 }
 
 /* number inputs without spinners — cleaner score boxes */
