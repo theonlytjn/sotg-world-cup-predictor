@@ -39,10 +39,10 @@ export default function Nav({ userEmail }: { userEmail: string }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-pitch-950/85 backdrop-blur">
-      <div className="mx-auto flex max-w-[1920px] items-center justify-between px-6 py-3">
-        <Link href="/predict" className="font-display text-lg uppercase tracking-wide text-chalk">
-          SOTG <span className="text-lime">’26</span>
+    <header className="sticky top-0 z-20 border-b border-white/10 bg-pitch-950/90 backdrop-blur">
+      <div className="mx-auto flex max-w-[1920px] items-center justify-between px-8 py-4">
+        <Link href="/predict" className="font-display text-xl uppercase text-chalk">
+          SOTG <span className="text-lime">&apos;26</span>
         </Link>
         <nav className="flex items-center gap-1">
           {tabs.map((t) => {
@@ -51,11 +51,12 @@ export default function Nav({ userEmail }: { userEmail: string }) {
               <Link
                 key={t.href}
                 href={t.href}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-display text-sm uppercase tracking-wide transition ${
-                  active ? 'bg-lime text-pitch-950' : 'text-chalk/60 hover:text-chalk'
-                }`}
+                className={[
+                  'flex h-10 items-center gap-2 rounded-full px-4 font-display text-sm uppercase transition',
+                  active ? 'bg-lime text-pitch-950' : 'text-chalk/60 hover:text-chalk',
+                ].join(' ')}
               >
-                <HugeiconsIcon icon={t.icon} size={14} color="currentColor" strokeWidth={2} />
+                <HugeiconsIcon icon={t.icon} size={18} color="currentColor" strokeWidth={1.8} />
                 {t.label}
               </Link>
             );
@@ -63,23 +64,24 @@ export default function Nav({ userEmail }: { userEmail: string }) {
           {userEmail === ADMIN_EMAIL && (
             <Link
               href="/admin"
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-display text-sm uppercase tracking-wide transition ${
+              className={[
+                'flex h-10 items-center gap-2 rounded-full px-4 font-display text-sm uppercase transition',
                 pathname === '/admin' || pathname.startsWith('/admin/')
                   ? 'bg-flame text-chalk'
-                  : 'text-flame/70 hover:text-flame'
-              }`}
+                  : 'text-flame/70 hover:text-flame',
+              ].join(' ')}
             >
-              <HugeiconsIcon icon={Settings01Icon} size={14} color="currentColor" strokeWidth={2} />
+              <HugeiconsIcon icon={Settings01Icon} size={18} color="currentColor" strokeWidth={1.8} />
               Admin
             </Link>
           )}
           <button
             onClick={signOut}
-            className="ml-1 rounded-full p-1.5 text-chalk/40 transition hover:text-flame"
+            className="ml-2 flex h-10 w-10 items-center justify-center rounded-full text-chalk/40 transition hover:text-flame"
             title="Sign out"
             aria-label="Sign out"
           >
-            <HugeiconsIcon icon={Logout01Icon} size={16} color="currentColor" strokeWidth={1.5} />
+            <HugeiconsIcon icon={Logout01Icon} size={20} color="currentColor" strokeWidth={1.5} />
           </button>
         </nav>
       </div>

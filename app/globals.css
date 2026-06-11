@@ -30,9 +30,15 @@ body {
   min-height: 100dvh;
 }
 
-/* Boldonse is a single-weight display face — don't override its natural tracking */
+/* Boldonse needs explicit line-height — its natural metrics are very tight */
 .font-display {
   letter-spacing: 0;
+  line-height: 1.15;
+}
+
+/* Balanced button text — Boldonse sits high inside its line-box */
+button, a {
+  -webkit-font-smoothing: antialiased;
 }
 
 /* number inputs without spinners — cleaner score boxes */
