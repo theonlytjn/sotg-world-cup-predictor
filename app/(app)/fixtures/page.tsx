@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Calendar1Icon } from '@hugeicons-pro/core-stroke-rounded';
 
 type Team = { name: string; tla: string | null; crest: string | null };
 type Fixture = {
@@ -38,18 +40,22 @@ export default async function FixturesPage() {
 
   return (
     <div>
+      <div className="flex items-center gap-3 mb-1">
+        <span className="text-lime"><HugeiconsIcon icon={Calendar1Icon} size={18} color="currentColor" strokeWidth={1.5} /></span>
+        <p className="font-display font-bold text-xs tracking-[0.28em] uppercase text-lime">Group stage</p>
+      </div>
       <h1 className="font-display text-4xl uppercase text-chalk">Fixtures</h1>
-      <p className="mt-1 text-sm text-chalk/55">Group stage · scores update automatically.</p>
+      <p className="mt-1 text-sm text-chalk/55">Scores update automatically as results come in.</p>
 
       {ordered.length === 0 && (
         <p className="mt-8 font-mono text-sm text-chalk/40">No fixtures imported yet — run the seed script.</p>
       )}
 
       {ordered.map(([md, list]) => (
-        <section key={md} className="mt-8">
+        <section key={md} className="mt-10">
           <div className="mb-3 flex items-center gap-3">
-            <h2 className="font-display text-2xl uppercase text-lime">Matchday {md}</h2>
-            <span className="h-px flex-1 bg-white/10" />
+            <h2 className="font-display text-xl font-bold uppercase text-lime">Matchday {md}</h2>
+            <span className="h-px flex-1 bg-white/8" />
           </div>
           <div className="space-y-2">
             {list.map((f) => (
@@ -66,30 +72,40 @@ function Row({ f }: { f: Fixture }) {
   const finished = f.status === 'FINISHED';
   const live = f.status === 'IN_PLAY' || f.status === 'PAUSED';
   const ko = new Date(f.kickoff).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-pitch-900/50 px-4 py-3">
-      <span className="w-10 shrink-0 font-mono text-[11px] uppercase tracking-widest text-chalk/35">
+    <div className={`flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors ${
+      live ? 'border-lime/25 bg-pitch-900/80' : finished ? 'border-white/6 bg-pitch-900/40' : 'border-white/10 bg-pitch-900/60'
+    }`}>
+      <span className="w-8 shrink-0 font-display text-[11px] font-semibold uppercase tracking-widest text-chalk/35">
         {f.group_label ?? '—'}
       </span>
+
       <Side t={f.home_team} />
-      <div className="w-16 shrink-0 text-center">
+
+      <div className="w-20 shrink-0 text-center">
         {finished || live ? (
-          <span className="font-mono text-lg text-chalk">
+          <span className="font-display text-lg font-black text-chalk">
             {f.home_score ?? 0}–{f.away_score ?? 0}
           </span>
         ) : (
           <span className="font-mono text-[11px] text-chalk/40">{ko}</span>
         )}
       </div>
+
       <Side t={f.away_team} reverse />
-      <span className="w-12 shrink-0 text-right font-mono text-[10px] uppercase tracking-widest">
-        {live ? <span className="text-flame">live</span> : finished ? <span className="text-chalk/35">FT</span> : ''}
+
+      <span className="w-10 shrink-0 text-right font-display text-[10px] font-bold uppercase tracking-widest">
+        {live ? (
+          <span className="flex items-center justify-end gap-1 text-flame">
+            <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
+            Live
+          </span>
+        ) : finished ? (
+          <span className="text-chalk/30">FT</span>
+        ) : ''}
       </span>
     </div>
   );
@@ -100,12 +116,12 @@ function Side({ t, reverse }: { t: Team | null; reverse?: boolean }) {
     <div className={`flex flex-1 items-center gap-2 ${reverse ? 'flex-row-reverse text-right' : ''}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {t?.crest ? (
-        <img src={t.crest} alt="" className="h-5 w-5 shrink-0 object-contain" />
+        <img src={t.crest} alt="" className="h-6 w-6 shrink-0 object-contain" />
       ) : (
-        <span className="h-5 w-5 shrink-0 rounded-full bg-pitch-700" />
+        <span className="h-6 w-6 shrink-0 rounded-full bg-pitch-700" />
       )}
-      <span className="truncate font-display text-sm uppercase tracking-wide text-chalk">
-        {t?.name ?? 'TBD'}
+      <span className="truncate font-display text-sm font-bold uppercase tracking-wide text-chalk">
+        {t?.tla ?? t?.name ?? 'TBD'}
       </span>
     </div>
   );

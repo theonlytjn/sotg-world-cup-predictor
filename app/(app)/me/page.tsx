@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { UserCircleIcon, AnalyticsIcon, DartIcon, CheckmarkBadge01Icon } from '@hugeicons-pro/core-stroke-rounded';
 
 export default function MePage() {
   const supabase = useMemo(() => createClient(), []);
@@ -59,47 +61,78 @@ export default function MePage() {
 
   return (
     <div className="max-w-lg">
+      <div className="flex items-center gap-3 mb-1">
+        <span className="text-lime"><HugeiconsIcon icon={UserCircleIcon} size={18} color="currentColor" strokeWidth={1.5} /></span>
+        <p className="font-display font-bold text-xs tracking-[0.28em] uppercase text-lime">Profile</p>
+      </div>
       <h1 className="font-display text-4xl uppercase text-chalk">You</h1>
 
+      {/* stats grid */}
       <div className="mt-6 grid grid-cols-3 gap-3">
-        <Stat big label="Points" value={stats?.total ?? 0} accent />
-        <Stat label="Exact (5pt)" value={stats?.exact ?? 0} />
-        <Stat label="Results (1pt)" value={stats?.results ?? 0} />
+        <StatCard
+          icon={<HugeiconsIcon icon={AnalyticsIcon} size={18} color="currentColor" strokeWidth={1.5} />}
+          label="Total points"
+          value={stats?.total ?? 0}
+          accent
+        />
+        <StatCard
+          icon={<HugeiconsIcon icon={DartIcon} size={18} color="currentColor" strokeWidth={1.5} />}
+          label="Exact (5pt)"
+          value={stats?.exact ?? 0}
+        />
+        <StatCard
+          icon={<HugeiconsIcon icon={CheckmarkBadge01Icon} size={18} color="currentColor" strokeWidth={1.5} />}
+          label="Result (1pt)"
+          value={stats?.results ?? 0}
+        />
       </div>
-      <p className="mt-3 font-mono text-xs uppercase tracking-widest text-chalk/40">
+
+      <p className="mt-3 font-mono text-xs uppercase tracking-widest text-chalk/35">
         {picks} picks made · {stats?.settled ?? 0} settled
       </p>
 
+      {/* display name form */}
       <div className="mt-8 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
-        <label className="font-mono text-xs uppercase tracking-widest text-chalk/50">
-          Display name (shown on the table)
+        <label className="block font-display text-[11px] font-bold uppercase tracking-widest text-chalk/50 mb-2">
+          Display name
         </label>
+        <p className="mb-3 text-xs text-chalk/40">Shown on the leaderboard.</p>
         <input
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           maxLength={24}
-          className="mt-2 w-full rounded-xl border border-white/15 bg-pitch-800 px-4 py-3 text-chalk outline-none focus:border-lime/60"
+          className="w-full rounded-xl border border-white/15 bg-pitch-800 px-4 py-3 font-body text-chalk outline-none transition focus:border-lime/60"
         />
-        <button
-          onClick={saveName}
-          disabled={saving || !displayName.trim()}
-          className="mt-3 rounded-xl bg-lime px-5 py-2.5 font-display uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
-        >
-          {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
-        </button>
-        <p className="mt-4 font-mono text-xs text-chalk/30">Signed in as {email}</p>
+        <div className="mt-3 flex items-center justify-between">
+          <button
+            onClick={saveName}
+            disabled={saving || !displayName.trim()}
+            className="rounded-xl bg-lime px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
+          >
+            {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
+          </button>
+          <p className="font-mono text-xs text-chalk/30">{email}</p>
+        </div>
       </div>
     </div>
   );
 }
 
-function Stat({ label, value, big, accent }: { label: string; value: number; big?: boolean; accent?: boolean }) {
+function StatCard({
+  icon, label, value, accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  accent?: boolean;
+}) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-4">
-      <div className={`font-display ${big ? 'text-5xl' : 'text-4xl'} ${accent ? 'text-lime' : 'text-chalk'}`}>
+    <div className={`rounded-2xl border p-4 ${accent ? 'border-lime/25 bg-gradient-to-br from-lime/10 to-pitch-900' : 'border-white/10 bg-pitch-900/60'}`}>
+      <span className={accent ? 'text-lime' : 'text-chalk/40'}>{icon}</span>
+      <div className={`mt-2 font-display text-4xl font-black ${accent ? 'text-lime' : 'text-chalk'}`}>
         {value}
       </div>
-      <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-chalk/40">{label}</div>
+      <div className="mt-1 font-display text-[10px] font-bold uppercase tracking-widest text-chalk/40">{label}</div>
     </div>
   );
 }
