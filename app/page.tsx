@@ -16,11 +16,21 @@ export default async function Home() {
   const { data: { user } } = await supabase.auth.getUser();
   const loggedIn = !!user;
 
-  const { data: leaders } = await supabase
-    .from('leaderboard')
-    .select('user_id, display_name, total_points')
-    .order('total_points', { ascending: false })
-    .limit(4);
+  const [{ data: leaders }, { data: scoringRules }] = await Promise.all([
+    supabase
+      .from('leaderboard')
+      .select('user_id, display_name, total_points')
+      .order('total_points', { ascending: false })
+      .limit(4),
+    supabase
+      .from('scoring_rules')
+      .select('key, label, description, points')
+      .order('points', { ascending: false }),
+  ]);
+
+  const rulesMap = Object.fromEntries((scoringRules ?? []).map((r) => [r.key, r]));
+  const exactPts  = rulesMap['match_exact']?.points  ?? 5;
+  const resultPts = rulesMap['match_result']?.points ?? 1;
 
   const RANK_COLOURS = ['text-gold', 'text-[#cfd6da]', 'text-[#e0a86b]', 'text-chalk/35'];
 
@@ -131,19 +141,27 @@ export default async function Home() {
           Simple, brutal scoring
         </h2>
         <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="rounded-[22px] p-7 border border-lime/30 bg-gradient-to-br from-lime/14 to-pitch-900 relative overflow-hidden">
+          <div className="rounded-[22px] p-7 border border-lime/30 bg-gradient-to-br from-lime/14 to-pitch-900">
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
-              5<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
+              {exactPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
             </div>
-            <h3 className="font-display font-black text-xl uppercase text-chalk mt-3.5 mb-1.5">Exact score</h3>
-            <p className="text-chalk/60 text-sm">Nail the scoreline in 90 minutes — both teams correct.</p>
+            <h3 className="font-display font-black text-xl uppercase text-chalk mt-3.5 mb-1.5">
+              {rulesMap['match_exact']?.label ?? 'Exact score'}
+            </h3>
+            <p className="text-chalk/60 text-sm">
+              {rulesMap['match_exact']?.description ?? 'Nail the scoreline in 90 minutes — both teams correct.'}
+            </p>
           </div>
           <div className="rounded-[22px] p-7 border border-white/8 bg-pitch-900">
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
-              1<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pt</span>
+              {resultPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> {resultPts === 1 ? 'pt' : 'pts'}</span>
             </div>
-            <h3 className="font-display font-black text-xl uppercase text-chalk mt-3.5 mb-1.5">Correct result</h3>
-            <p className="text-chalk/60 text-sm">Right winner or a draw, but the scoreline&apos;s off.</p>
+            <h3 className="font-display font-black text-xl uppercase text-chalk mt-3.5 mb-1.5">
+              {rulesMap['match_result']?.label ?? 'Correct result'}
+            </h3>
+            <p className="text-chalk/60 text-sm">
+              {rulesMap['match_result']?.description ?? "Right winner or a draw, but the scoreline's off."}
+            </p>
           </div>
           <div className="rounded-[22px] p-7 border border-white/8 bg-pitch-900">
             <div className="font-display font-black text-flame" style={{ fontSize: 64, lineHeight: 1 }}>
@@ -153,6 +171,11 @@ export default async function Home() {
             <p className="text-chalk/60 text-sm">Wrong result. There&apos;s always the next matchday.</p>
           </div>
         </div>
+        <p className="mt-6 text-sm text-chalk/40">
+          Point values are set by the admin and may change. See the{' '}
+          <Link href="/rules" className="text-lime/70 hover:text-lime transition">full rules page</Link>{' '}
+          for all categories.
+        </p>
       </section>
 
       {/* ── LEADERBOARD TEASER ───────────────────────────── */}
