@@ -9,7 +9,6 @@
  */
 import { config } from 'dotenv'; config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js';
-import ws from 'ws';
 
 const FD_KEY = process.env.FOOTBALL_DATA_KEY!;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -22,7 +21,6 @@ if (!FD_KEY || !SUPABASE_URL || !SERVICE_KEY) {
 
 const db = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false },
-  realtime: { transport: ws },
 });
 
 type FDTeam = { id: number; name: string; tla: string | null; crest: string | null };
