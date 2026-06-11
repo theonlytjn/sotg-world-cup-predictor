@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import AwardPanel from './_components/AwardPanel';
 import FixturePanel from './_components/FixturePanel';
 import PollPanel from './_components/PollPanel';
+import ScoringPanel from './_components/ScoringPanel';
 import type { AwardCategory, PollQuestion } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,7 @@ export default async function AdminPage() {
     { data: players },
     { data: fixtures },
     { data: pollQuestions },
+    { data: scoringRules },
   ] = await Promise.all([
     db.from('award_categories').select('*').order('sort_order'),
     db.from('award_results').select('*'),
@@ -35,6 +37,7 @@ export default async function AdminPage() {
       away_team:teams!fixtures_away_team_id_fkey (id, name, tla)
     `).order('kickoff'),
     db.from('poll_questions').select('*').order('sort_order'),
+    db.from('scoring_rules').select('key, label, description, points').order('key'),
   ]);
 
   const resultsByCategory: Record<number, string> = {};
@@ -52,12 +55,16 @@ export default async function AdminPage() {
         </span>
       </div>
 
-      <AwardPanel
-        categories={(categories as AwardCategory[]) ?? []}
-        resultsByCategory={resultsByCategory}
-        teams={(teams as { id: number; name: string; tla: string | null; confederation: string | null }[]) ?? []}
-        players={(players as { id: number; name: string; position: string | null; team_id: number | null }[]) ?? []}
-      />
+      <ScoringPanel rules={(scoringRules as { key: string; label: string; description: string; points: number }[]) ?? []} />
+
+      <div className="mt-12">
+        <AwardPanel
+          categories={(categories as AwardCategory[]) ?? []}
+          resultsByCategory={resultsByCategory}
+          teams={(teams as { id: number; name: string; tla: string | null; confederation: string | null }[]) ?? []}
+          players={(players as { id: number; name: string; position: string | null; team_id: number | null }[]) ?? []}
+        />
+      </div>
 
       <div className="mt-12">
         <PollPanel questions={(pollQuestions as PollQuestion[]) ?? []} />

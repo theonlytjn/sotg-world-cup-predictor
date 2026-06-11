@@ -1,9 +1,4 @@
-// Single source of truth for the Phase 1 scoring rules.
-//   Exact score (home & away both correct)  -> 5 points
-//   Correct result only (W / D / L matches) -> 1 point
-//   Wrong                                    -> 0 points
-// Group games have no extra time, so the full-time score IS the 90' score.
-
+// Fallback values used when the DB table is unavailable.
 export const EXACT_SCORE_POINTS = 5;
 export const CORRECT_RESULT_POINTS = 1;
 
@@ -15,6 +10,8 @@ export const AWARD_POINTS: Record<string, [number, number]> = {
   top_scorer:             [13, 10],
   confederation_furthest: [5,  3],
 };
+
+export type ScoringRules = { exactPts: number; resultPts: number };
 
 export function scoreAwardPrediction(
   pick1: string | null,
@@ -38,13 +35,11 @@ export function scorePrediction(
   predHome: number,
   predAway: number,
   actualHome: number,
-  actualAway: number
+  actualAway: number,
+  exactPts: number = EXACT_SCORE_POINTS,
+  resultPts: number = CORRECT_RESULT_POINTS,
 ): number {
-  if (predHome === actualHome && predAway === actualAway) {
-    return EXACT_SCORE_POINTS;
-  }
-  if (outcome(predHome, predAway) === outcome(actualHome, actualAway)) {
-    return CORRECT_RESULT_POINTS;
-  }
+  if (predHome === actualHome && predAway === actualAway) return exactPts;
+  if (outcome(predHome, predAway) === outcome(actualHome, actualAway)) return resultPts;
   return 0;
 }

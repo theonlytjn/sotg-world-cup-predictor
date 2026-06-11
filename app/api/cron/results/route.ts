@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { scorePrediction } from '@/lib/scoring';
+import { scorePrediction, EXACT_SCORE_POINTS, CORRECT_RESULT_POINTS } from '@/lib/scoring';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -28,6 +28,12 @@ export async function GET(req: NextRequest) {
   }
 
   const db = createAdminClient();
+
+  // 0) load live scoring rules (fall back to hardcoded defaults)
+  const { data: rulesRows } = await db.from('scoring_rules').select('key, points');
+  const rulesMap = Object.fromEntries((rulesRows ?? []).map((r) => [r.key, r.points]));
+  const exactPts  = rulesMap['match_exact']  ?? EXACT_SCORE_POINTS;
+  const resultPts = rulesMap['match_result'] ?? CORRECT_RESULT_POINTS;
 
   // 1) pull live data from football-data.org
   const res = await fetch('https://api.football-data.org/v4/competitions/WC/matches', {
@@ -73,7 +79,7 @@ export async function GET(req: NextRequest) {
       .select('id, home_pred, away_pred')
       .eq('fixture_id', fx.id);
     for (const p of preds ?? []) {
-      const pts = scorePrediction(p.home_pred, p.away_pred, fx.home_score, fx.away_score);
+      const pts = scorePrediction(p.home_pred, p.away_pred, fx.home_score, fx.away_score, exactPts, resultPts);
       await db.from('match_predictions').update({ points: pts }).eq('id', p.id);
       settled++;
     }

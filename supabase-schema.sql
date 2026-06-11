@@ -420,3 +420,25 @@ SET search_path = public
 AS $$
   SELECT coalesce(auth.jwt() ->> 'email', '') = 'tony@theonlytjn.com'
 $$;
+
+-- ============================================================
+--  Phase 3 Step 3: Database-driven scoring rules
+-- ============================================================
+
+create table if not exists public.scoring_rules (
+  key         text primary key,
+  label       text not null,
+  description text not null,
+  points      integer not null
+);
+
+insert into public.scoring_rules (key, label, description, points) values
+  ('match_exact',  'Exact score',    'Home and away goals both correct — the full scoreline must match.', 5),
+  ('match_result', 'Correct result', 'Win / draw / loss correct but the scoreline is wrong.', 1)
+on conflict (key) do nothing;
+
+alter table public.scoring_rules enable row level security;
+
+drop policy if exists "scoring rules read all" on public.scoring_rules;
+create policy "scoring rules read all" on public.scoring_rules
+  for select using (true);
