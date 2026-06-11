@@ -18,10 +18,26 @@ const POS_ABBR: Record<string, string> = {
   Goalkeeper: 'GK', Defence: 'DEF', Midfield: 'MID', Offence: 'FWD',
 };
 
+const STAGE_GROUPS: SelectGroup[] = [{
+  label: '',
+  options: [
+    { value: 'group-stage',   label: 'Group Stage',   sublabel: 'Exit in group stage' },
+    { value: 'round-of-16',   label: 'Round of 16' },
+    { value: 'quarter-final', label: 'Quarter-Final' },
+    { value: 'semi-final',    label: 'Semi-Final' },
+    { value: 'final',         label: 'Final',          sublabel: 'Runners-up' },
+    { value: 'champion',      label: 'Champions',      sublabel: 'Win the tournament' },
+  ],
+}];
+const STAGE_LABEL: Record<string, string> = Object.fromEntries(
+  STAGE_GROUPS[0].options.map((o) => [o.value, o.label])
+);
+
 const SECTIONS: { key: AwardCategory['section']; label: string; description?: string }[] = [
   { key: 'main',     label: 'FIFA Awards', description: 'The five official post-tournament awards from the FIFA Technical Study Group.' },
   { key: 'specials', label: 'SOTG Specials' },
   { key: 'xtra',     label: 'SOTG Xtra' },
+  { key: 'opinion',  label: 'Opinion Poll', description: 'No points — just your gut feeling. Votes are tallied when the tournament ends.' },
 ];
 
 export default function AwardsPage() {
@@ -31,6 +47,7 @@ export default function AwardsPage() {
   const [teams, setTeams]           = useState<Team[]>([]);
   const [players, setPlayers]       = useState<Player[]>([]);
   const [preds, setPreds]           = useState<Record<number, AwardPrediction>>({});
+  const [tallies, setTallies]       = useState<Record<number, Record<string, number>>>({});
   const [loading, setLoading]       = useState(true);
 
   const load = useCallback(async () => {
@@ -46,18 +63,40 @@ export default function AwardsPage() {
       supabase.from('award_predictions').select('*').eq('user_id', u.user.id),
     ]);
 
-    setCategories((cats as AwardCategory[]) ?? []);
+    const catList = (cats as AwardCategory[]) ?? [];
+    setCategories(catList);
     setTeams((ts as Team[]) ?? []);
     setPlayers((ps as Player[]) ?? []);
+
     const map: Record<number, AwardPrediction> = {};
     for (const p of (ap as AwardPrediction[]) ?? []) map[p.category_id] = p;
     setPreds(map);
+
+    // Fetch opinion tallies for any categories where results are revealed
+    const visibleIds = catList
+      .filter((c) => c.section === 'opinion' && c.results_visible)
+      .map((c) => c.id);
+
+    if (visibleIds.length > 0) {
+      const { data: tallyData } = await supabase
+        .from('award_predictions')
+        .select('category_id, pick_1')
+        .in('category_id', visibleIds)
+        .not('pick_1', 'is', null);
+
+      const t: Record<number, Record<string, number>> = {};
+      for (const row of (tallyData ?? []) as { category_id: number; pick_1: string }[]) {
+        if (!t[row.category_id]) t[row.category_id] = {};
+        t[row.category_id][row.pick_1] = (t[row.category_id][row.pick_1] ?? 0) + 1;
+      }
+      setTallies(t);
+    }
+
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => { load(); }, [load]);
 
-  // Players sorted by position, grouped by team
   const playersByTeam = useMemo((): TeamGroup[] => {
     const teamMap = new Map(teams.map((t) => [t.id, t]));
     const groups = new Map<number, TeamGroup>();
@@ -85,7 +124,6 @@ export default function AwardsPage() {
     });
   }, [players, teams]);
 
-  // Team select groups: confederation → teams
   const teamGroups = useMemo((): SelectGroup[] => {
     const byConf = new Map<string, Team[]>();
     for (const t of teams) {
@@ -106,7 +144,6 @@ export default function AwardsPage() {
       }));
   }, [teams]);
 
-  // Player select groups: confederation · team → players
   const playerGroups = useMemo((): SelectGroup[] => {
     return playersByTeam.map(({ team, players: ps }) => ({
       label: team.confederation
@@ -143,11 +180,14 @@ export default function AwardsPage() {
       {SECTIONS.map(({ key, label, description }) => {
         const cats = bySection.get(key);
         if (!cats?.length) return null;
-        const isMain = key === 'main';
+        const isMain    = key === 'main';
+        const isOpinion = key === 'opinion';
         return (
           <section key={key} className="mt-8">
             <div className="mb-1 flex items-center gap-3">
-              <h2 className="font-display text-2xl uppercase text-lime">{label}</h2>
+              <h2 className={['font-display text-2xl uppercase', isOpinion ? 'text-gold' : 'text-lime'].join(' ')}>
+                {label}
+              </h2>
               <span className="h-px flex-1 bg-white/10" />
             </div>
             {description && <p className="mb-4 text-sm text-chalk/55">{description}</p>}
@@ -163,6 +203,8 @@ export default function AwardsPage() {
                   userId={userId!}
                   supabase={supabase}
                   onSaved={(p) => setPreds((prev) => ({ ...prev, [cat.id]: p }))}
+                  isOpinion={isOpinion}
+                  tally={isOpinion && cat.results_visible ? tallies[cat.id] : undefined}
                 />
               ))}
             </div>
@@ -170,10 +212,11 @@ export default function AwardsPage() {
         );
       })}
 
+      {/* Points breakdown — opinion section excluded (0 pts) */}
       <div className="mt-10 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
         <p className="font-display text-sm uppercase tracking-wide text-chalk/50">Points breakdown</p>
         <div className="mt-3 space-y-3">
-          {SECTIONS.map(({ key, label }) => {
+          {SECTIONS.filter((s) => s.key !== 'opinion').map(({ key, label }) => {
             const cats = bySection.get(key);
             if (!cats?.length) return null;
             return (
@@ -207,6 +250,8 @@ function CategoryRow({
   userId,
   supabase,
   onSaved,
+  isOpinion = false,
+  tally,
 }: {
   category: AwardCategory;
   teams: Team[];
@@ -216,38 +261,47 @@ function CategoryRow({
   userId: string;
   supabase: ReturnType<typeof createClient>;
   onSaved: (p: AwardPrediction) => void;
+  isOpinion?: boolean;
+  tally?: Record<string, number>;
 }) {
-  const locked = category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
+  const locked = !isOpinion && category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
   const [pick1, setPick1] = useState(pred?.pick_1 ?? '');
   const [pick2, setPick2] = useState(pred?.pick_2 ?? '');
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  // For confederation-filtered team questions, narrow down to just that conf's group
   const filteredTeamGroups = useMemo((): SelectGroup[] => {
     const conf = category.meta?.confederation as string | undefined;
     if (!conf) return teamGroups;
-    // Show only the one matching confederation group
     const match = teamGroups.find((g) => g.label === conf);
     if (!match) {
-      // confederation not yet set on any team — fall back to all teams with no group labels
-      const flat = teams.filter(() => true).map((t) => ({
-        value: String(t.id),
-        label: t.name,
-        sublabel: t.tla ?? undefined,
-      }));
-      return [{ label: '', options: flat }];
+      return [{ label: '', options: teams.map((t) => ({ value: String(t.id), label: t.name, sublabel: t.tla ?? undefined })) }];
     }
     return [{ label: conf, options: match.options }];
   }, [category.meta, teamGroups, teams]);
 
+  // Label lookup for vote tally display
+  const teamLabelMap = useMemo(() => new Map(teams.map((t) => [String(t.id), t.name])), [teams]);
+  const playerLabelMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const g of playerGroups) for (const o of g.options) m.set(o.value, o.label);
+    return m;
+  }, [playerGroups]);
+
+  function getPickLabel(pick: string): string {
+    if (category.pick_kind === 'stage')  return STAGE_LABEL[pick] ?? pick;
+    if (category.pick_kind === 'team')   return teamLabelMap.get(pick) ?? pick;
+    if (category.pick_kind === 'player') return playerLabelMap.get(pick) ?? pick;
+    return pick;
+  }
+
   async function save() {
-    if (!pick1 && !pick2) return;
+    if (isOpinion ? !pick1 : (!pick1 && !pick2)) return;
     setState('saving');
     const row = {
       user_id: userId,
       category_id: category.id,
       pick_1: pick1 || null,
-      pick_2: pick2 || null,
+      pick_2: isOpinion ? null : (pick2 || null),
     };
     const { error } = await supabase
       .from('award_predictions')
@@ -261,9 +315,81 @@ function CategoryRow({
     }
   }
 
-  const settled = pred?.points !== undefined && pred.points !== null;
-  const confLabel = (category.meta?.confederation as string | undefined);
+  const settled = !isOpinion && pred?.points !== undefined && pred.points !== null;
+  const confLabel = category.meta?.confederation as string | undefined;
 
+  // ---- Opinion Poll card ----
+  if (isOpinion) {
+    const totalVotes = tally ? Object.values(tally).reduce((a, b) => a + b, 0) : 0;
+    return (
+      <div className="flex flex-col rounded-2xl border border-gold/25 bg-pitch-900/60 p-5 shadow-card">
+        <div className="mb-4">
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>
+            <span className="shrink-0 rounded-full border border-gold/30 px-3 py-1 font-display text-xs uppercase text-gold/70">
+              Poll
+            </span>
+          </div>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
+            Opinion · No points
+          </p>
+        </div>
+
+        {tally ? (
+          // Results revealed — show vote bars
+          <div className="space-y-2.5">
+            {Object.entries(tally)
+              .sort(([, a], [, b]) => b - a)
+              .map(([pick, count]) => {
+                const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+                const isMyVote = pred?.pick_1 === pick;
+                return (
+                  <div key={pick}>
+                    <div className="mb-1 flex items-center justify-between">
+                      <span className={['text-sm', isMyVote ? 'text-gold' : 'text-chalk/80'].join(' ')}>
+                        {getPickLabel(pick)}{isMyVote ? ' ✓' : ''}
+                      </span>
+                      <span className="font-mono text-xs text-chalk/40">{count} · {pct}%</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                      <div
+                        className="h-full rounded-full bg-gold/60 transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        ) : (
+          // Voting open — show single pick input
+          <>
+            <PickInput
+              label="Your vote"
+              value={pick1}
+              onChange={setPick1}
+              disabled={false}
+              kind={category.pick_kind}
+              teamGroups={filteredTeamGroups}
+              playerGroups={playerGroups}
+            />
+            <div className="mt-3 flex items-center gap-3">
+              <button
+                onClick={save}
+                disabled={!pick1 || state === 'saving'}
+                className="rounded-full bg-gold/15 px-4 py-1.5 font-display text-sm uppercase tracking-wide text-gold transition hover:bg-gold/25 disabled:opacity-30"
+              >
+                {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Voted ✓' : pred?.pick_1 ? 'Update vote' : 'Submit vote'}
+              </button>
+              {state === 'error' && <span className="font-mono text-xs text-flame">Couldn&apos;t save</span>}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // ---- Regular Award / Prediction card ----
   return (
     <div className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5 shadow-card">
       <div className="mb-4">
@@ -370,10 +496,17 @@ function PickInput({
           onChange={onChange}
           disabled={disabled}
           placeholder="— pick a confederation —"
-          groups={[{
-            label: '',
-            options: CONFEDERATIONS.map((c) => ({ value: c, label: c })),
-          }]}
+          groups={[{ label: '', options: CONFEDERATIONS.map((c) => ({ value: c, label: c })) }]}
+        />
+      )}
+
+      {kind === 'stage' && (
+        <SearchableSelect
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder="— pick a stage —"
+          groups={STAGE_GROUPS}
         />
       )}
     </div>

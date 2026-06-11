@@ -69,12 +69,13 @@ export interface AwardCategory {
   id: number;
   slug: string;
   label: string;
-  pick_kind: 'team' | 'player' | 'confederation';
-  section: 'main' | 'specials' | 'xtra';
+  pick_kind: 'team' | 'player' | 'confederation' | 'stage';
+  section: 'main' | 'specials' | 'xtra' | 'opinion';
   deadline: string | null;
   pts_pick_1: number;
   pts_pick_2: number;
   sort_order: number;
+  results_visible: boolean;
   meta: { confederation?: string } | null;
 }
 
