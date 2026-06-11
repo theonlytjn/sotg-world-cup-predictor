@@ -135,7 +135,7 @@ create policy "predictions update own" on public.match_predictions
   );
 
 -- ============================================================
---  LEADERBOARD VIEW
+--  LEADERBOARD VIEW  (updated Phase 2 — includes award_points)
 --  Defined WITHOUT security_invoker so it aggregates every user's
 --  totals regardless of the prediction read policy above. It only
 --  ever exposes sums + names, never individual unplayed picks.
@@ -143,15 +143,124 @@ create policy "predictions update own" on public.match_predictions
 drop view if exists public.leaderboard;
 create view public.leaderboard as
 select
-  pr.id                                                   as user_id,
+  pr.id                                                                   as user_id,
   pr.display_name,
   pr.username,
-  coalesce(sum(mp.points), 0)::int                        as total_points,
-  count(*) filter (where mp.points = 5)                   as exact_scores,
-  count(*) filter (where mp.points = 1)                   as correct_results,
-  count(mp.id) filter (where mp.points is not null)       as settled_predictions
+  (coalesce(m.total, 0) + coalesce(a.total, 0))::int                     as total_points,
+  coalesce(m.exact_scores, 0)::int                                        as exact_scores,
+  coalesce(m.correct_results, 0)::int                                     as correct_results,
+  coalesce(m.settled, 0)::int                                             as settled_predictions,
+  coalesce(a.total, 0)::int                                               as award_points
 from public.profiles pr
-left join public.match_predictions mp on mp.user_id = pr.id
-group by pr.id, pr.display_name, pr.username;
+left join (
+  select
+    user_id,
+    sum(points)                                  as total,
+    count(*) filter (where points = 5)           as exact_scores,
+    count(*) filter (where points = 1)           as correct_results,
+    count(id) filter (where points is not null)  as settled
+  from public.match_predictions
+  group by user_id
+) m on m.user_id = pr.id
+left join (
+  select user_id, sum(points) as total
+  from public.award_predictions
+  group by user_id
+) a on a.user_id = pr.id;
 
 grant select on public.leaderboard to anon, authenticated;
+
+-- ============================================================
+--  Phase 2 Slice 1: Awards
+-- ============================================================
+
+-- ---------- AWARD CATEGORIES ----------
+create table if not exists public.award_categories (
+  id          serial primary key,
+  slug        text unique not null,
+  label       text not null,
+  pick_kind   text not null check (pick_kind in ('team', 'player', 'confederation')),
+  deadline    timestamptz,
+  pts_pick_1  integer not null,
+  pts_pick_2  integer not null,
+  sort_order  integer not null default 0
+);
+
+insert into public.award_categories (slug, label, pick_kind, pts_pick_1, pts_pick_2, sort_order)
+values
+  ('winner',                 'Tournament Winner',     'team',            35, 30, 1),
+  ('runners_up',             'Runners-up',            'team',            25, 20, 2),
+  ('player_of_tournament',   'Player of Tournament',  'player',          18, 15, 3),
+  ('top_scorer',             'Top Scorer',            'player',          13, 10, 4),
+  ('confederation_furthest', 'Best Confederation',    'confederation',    5,  3, 5)
+on conflict (slug) do nothing;
+
+-- ---------- AWARD PREDICTIONS ----------
+create table if not exists public.award_predictions (
+  id           serial primary key,
+  user_id      uuid not null references public.profiles (id) on delete cascade,
+  category_id  integer not null references public.award_categories (id),
+  pick_1       text,
+  pick_2       text,
+  points       integer,
+  updated_at   timestamptz not null default now(),
+  unique (user_id, category_id)
+);
+
+create index if not exists ap_user_idx     on public.award_predictions (user_id);
+create index if not exists ap_category_idx on public.award_predictions (category_id);
+
+-- ---------- AWARD RESULTS ----------
+create table if not exists public.award_results (
+  category_id  integer primary key references public.award_categories (id),
+  result       text not null,
+  set_at       timestamptz not null default now()
+);
+
+-- RLS
+alter table public.award_categories  enable row level security;
+alter table public.award_predictions enable row level security;
+alter table public.award_results     enable row level security;
+
+drop policy if exists "award categories read all" on public.award_categories;
+create policy "award categories read all" on public.award_categories
+  for select using (true);
+
+drop policy if exists "award results read all" on public.award_results;
+create policy "award results read all" on public.award_results
+  for select using (true);
+
+drop policy if exists "award predictions read" on public.award_predictions;
+create policy "award predictions read" on public.award_predictions
+  for select using (
+    auth.uid() = user_id
+    or exists (
+      select 1 from public.award_categories ac
+      where ac.id = category_id
+        and ac.deadline is not null
+        and ac.deadline <= now()
+    )
+  );
+
+drop policy if exists "award predictions insert own" on public.award_predictions;
+create policy "award predictions insert own" on public.award_predictions
+  for insert with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from public.award_categories ac
+      where ac.id = category_id
+        and (ac.deadline is null or ac.deadline > now())
+    )
+  );
+
+drop policy if exists "award predictions update own" on public.award_predictions;
+create policy "award predictions update own" on public.award_predictions
+  for update using (auth.uid() = user_id)
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from public.award_categories ac
+      where ac.id = category_id
+        and (ac.deadline is null or ac.deadline > now())
+    )
+  );

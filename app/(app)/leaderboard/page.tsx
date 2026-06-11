@@ -7,6 +7,7 @@ type Row = {
   exact_scores: number;
   correct_results: number;
   settled_predictions: number;
+  award_points: number;
 };
 
 export const dynamic = 'force-dynamic';
@@ -28,11 +29,12 @@ export default async function LeaderboardPage() {
       <p className="mt-1 text-sm text-chalk/55">Live standings — updates as results come in.</p>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
-        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_4rem] items-center gap-2 bg-pitch-800 px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
+        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_4rem] items-center gap-2 bg-pitch-800 px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
           <span>#</span>
           <span>Player</span>
           <span className="text-center">5pt</span>
           <span className="text-center">1pt</span>
+          <span className="text-center">Awds</span>
           <span className="text-right">Pts</span>
         </div>
 
@@ -47,7 +49,7 @@ export default async function LeaderboardPage() {
           return (
             <div
               key={r.user_id}
-              className={`grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_4rem] items-center gap-2 border-t border-white/5 px-4 py-3 ${
+              className={`grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_4rem] items-center gap-2 border-t border-white/5 px-4 py-3 ${
                 isMe ? 'bg-lime/5' : ''
               }`}
             >
@@ -60,6 +62,7 @@ export default async function LeaderboardPage() {
               </span>
               <span className="text-center font-mono text-sm text-chalk/60">{r.exact_scores}</span>
               <span className="text-center font-mono text-sm text-chalk/60">{r.correct_results}</span>
+              <span className="text-center font-mono text-sm text-chalk/60">{r.award_points}</span>
               <span className="text-right font-display text-2xl text-chalk">{r.total_points}</span>
             </div>
           );

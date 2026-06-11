@@ -51,4 +51,31 @@ export interface LeaderboardRow {
   exact_scores: number;
   correct_results: number;
   settled_predictions: number;
+  award_points: number;
+}
+
+export interface AwardCategory {
+  id: number;
+  slug: string;
+  label: string;
+  pick_kind: 'team' | 'player' | 'confederation';
+  deadline: string | null;
+  pts_pick_1: number;
+  pts_pick_2: number;
+  sort_order: number;
+}
+
+export interface AwardPrediction {
+  id: number;
+  user_id: string;
+  category_id: number;
+  pick_1: string | null;
+  pick_2: string | null;
+  points: number | null;
+}
+
+export interface AwardResult {
+  category_id: number;
+  result: string;
+  set_at: string;
 }

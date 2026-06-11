@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 
 const tabs = [
   { href: '/predict', label: 'Predict' },
+  { href: '/awards', label: 'Awards' },
   { href: '/fixtures', label: 'Fixtures' },
   { href: '/leaderboard', label: 'Table' },
   { href: '/me', label: 'Me' },
