@@ -40,6 +40,11 @@ export default async function Home() {
       {/* ── HERO ─────────────────────────────────────────── */}
       <header className="px-6 sm:px-10 lg:px-16 xl:px-24 pt-16 pb-12 grid grid-cols-1 md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
         <div data-aos="fade-up" data-aos-duration="700">
+          <img
+            src="/logo.svg"
+            alt="SOTG '26"
+            className="h-16 w-auto object-contain mb-6"
+          />
           <span className="inline-flex items-center gap-2.5 font-display font-semibold text-xs tracking-[0.28em] uppercase text-lime border border-lime/25 rounded-full px-3.5 py-1.5 bg-lime/5">
             <span className="w-1.5 h-1.5 rounded-full bg-flame live-ping" />
             Group stage · live now
@@ -76,17 +81,12 @@ export default async function Home() {
         </div>
 
         {/* Right column — WC logo + animated ticket */}
-        <div className="flex flex-col items-center gap-6" data-aos="fade-up" data-aos-duration="700" data-aos-delay="150">
-          <div className="text-center">
-            <img
-              src="/logo.svg"
-              alt="SOTG '26"
-              className="mx-auto h-20 w-auto object-contain"
-            />
-            <p className="mt-2 font-display text-[11px] uppercase tracking-[0.3em] text-chalk/50">
-              FIFA World Cup 2026
-            </p>
-          </div>
+        <div className="flex flex-col items-center gap-5" data-aos="fade-up" data-aos-duration="700" data-aos-delay="150">
+          <img
+            src="/wc-logo-white.png"
+            alt="FIFA World Cup 2026"
+            className="mx-auto h-24 w-auto object-contain"
+          />
           <div className="w-full max-w-sm">
             <TicketCarousel />
           </div>
@@ -261,6 +261,11 @@ export default async function Home() {
             <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/10 blur-3xl" />
             <div className="absolute -bottom-10 -left-10 w-52 h-52 rounded-full bg-pitch-950/20 blur-3xl" />
           </div>
+          <img
+            src="/wc-logo-black.png"
+            alt="FIFA World Cup 2026"
+            className="relative mx-auto h-20 w-auto object-contain mb-4 opacity-70"
+          />
           <h2
             className="relative font-display uppercase text-pitch-950"
             style={{ fontSize: 'clamp(32px, 5vw, 60px)' }}
