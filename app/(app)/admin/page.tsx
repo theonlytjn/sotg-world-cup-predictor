@@ -58,32 +58,40 @@ export default async function AdminPage() {
         </span>
       </div>
 
-      <ScoringPanel rules={(scoringRules as { key: string; label: string; description: string; points: number }[]) ?? []} />
-
-      <div className="mt-12">
-        <AwardPanel
-          categories={(categories as AwardCategory[]) ?? []}
-          resultsByCategory={resultsByCategory}
-          teams={(teams as { id: number; name: string; tla: string | null; confederation: string | null }[]) ?? []}
-          players={(players as { id: number; name: string; position: string | null; team_id: number | null }[]) ?? []}
-        />
+      {/* Scoring — full width */}
+      <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
+        <ScoringPanel rules={(scoringRules as { key: string; label: string; description: string; points: number }[]) ?? []} />
       </div>
 
-      <div className="mt-12">
-        <PollPanel questions={(pollQuestions as PollQuestion[]) ?? []} />
-      </div>
+      {/* 2-column grid for the heavier panels */}
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
+        <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
+          <AwardPanel
+            categories={(categories as AwardCategory[]) ?? []}
+            resultsByCategory={resultsByCategory}
+            teams={(teams as { id: number; name: string; tla: string | null; confederation: string | null }[]) ?? []}
+            players={(players as { id: number; name: string; position: string | null; team_id: number | null }[]) ?? []}
+          />
+        </div>
 
-      <div className="mt-12">
-        <FixturePanel
-          fixtures={(fixtures as unknown as Parameters<typeof FixturePanel>[0]['fixtures']) ?? []}
-        />
-      </div>
+        <div className="flex flex-col gap-6">
+          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
+            <PollPanel questions={(pollQuestions as PollQuestion[]) ?? []} />
+          </div>
 
-      <div className="mt-12">
-        <ManualPredictionsPanel
-          profiles={(profiles as { id: string; display_name: string; username: string | null }[]) ?? []}
-          fixtures={(fixtures as unknown as Parameters<typeof ManualPredictionsPanel>[0]['fixtures']) ?? []}
-        />
+          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
+            <FixturePanel
+              fixtures={(fixtures as unknown as Parameters<typeof FixturePanel>[0]['fixtures']) ?? []}
+            />
+          </div>
+
+          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
+            <ManualPredictionsPanel
+              profiles={(profiles as { id: string; display_name: string; username: string | null }[]) ?? []}
+              fixtures={(fixtures as unknown as Parameters<typeof ManualPredictionsPanel>[0]['fixtures']) ?? []}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

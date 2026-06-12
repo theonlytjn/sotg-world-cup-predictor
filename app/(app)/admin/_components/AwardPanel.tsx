@@ -126,8 +126,27 @@ function CategoryCard({
   const [deadline, setDeadline] = useState(
     category.deadline ? new Date(category.deadline).toISOString().slice(0, 16) : ''
   );
+  const [pts1, setPts1] = useState(String(category.pts_pick_1));
+  const [pts2, setPts2] = useState(String(category.pts_pick_2));
+  const [ptsState, setPtsState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [resultState, setResultState]   = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [deadlineState, setDeadlineState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  async function savePoints() {
+    const p1 = parseInt(pts1, 10);
+    const p2 = parseInt(pts2, 10);
+    if (isNaN(p1) || isNaN(p2) || p1 < 0 || p2 < 0) return;
+    setPtsState('saving');
+    const res = await fetch('/api/admin/set-award-points', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category_id: category.id, pts_pick_1: p1, pts_pick_2: p2 }),
+    });
+    setPtsState(res.ok ? 'saved' : 'error');
+    if (res.ok) setTimeout(() => setPtsState('idle'), 1500);
+  }
+
+  const ptsUnchanged = parseInt(pts1, 10) === category.pts_pick_1 && parseInt(pts2, 10) === category.pts_pick_2;
 
   const filteredTeams = useMemo(() => {
     const conf = category.meta?.confederation;
@@ -177,7 +196,7 @@ function CategoryCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="font-display text-base uppercase tracking-wide text-chalk">{category.label}</p>
-          <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
             {category.pts_pick_1}pts · {category.pts_pick_2}pts
           </p>
         </div>
@@ -222,6 +241,37 @@ function CategoryCard({
           </button>
         )}
         {resultState === 'error' && <span className="font-mono text-xs text-flame">Error</span>}
+      </div>
+
+      {/* Points */}
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/5 pt-3">
+        <span className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">Points</span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[11px] text-chalk/40">Pick 1</span>
+          <input
+            type="number" min={0} value={pts1}
+            onChange={(e) => { setPts1(e.target.value); setPtsState('idle'); }}
+            className="w-14 rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 text-center font-mono text-xs text-chalk outline-none focus:border-lime/60"
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[11px] text-chalk/40">Pick 2</span>
+          <input
+            type="number" min={0} value={pts2}
+            onChange={(e) => { setPts2(e.target.value); setPtsState('idle'); }}
+            className="w-14 rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 text-center font-mono text-xs text-chalk outline-none focus:border-lime/60"
+          />
+        </div>
+        <button
+          onClick={savePoints}
+          disabled={ptsState === 'saving' || ptsUnchanged}
+          className="rounded-lg bg-lime/15 px-3 py-1 font-mono text-xs uppercase tracking-widest text-lime transition hover:bg-lime/25 disabled:opacity-40"
+        >
+          {ptsState === 'saving' ? 'Saving…' : ptsState === 'saved' ? 'Saved ✓' : ptsState === 'error' ? 'Error' : 'Save pts'}
+        </button>
+        {ptsState !== 'idle' && currentResult && (
+          <span className="font-mono text-[11px] text-chalk/40">rescores existing picks</span>
+        )}
       </div>
 
       {/* Deadline */}
