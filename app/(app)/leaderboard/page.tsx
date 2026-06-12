@@ -197,7 +197,7 @@ export default function LeaderboardPage() {
         <span className="text-lime">
           <HugeiconsIcon icon={BarChartIcon} size={18} color="currentColor" strokeWidth={1.5} />
         </span>
-        <p className="font-display text-xs uppercase tracking-[0.28em] text-lime">
+        <p className="font-display text-sm uppercase tracking-[0.28em] text-lime">
           {isLive ? 'Live standings' : 'Standings'}
         </p>
         {isLive && (

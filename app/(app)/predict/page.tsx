@@ -178,7 +178,7 @@ export default function PredictPage() {
         <span className="text-lime">
           <HugeiconsIcon icon={DartIcon} size={18} color="currentColor" strokeWidth={1.5} />
         </span>
-        <p className="font-display text-xs tracking-[0.28em] uppercase text-lime">Your picks</p>
+        <p className="font-display text-sm tracking-[0.28em] uppercase text-lime">Your picks</p>
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">Predict</h1>
       <p className="mt-1 text-sm text-chalk/55">
@@ -238,7 +238,7 @@ export default function PredictPage() {
               <p className="font-display text-base uppercase tracking-widest text-chalk">
                 {activeDayGroup?.label ?? '—'}
               </p>
-              <p className="font-mono text-xs text-chalk/35">
+              <p className="font-mono text-sm text-chalk/35">
                 {activeDayGroup?.fixtures.length ?? 0} matches
                 {totalDays > 1 && (
                   <span className="ml-2 text-chalk/25">
@@ -378,12 +378,12 @@ function FixtureRow({
             <button
               onClick={save}
               disabled={home === '' || away === '' || state === 'saving'}
-              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-display text-xs uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
             >
               {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
             </button>
           ) : (
-            <span className="flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-chalk/30">
+            <span className="flex items-center gap-1.5 font-display text-sm uppercase tracking-widest text-chalk/30">
               <HugeiconsIcon icon={LockIcon} size={12} color="currentColor" strokeWidth={2} />
               Locked
             </span>
@@ -396,7 +396,7 @@ function FixtureRow({
           )}
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs">
+        <div className="flex items-center gap-2 font-mono text-sm">
           {finished && (
             <span className="text-chalk/40">
               {fixture.home_score}–{fixture.away_score}

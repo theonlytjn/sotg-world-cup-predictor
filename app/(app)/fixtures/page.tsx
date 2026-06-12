@@ -161,12 +161,12 @@ export default function FixturesPage() {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-3">
           <span className="text-lime"><HugeiconsIcon icon={Calendar1Icon} size={18} color="currentColor" strokeWidth={1.5} /></span>
-          <p className="font-display text-xs tracking-[0.28em] uppercase text-lime">Group stage</p>
+          <p className="font-display text-sm tracking-[0.28em] uppercase text-lime">Group stage</p>
         </div>
         {byGroup.length > 0 && (
           <button
             onClick={() => setShowStandings((v) => !v)}
-            className="font-mono text-xs uppercase tracking-widest text-chalk/40 hover:text-lime transition"
+            className="font-mono text-sm uppercase tracking-widest text-chalk/40 hover:text-lime transition"
           >
             {showStandings ? 'Hide tables' : 'Show tables'}
           </button>
@@ -182,7 +182,7 @@ export default function FixturesPage() {
             {byGroup.map(([label, rows]) => (
               <div key={label} className="overflow-hidden rounded-2xl border border-white/10 bg-pitch-900/60">
                 <div className="border-b border-white/8 bg-pitch-800/60 px-4 py-2.5">
-                  <span className="font-display text-xs uppercase tracking-widest text-lime">Group {label}</span>
+                  <span className="font-display text-sm uppercase tracking-widest text-lime">Group {label}</span>
                 </div>
                 <table className="w-full">
                   <thead>
@@ -195,17 +195,17 @@ export default function FixturesPage() {
                   <tbody>
                     {rows.map((r, i) => (
                       <tr key={r.position} className={`border-t border-white/5 ${i < 2 ? 'bg-lime/[0.03]' : ''}`}>
-                        <td className="pl-3 py-2 font-mono text-xs text-chalk/40">{r.position}</td>
+                        <td className="pl-3 py-2 font-mono text-sm text-chalk/40">{r.position}</td>
                         <td className="px-1 py-2">
                           <div className="flex items-center gap-1.5">
                             {r.team?.crest && <img src={r.team.crest} alt="" className="h-4 w-4 shrink-0 object-contain" />}
-                            <span className="font-display text-xs uppercase text-chalk truncate">{r.team?.tla ?? '—'}</span>
+                            <span className="font-display text-sm uppercase text-chalk truncate">{r.team?.tla ?? '—'}</span>
                           </div>
                         </td>
                         {[r.played, r.won, r.drawn, r.lost].map((v, j) => (
-                          <td key={j} className="px-1 py-2 text-center font-mono text-xs text-chalk/60">{v}</td>
+                          <td key={j} className="px-1 py-2 text-center font-mono text-sm text-chalk/60">{v}</td>
                         ))}
-                        <td className="px-1 py-2 text-center font-mono text-xs text-chalk/60">{r.goal_diff > 0 ? `+${r.goal_diff}` : r.goal_diff}</td>
+                        <td className="px-1 py-2 text-center font-mono text-sm text-chalk/60">{r.goal_diff > 0 ? `+${r.goal_diff}` : r.goal_diff}</td>
                         <td className="pr-3 py-2 text-center font-display text-sm text-chalk">{r.points}</td>
                       </tr>
                     ))}
@@ -262,7 +262,7 @@ export default function FixturesPage() {
             >←</button>
             <div className="flex-1 text-center">
               <p className="font-display text-base uppercase tracking-widest text-chalk">{activeDayGroup?.label ?? '—'}</p>
-              <p className="font-mono text-xs text-chalk/35">
+              <p className="font-mono text-sm text-chalk/35">
                 {activeDayGroup?.fixtures.length ?? 0} matches
                 {totalDays > 1 && <span className="ml-2 text-chalk/25">Day {activeDayIdx + 1} of {totalDays}</span>}
               </p>
@@ -302,12 +302,12 @@ function FixtureRow({ f }: { f: Fixture }) {
   return (
     <div className={`rounded-2xl border px-4 py-3 transition-colors ${live ? 'border-lime/25 bg-pitch-900/80' : finished ? 'border-white/6 bg-pitch-900/40' : 'border-white/10 bg-pitch-900/60'}`}>
       <div className="flex items-center gap-3">
-        <span className="w-8 shrink-0 font-display text-[11px] uppercase tracking-widest text-chalk/35">{f.group_label ?? '—'}</span>
+        <span className="w-8 shrink-0 font-display text-sm uppercase tracking-widest text-chalk/40">{f.group_label ?? '—'}</span>
         <Side t={f.home_team} />
         <div className="w-20 shrink-0 text-center">
           {finished || live
-            ? <span className="font-display text-lg text-chalk">{f.home_score ?? 0}–{f.away_score ?? 0}</span>
-            : <span className="font-mono text-[11px] text-chalk/40">{koTime}</span>}
+            ? <span className="font-display font-black text-2xl text-chalk">{f.home_score ?? 0}–{f.away_score ?? 0}</span>
+            : <span className="font-mono text-sm text-chalk/40">{koTime}</span>}
         </div>
         <Side t={f.away_team} reverse />
         <span className="w-10 shrink-0 text-right font-display text-[10px] uppercase tracking-widest">
@@ -340,7 +340,7 @@ function GoalLine({ g, reverse }: { g: GoalEvent; reverse?: boolean }) {
   const min = g.minute != null ? (g.injury_time ? `${g.minute}+${g.injury_time}'` : `${g.minute}'`) : '';
   const tag = g.type === 'OWN_GOAL' ? '(og)' : g.type === 'PENALTY' ? '(p)' : '';
   return (
-    <p className={`font-mono text-[10px] text-chalk/50 ${reverse ? 'text-right' : ''}`}>
+    <p className={`font-mono text-sm text-chalk/55 ${reverse ? 'text-right' : ''}`}>
       {reverse
         ? <>{tag && <span className="text-chalk/30 mr-1">{tag}</span>}{g.scorer ?? '—'}{min && <span className="text-chalk/30 ml-1">{min}</span>}</>
         : <>{min && <span className="text-chalk/30 mr-1">{min}</span>}{g.scorer ?? '—'}{tag && <span className="text-chalk/30 ml-1">{tag}</span>}</>}
@@ -355,7 +355,7 @@ function Side({ t, reverse }: { t: Team | null; reverse?: boolean }) {
         // eslint-disable-next-line @next/next/no-img-element
         ? <img src={t.crest} alt="" className="h-6 w-6 shrink-0 object-contain" />
         : <span className="h-6 w-6 shrink-0 rounded-full bg-pitch-700" />}
-      <span className="truncate font-display text-sm uppercase text-chalk">{t?.tla ?? t?.name ?? 'TBD'}</span>
+      <span className="truncate font-display text-base font-bold uppercase text-chalk">{t?.tla ?? t?.name ?? 'TBD'}</span>
     </div>
   );
 }

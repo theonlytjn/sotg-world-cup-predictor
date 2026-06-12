@@ -102,7 +102,7 @@ export default function SearchableSelect({
           <span className="text-chalk/35">{placeholder}</span>
         )}
         <span
-          className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-chalk/40 transition-transform text-xs ${
+          className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-chalk/40 transition-transform text-sm ${
             open ? 'rotate-180' : ''
           }`}
         >
@@ -127,7 +127,7 @@ export default function SearchableSelect({
 
           <div className="max-h-64 overflow-y-auto overscroll-contain">
             {totalVisible === 0 && (
-              <p className="px-3 py-4 text-center font-mono text-xs text-chalk/35">
+              <p className="px-3 py-4 text-center font-mono text-sm text-chalk/35">
                 No results for &ldquo;{query}&rdquo;
               </p>
             )}
@@ -136,7 +136,7 @@ export default function SearchableSelect({
               <button
                 type="button"
                 onClick={() => select('')}
-                className="w-full px-3 py-2 text-left font-mono text-xs text-chalk/30 hover:bg-white/5"
+                className="w-full px-3 py-2 text-left font-mono text-sm text-chalk/30 hover:bg-white/5"
               >
                 — clear selection —
               </button>

@@ -64,13 +64,17 @@ export async function GET(req: NextRequest) {
   const exactPts  = rulesMap['match_exact']  ?? EXACT_SCORE_POINTS;
   const resultPts = rulesMap['match_result'] ?? CORRECT_RESULT_POINTS;
 
-  // 1) fetch matches + goals from football-data.org Tier 1
-  const [matchesRes, standingsRes] = await Promise.all([
+  // 1) fetch matches, standings, and top scorers from football-data.org Tier 1
+  const [matchesRes, standingsRes, scorersRes] = await Promise.all([
     fetch('https://api.football-data.org/v4/competitions/WC/matches', {
       headers: { 'X-Auth-Token': fdKey },
       cache: 'no-store',
     }),
     fetch('https://api.football-data.org/v4/competitions/WC/standings', {
+      headers: { 'X-Auth-Token': fdKey },
+      cache: 'no-store',
+    }),
+    fetch('https://api.football-data.org/v4/competitions/WC/scorers?limit=50', {
       headers: { 'X-Auth-Token': fdKey },
       cache: 'no-store',
     }),
@@ -196,11 +200,45 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // 5) upsert top scorers from dedicated /scorers endpoint (Tier 1 accessible)
+  let scorersUpserted = 0;
+  if (scorersRes.ok) {
+    type FDScorer = {
+      player: { id: number; name: string };
+      team: { id: number; tla: string; name: string; crest: string };
+      playedMatches: number;
+      goals: number;
+      assists: number | null;
+      penalties: number | null;
+    };
+    const { scorers } = (await scorersRes.json()) as { scorers: FDScorer[] };
+    if (scorers.length > 0) {
+      const scorerRows = scorers.map((s) => ({
+        player_external_id: s.player.id,
+        player_name:        s.player.name,
+        team_external_id:   s.team.id,
+        team_tla:           s.team.tla,
+        team_name:          s.team.name,
+        team_crest:         s.team.crest,
+        goals:              s.goals ?? 0,
+        assists:            s.assists ?? 0,
+        penalties:          s.penalties ?? 0,
+        played_matches:     s.playedMatches ?? 0,
+        updated_at:         new Date().toISOString(),
+      }));
+      const { error } = await db
+        .from('competition_scorers')
+        .upsert(scorerRows, { onConflict: 'player_external_id' });
+      if (!error) scorersUpserted = scorerRows.length;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     fixtures_updated: updated,
     predictions_settled: settled,
     standings_upserted: standingsUpserted,
+    scorers_upserted: scorersUpserted,
     ran_at: new Date().toISOString(),
   });
 }

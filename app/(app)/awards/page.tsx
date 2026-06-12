@@ -224,7 +224,7 @@ export default function AwardsPage() {
                 <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-chalk/30">{label}</p>
                 <div className="grid gap-1">
                   {cats.map((cat) => (
-                    <div key={cat.id} className="flex items-center justify-between font-mono text-xs text-chalk/60">
+                    <div key={cat.id} className="flex items-center justify-between font-mono text-sm text-chalk/60">
                       <span>{cat.label}</span>
                       <span className="text-lime">
                         {cat.pts_pick_1}<span className="text-chalk/30"> / </span>{cat.pts_pick_2}
@@ -326,7 +326,7 @@ function CategoryRow({
         <div className="mb-4">
           <div className="mb-2 flex items-start justify-between gap-2">
             <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>
-            <span className="shrink-0 rounded-full border border-gold/30 px-3 py-1 font-display text-xs uppercase text-gold/70">
+            <span className="shrink-0 rounded-full border border-gold/30 px-3 py-1 font-display text-sm uppercase text-gold/70">
               Poll
             </span>
           </div>
@@ -349,7 +349,7 @@ function CategoryRow({
                       <span className={['text-sm', isMyVote ? 'text-gold' : 'text-chalk/80'].join(' ')}>
                         {getPickLabel(pick)}{isMyVote ? ' ✓' : ''}
                       </span>
-                      <span className="font-mono text-xs text-chalk/40">{count} · {pct}%</span>
+                      <span className="font-mono text-sm text-chalk/40">{count} · {pct}%</span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
                       <div
@@ -381,7 +381,7 @@ function CategoryRow({
               >
                 {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Voted ✓' : pred?.pick_1 ? 'Update vote' : 'Submit vote'}
               </button>
-              {state === 'error' && <span className="font-mono text-xs text-flame">Couldn&apos;t save</span>}
+              {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
             </div>
           </>
         )}
@@ -401,7 +401,7 @@ function CategoryRow({
             </span>
           )}
           {locked && !settled && (
-            <span className="shrink-0 font-mono text-xs uppercase tracking-widest text-chalk/40">Locked</span>
+            <span className="shrink-0 font-mono text-sm uppercase tracking-widest text-chalk/40">Locked</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -446,7 +446,7 @@ function CategoryRow({
           >
             {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save picks'}
           </button>
-          {state === 'error' && <span className="font-mono text-xs text-flame">Couldn&apos;t save</span>}
+          {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
         </div>
       )}
     </div>

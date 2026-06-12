@@ -63,7 +63,7 @@ export default function MePage() {
     <div className="max-w-lg">
       <div className="flex items-center gap-3 mb-1">
         <span className="text-lime"><HugeiconsIcon icon={UserCircleIcon} size={18} color="currentColor" strokeWidth={1.5} /></span>
-        <p className="font-display font-bold text-xs tracking-[0.28em] uppercase text-lime">Profile</p>
+        <p className="font-display font-bold text-sm tracking-[0.28em] uppercase text-lime">Profile</p>
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">You</h1>
 
@@ -87,7 +87,7 @@ export default function MePage() {
         />
       </div>
 
-      <p className="mt-3 font-mono text-xs uppercase tracking-widest text-chalk/35">
+      <p className="mt-3 font-mono text-sm uppercase tracking-widest text-chalk/35">
         {picks} picks made · {stats?.settled ?? 0} settled
       </p>
 
@@ -96,7 +96,7 @@ export default function MePage() {
         <label className="block font-display text-[11px] font-bold uppercase tracking-widest text-chalk/50 mb-2">
           Display name
         </label>
-        <p className="mb-3 text-xs text-chalk/40">Shown on the leaderboard.</p>
+        <p className="mb-3 text-sm text-chalk/40">Shown on the leaderboard.</p>
         <input
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
@@ -111,7 +111,7 @@ export default function MePage() {
           >
             {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
           </button>
-          <p className="font-mono text-xs text-chalk/30">{email}</p>
+          <p className="font-mono text-sm text-chalk/30">{email}</p>
         </div>
       </div>
     </div>

@@ -45,7 +45,7 @@ export default async function Home() {
             alt="SOTG '26"
             className="h-16 w-auto object-contain mb-6"
           />
-          <span className="inline-flex items-center gap-2.5 font-display font-semibold text-xs tracking-[0.28em] uppercase text-lime border border-lime/25 rounded-full px-3.5 py-1.5 bg-lime/5">
+          <span className="inline-flex items-center gap-2.5 font-display font-semibold text-sm tracking-[0.28em] uppercase text-lime border border-lime/25 rounded-full px-3.5 py-1.5 bg-lime/5">
             <span className="w-1.5 h-1.5 rounded-full bg-flame live-ping" />
             Group stage · live now
           </span>
@@ -110,7 +110,7 @@ export default async function Home() {
 
       {/* ── HOW IT WORKS ─────────────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
-        <p className="font-display font-bold text-xs tracking-[0.3em] uppercase text-lime mb-3.5">How it works</p>
+        <p className="font-display font-bold text-sm tracking-[0.3em] uppercase text-lime mb-3.5">How it works</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Three taps to glory
         </h2>
@@ -154,7 +154,7 @@ export default async function Home() {
 
       {/* ── SCORING ──────────────────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
-        <p className="font-display font-bold text-xs tracking-[0.3em] uppercase text-lime mb-3.5">The points</p>
+        <p className="font-display font-bold text-sm tracking-[0.3em] uppercase text-lime mb-3.5">The points</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Simple, brutal scoring
         </h2>
@@ -198,7 +198,7 @@ export default async function Home() {
 
       {/* ── LEADERBOARD TEASER ───────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
-        <p className="font-display font-bold text-xs tracking-[0.3em] uppercase text-lime mb-3.5">The race</p>
+        <p className="font-display font-bold text-sm tracking-[0.3em] uppercase text-lime mb-3.5">The race</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Where will you land?
         </h2>
@@ -286,10 +286,10 @@ export default async function Home() {
 
       {/* ── FOOTER ───────────────────────────────────────── */}
       <footer className="text-center pb-14 pt-6 border-t border-[#272727]">
-        <p className="text-chalk/40 font-display font-semibold text-xs tracking-[0.18em] uppercase">
+        <p className="text-chalk/40 font-display font-semibold text-sm tracking-[0.18em] uppercase">
           All rights reserved Students of the Game
         </p>
-        <p className="mt-1.5 text-chalk/30 font-display text-xs tracking-[0.15em] uppercase">
+        <p className="mt-1.5 text-chalk/30 font-display text-sm tracking-[0.15em] uppercase">
           Crafted by{' '}
           <a
             href="https://www.theonlytjn.com"

@@ -227,7 +227,7 @@ function QuestionCard({
       <h2 className="font-display text-xl uppercase tracking-wide text-chalk">{question.label}</h2>
 
       {!open ? (
-        <p className="mt-2 font-mono text-xs uppercase tracking-widest text-chalk/40">Not open yet</p>
+        <p className="mt-2 font-mono text-sm uppercase tracking-widest text-chalk/40">Not open yet</p>
       ) : (
         <>
           {/* Picker */}
@@ -248,7 +248,7 @@ function QuestionCard({
             >
               {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : myPick ? 'Update' : 'Submit'}
             </button>
-            {state === 'error' && <span className="font-mono text-xs text-flame">Couldn&apos;t save</span>}
+            {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
           </div>
 
           {/* Results reveal */}
@@ -269,7 +269,7 @@ function QuestionCard({
                           {label}
                           {isMe && <span className="ml-1.5 font-mono text-[10px] text-lime/70">you</span>}
                         </span>
-                        <span className="shrink-0 font-mono text-xs text-chalk/40">{pct}%</span>
+                        <span className="shrink-0 font-mono text-sm text-chalk/40">{pct}%</span>
                       </div>
                       <div className="mt-1 h-1.5 w-full rounded-full bg-pitch-700">
                         <div
