@@ -26,6 +26,7 @@ export default function MePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [resetState, setResetState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [shareState, setShareState] = useState<'idle' | 'copied'>('idle');
 
   useEffect(() => {
     (async () => {
@@ -82,6 +83,35 @@ export default function MePage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
+  }
+
+  async function shareStats() {
+    const hitRate = stats && stats.settled > 0
+      ? `${Math.round(((stats.exact + stats.results) / stats.settled) * 100)}%`
+      : '—';
+    const grid = Array.from({ length: Math.min(stats?.settled ?? 0, 20) }, (_, i) => {
+      if (i < (stats?.exact ?? 0)) return '🟩';
+      if (i < (stats?.exact ?? 0) + (stats?.results ?? 0)) return '🟨';
+      return '🟥';
+    }).join('');
+    const text = [
+      `📊 SOTG World Cup 2026`,
+      `${displayName} · ${rank !== null ? `#${rank} of ${totalUsers}` : 'unranked'}`,
+      ``,
+      grid || '—',
+      ``,
+      `${stats?.total ?? 0}pts total · ${hitRate} hit rate`,
+      `🎯 ${stats?.exact ?? 0} exact  ✅ ${stats?.results ?? 0} correct`,
+      ``,
+      `Think you can beat me? ${typeof window !== 'undefined' ? window.location.origin : ''}`,
+    ].join('\n');
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try { await navigator.share({ text }); return; } catch {}
+    }
+    await navigator.clipboard.writeText(text);
+    setShareState('copied');
+    setTimeout(() => setShareState('idle'), 2000);
   }
 
   async function sendReset() {
@@ -158,9 +188,19 @@ export default function MePage() {
         />
       </div>
 
-      <p className="mt-3 font-mono text-base uppercase tracking-widest text-chalk">
-        {picks} picks made · {stats?.settled ?? 0} settled
-      </p>
+      <div className="mt-3 flex items-center justify-between">
+        <p className="font-mono text-base uppercase tracking-widest text-chalk">
+          {picks} picks made · {stats?.settled ?? 0} settled
+        </p>
+        {stats && stats.settled > 0 && (
+          <button
+            onClick={shareStats}
+            className="rounded-full border border-lime/30 bg-lime/10 px-4 py-1.5 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/20"
+          >
+            {shareState === 'copied' ? 'Copied ✓' : 'Share my stats'}
+          </button>
+        )}
+      </div>
 
       {/* display name form */}
       <div className="mt-8 rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-10 focus-within:border-gold/60 transition-colors">

@@ -736,8 +736,11 @@ function MatchdayRecap({
   resultPts: number;
   stageLabel?: string;
 }) {
+  const [shareState, setShareState] = useState<'idle' | 'copied'>('idle');
+
   const allFixtures = matchdayGroup.dateGroups.flatMap((dg) => dg.fixtures);
-  const finished = allFixtures.filter((f) => f.status === 'FINISHED');
+  const finished = allFixtures.filter((f) => f.status === 'FINISHED')
+    .sort((a, b) => a.kickoff.localeCompare(b.kickoff));
   if (finished.length === 0) return null;
 
   const settledPreds = finished.map((f) => preds[f.id]).filter(Boolean);
@@ -755,13 +758,53 @@ function MatchdayRecap({
     ? `${stageLabel} · ${allDone ? 'complete' : `${finished.length}/${matchdayGroup.totalCount} settled`}`
     : `Matchday ${matchdayGroup.matchday} · ${allDone ? 'complete' : `${finished.length}/${matchdayGroup.totalCount} settled`}`;
 
+  function buildShareText() {
+    const grid = finished.map((f) => {
+      const p = preds[f.id];
+      if (!p) return '⬜';
+      if (p.points === exactPts) return '🟩';
+      if (p.points === resultPts) return '🟨';
+      return '🟥';
+    }).join('');
+
+    const label = stageLabel ? stageLabel : `Matchday ${matchdayGroup.matchday}`;
+    const lines = [
+      `📊 SOTG World Cup 2026`,
+      `${label} · +${totalPts}pts`,
+      ``,
+      grid,
+      `${exact > 0 ? `🎯 ${exact} exact` : ''}${correct > 0 ? `  ✅ ${correct} correct` : ''}${missed > 0 ? `  ❌ ${missed} missed` : ''}`.trim(),
+      ``,
+      `Can you beat me? ${typeof window !== 'undefined' ? window.location.origin : ''}`,
+    ];
+    return lines.filter((l, i) => !(l === '' && i === lines.length - 2)).join('\n');
+  }
+
+  async function share() {
+    const text = buildShareText();
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try { await navigator.share({ text }); return; } catch {}
+    }
+    await navigator.clipboard.writeText(text);
+    setShareState('copied');
+    setTimeout(() => setShareState('idle'), 2000);
+  }
+
   return (
     <div className="mb-5 rounded-2xl border border-lime/20 bg-lime/5 px-5 py-4">
       <div className="flex items-center justify-between">
         <p className="font-display text-sm uppercase tracking-widest text-lime">{heading}</p>
-        <span className="font-display text-2xl text-chalk">
-          {totalPts > 0 ? `+${totalPts}` : totalPts}pts
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="font-display text-2xl text-chalk">
+            {totalPts > 0 ? `+${totalPts}` : totalPts}pts
+          </span>
+          <button
+            onClick={share}
+            className="rounded-full border border-lime/30 bg-lime/10 px-3 py-1 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/20"
+          >
+            {shareState === 'copied' ? 'Copied ✓' : 'Share'}
+          </button>
+        </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
