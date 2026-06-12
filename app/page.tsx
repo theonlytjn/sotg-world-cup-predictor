@@ -295,7 +295,7 @@ export default async function Home() {
           {/* Claim-it CTA */}
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-dashed border-lime/40 px-6 py-4">
             <span className="text-base text-chalk">
-              {loggedIn ? 'Every fixture moves you up or down.' : 'You&apos;re either chasing first place or defending it.'}
+              {loggedIn ? 'Every fixture moves you up or down.' : "You're either chasing first place or defending it."}
             </span>
             <Link
               href={loggedIn ? '/leaderboard' : '/login'}

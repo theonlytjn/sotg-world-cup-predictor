@@ -253,6 +253,15 @@ export default function PredictPage() {
     setTimeout(() => setSaveAllState('idle'), 2000);
   }
 
+  // Unpredicted upcoming fixtures (not locked, no prediction yet)
+  const unpredictedCount = useMemo(() => {
+    return fixtures.filter((f) => {
+      if (getLockStatus(f.kickoff).locked) return false;
+      if (f.status === 'FINISHED') return false;
+      return !preds[f.id];
+    }).length;
+  }, [fixtures, preds]);
+
   if (loading) {
     return <p className="py-20 text-center font-mono text-base text-chalk">Loading fixtures…</p>;
   }
@@ -282,6 +291,17 @@ export default function PredictPage() {
       <p className="mt-1 text-base text-chalk">
         Call the scoreline for every game. Locks at kickoff — no edits after.
       </p>
+
+      {/* Unpredicted fixtures warning */}
+      {unpredictedCount > 0 && (
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-flame/30 bg-flame/10 px-4 py-3">
+          <span className="text-xl">⚠️</span>
+          <p className="font-display text-base uppercase tracking-wide text-flame">
+            {unpredictedCount} fixture{unpredictedCount !== 1 ? 's' : ''} without a prediction
+            {unpredictedCount === 1 ? ' — get your call in before the whistle.' : ' — get your calls in before kick-off.'}
+          </p>
+        </div>
+      )}
 
       {/* Stage tabs — only shown when multiple stages have fixtures */}
       {stageGroups.length > 1 && (
