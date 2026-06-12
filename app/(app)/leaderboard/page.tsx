@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { scorePrediction } from '@/lib/scoring';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { BarChartIcon, CrownIcon } from '@hugeicons-pro/core-stroke-rounded';
+import { BarChartIcon, CrownIcon, Medal01Icon } from '@hugeicons-pro/core-stroke-rounded';
+import Link from 'next/link';
 
 type Row = {
   user_id: string;
@@ -175,6 +176,25 @@ export default function LeaderboardPage() {
           {copied ? 'Copied!' : 'Copy link'}
         </button>
       </div>
+
+      {/* Leagues promo */}
+      <Link
+        href="/leagues"
+        className="mt-3 group flex items-center gap-4 rounded-2xl border-2 border-lime/20 bg-lime/5 px-5 py-4 transition hover:border-lime/40 hover:bg-lime/10"
+      >
+        <span className="shrink-0 text-lime">
+          <HugeiconsIcon icon={Medal01Icon} size={28} color="currentColor" strokeWidth={1.4} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-base uppercase tracking-wide text-lime">
+            Create a private league
+          </p>
+          <p className="mt-0.5 text-sm text-chalk">
+            Who&apos;s really top of the football knowledge tree? Set up a league for your group, share an invite link, and find out exactly where you rank against the people who matter — no hiding behind the full table.
+          </p>
+        </div>
+        <span className="shrink-0 font-mono text-sm text-lime/50 transition group-hover:text-lime">→</span>
+      </Link>
 
       {/* Table */}
       <div className="mt-6 overflow-hidden rounded-2xl border-2 border-white/20">
