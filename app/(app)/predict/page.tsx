@@ -63,6 +63,8 @@ export default function PredictPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [preds, setPreds] = useState<Record<number, Pred>>({});
+  const [localEdits, setLocalEdits] = useState<Record<number, {home: string; away: string}>>({});
+  const [saveAllState, setSaveAllState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [loading, setLoading] = useState(true);
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<number | null>(null);
@@ -91,6 +93,11 @@ export default function PredictPage() {
     const map: Record<number, Pred> = {};
     for (const p of (mp as Pred[]) ?? []) map[p.fixture_id] = p;
     setPreds(map);
+    const initEdits: Record<number, {home: string; away: string}> = {};
+    for (const p of (mp as Pred[]) ?? []) {
+      initEdits[p.fixture_id] = { home: String(p.home_pred), away: String(p.away_pred) };
+    }
+    setLocalEdits(initEdits);
     setLoading(false);
   }, [supabase]);
 
@@ -208,6 +215,42 @@ export default function PredictPage() {
   function nextDay() {
     if (!activeGroup || activeDayIdx >= totalDays - 1) return;
     setActiveDay(activeGroup.dateGroups[activeDayIdx + 1].dateKey);
+  }
+
+  async function saveAll(fixtureList: Fixture[]) {
+    const rows: { user_id: string; fixture_id: number; home_pred: number; away_pred: number }[] = [];
+    for (const f of fixtureList) {
+      if (getLockStatus(f.kickoff).locked) continue;
+      const edit = localEdits[f.id];
+      const existing = preds[f.id];
+      const h = edit?.home ?? (existing ? String(existing.home_pred) : '');
+      const a = edit?.away ?? (existing ? String(existing.away_pred) : '');
+      if (h === '' || a === '') continue;
+      const hp = parseInt(h, 10);
+      const ap = parseInt(a, 10);
+      if (isNaN(hp) || isNaN(ap)) continue;
+      rows.push({ user_id: userId!, fixture_id: f.id, home_pred: hp, away_pred: ap });
+    }
+    if (rows.length === 0) return;
+    setSaveAllState('saving');
+    const { error } = await supabase
+      .from('match_predictions')
+      .upsert(rows, { onConflict: 'user_id,fixture_id' });
+    if (error) { setSaveAllState('error'); return; }
+    setSaveAllState('saved');
+    setPreds((prev) => {
+      const next = { ...prev };
+      for (const row of rows) {
+        next[row.fixture_id] = {
+          fixture_id: row.fixture_id,
+          home_pred: row.home_pred,
+          away_pred: row.away_pred,
+          points: prev[row.fixture_id]?.points ?? null,
+        };
+      }
+      return next;
+    });
+    setTimeout(() => setSaveAllState('idle'), 2000);
   }
 
   if (loading) {
@@ -379,9 +422,17 @@ export default function PredictPage() {
                     userId={userId!}
                     supabase={supabase}
                     onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
+                    onEdit={(id, h, a) => setLocalEdits((prev) => ({ ...prev, [id]: { home: h, away: a } }))}
                   />
                 ))}
               </div>
+              {(activeDayGroup?.fixtures.length ?? 0) > 1 && (
+                <SaveAllBar
+                  fixtures={activeDayGroup?.fixtures ?? []}
+                  state={saveAllState}
+                  onSaveAll={saveAll}
+                />
+              )}
             </div>
           )}
         </>
@@ -395,18 +446,28 @@ export default function PredictPage() {
               Fixtures for this round will appear once the previous round is complete.
             </p>
           ) : (
-            <div className="space-y-2.5">
-              {knockoutFixtures.map((f) => (
-                <FixtureRow
-                  key={f.id}
-                  fixture={f}
-                  pred={preds[f.id]}
-                  userId={userId!}
-                  supabase={supabase}
-                  onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
+            <>
+              <div className="space-y-2.5">
+                {knockoutFixtures.map((f) => (
+                  <FixtureRow
+                    key={f.id}
+                    fixture={f}
+                    pred={preds[f.id]}
+                    userId={userId!}
+                    supabase={supabase}
+                    onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
+                    onEdit={(id, h, a) => setLocalEdits((prev) => ({ ...prev, [id]: { home: h, away: a } }))}
+                  />
+                ))}
+              </div>
+              {knockoutFixtures.length > 1 && (
+                <SaveAllBar
+                  fixtures={knockoutFixtures}
+                  state={saveAllState}
+                  onSaveAll={saveAll}
                 />
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -415,13 +476,14 @@ export default function PredictPage() {
 }
 
 function FixtureRow({
-  fixture, pred, userId, supabase, onSaved,
+  fixture, pred, userId, supabase, onSaved, onEdit,
 }: {
   fixture: Fixture;
   pred?: Pred;
   userId: string;
   supabase: ReturnType<typeof createClient>;
   onSaved: (p: Pred) => void;
+  onEdit?: (fixtureId: number, home: string, away: string) => void;
 }) {
   const { locked, locksInMin } = getLockStatus(fixture.kickoff);
   const finished = fixture.status === 'FINISHED';
@@ -430,6 +492,9 @@ function FixtureRow({
 
   const [home, setHome] = useState<string>(pred ? String(pred.home_pred) : '');
   const [away, setAway] = useState<string>(pred ? String(pred.away_pred) : '');
+
+  function handleHomeChange(v: string) { setHome(v); onEdit?.(fixture.id, v, away); }
+  function handleAwayChange(v: string) { setAway(v); onEdit?.(fixture.id, home, v); }
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   async function save() {
@@ -489,18 +554,18 @@ function FixtureRow({
           <TeamSide team={fixture.away_team} align="right" fullName />
         </div>
         <div className="flex items-center justify-center gap-2">
-          <ScoreBox value={home} setValue={setHome} disabled={locked} onCommit={save} />
+          <ScoreBox value={home} setValue={handleHomeChange} disabled={locked} onCommit={save} />
           <span className="font-display text-lg text-chalk">–</span>
-          <ScoreBox value={away} setValue={setAway} disabled={locked} onCommit={save} />
+          <ScoreBox value={away} setValue={handleAwayChange} disabled={locked} onCommit={save} />
         </div>
       </div>
       {/* Desktop: 3-column with TLA */}
       <div className="mt-2 hidden sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
         <TeamSide team={fixture.home_team} align="left" />
         <div className="flex items-center gap-2">
-          <ScoreBox value={home} setValue={setHome} disabled={locked} onCommit={save} />
+          <ScoreBox value={home} setValue={handleHomeChange} disabled={locked} onCommit={save} />
           <span className="font-display text-lg text-chalk">–</span>
-          <ScoreBox value={away} setValue={setAway} disabled={locked} onCommit={save} />
+          <ScoreBox value={away} setValue={handleAwayChange} disabled={locked} onCommit={save} />
         </div>
         <TeamSide team={fixture.away_team} align="right" />
       </div>
@@ -557,6 +622,29 @@ function TeamSide({ team, align, fullName = false }: { team: Team | null; align:
       <span className={`font-display uppercase text-chalk ${fullName ? 'text-sm leading-snug' : 'truncate text-base'}`}>
         {name}
       </span>
+    </div>
+  );
+}
+
+function SaveAllBar({
+  fixtures, state, onSaveAll,
+}: {
+  fixtures: Fixture[];
+  state: 'idle' | 'saving' | 'saved' | 'error';
+  onSaveAll: (fixtures: Fixture[]) => void;
+}) {
+  const unlocked = fixtures.filter((f) => !getLockStatus(f.kickoff).locked);
+  if (unlocked.length < 2) return null;
+  return (
+    <div className="mt-4 flex items-center justify-center gap-3">
+      <button
+        onClick={() => onSaveAll(fixtures)}
+        disabled={state === 'saving'}
+        className="rounded-full border-2 border-lime/30 bg-lime/10 px-8 py-2.5 font-body font-bold text-base uppercase tracking-wide text-lime transition hover:bg-lime/20 disabled:opacity-40"
+      >
+        {state === 'saving' ? 'Saving all…' : state === 'saved' ? 'All saved ✓' : 'Save all picks'}
+      </button>
+      {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
     </div>
   );
 }
