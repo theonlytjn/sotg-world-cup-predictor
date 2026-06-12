@@ -35,14 +35,21 @@ const RANK_STYLES = [
   { text: 'text-[#e0a86b]', crown: 'text-[#e0a86b]' },
 ];
 
-// Tighter on mobile so all 6 cols fit without scrolling
-const GRID = 'grid grid-cols-[1.25rem_1fr_2.25rem_2.25rem_2.25rem_2.75rem] gap-1 sm:grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem] sm:gap-2';
+// Mobile: tight fixed columns so all 6 fit. Desktop: wider to hold full column labels.
+const GRID = 'grid grid-cols-[1.25rem_1fr_2.25rem_2.25rem_2.25rem_2.75rem] gap-1 sm:grid-cols-[2rem_1fr_8rem_8.5rem_5.5rem_4rem] sm:gap-3';
 
-function ColTip({ label, tip, className = 'justify-center' }: { label: string; tip: string; className?: string }) {
+function ColTip({ label, fullLabel, tip, className = 'justify-center' }: {
+  label: string; fullLabel?: string; tip: string; className?: string;
+}) {
   return (
     <span className={`relative flex items-center group cursor-default ${className}`}>
-      <span className="font-display text-xs font-bold uppercase tracking-widest">{label}</span>
-      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[180px] rounded-xl border border-white/20 bg-pitch-800 px-3 py-2 font-mono text-[11px] leading-snug text-chalk opacity-0 shadow-xl transition-opacity group-hover:opacity-100 z-20 text-center whitespace-nowrap">
+      <span className="font-display text-xs font-bold uppercase tracking-widest">
+        {/* Mobile: short label with tooltip */}
+        <span className="sm:hidden">{label}</span>
+        {/* Desktop: full label, no tooltip needed */}
+        <span className="hidden sm:inline">{fullLabel ?? label}</span>
+      </span>
+      <span className="sm:hidden pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[180px] rounded-xl border border-white/20 bg-pitch-800 px-3 py-2 font-mono text-[11px] leading-snug text-chalk opacity-0 shadow-xl transition-opacity group-hover:opacity-100 z-20 text-center whitespace-nowrap">
         {tip}
       </span>
     </span>
@@ -202,9 +209,9 @@ export default function LeaderboardPage() {
         <div className={`${GRID} items-center border-b border-white/20 bg-pitch-800 px-3 py-3 sm:px-5 sm:py-3.5 font-display text-[10px] sm:text-xs font-bold uppercase tracking-widest text-chalk`}>
           <span>#</span>
           <span>Player</span>
-          <ColTip label="CS" tip="Correct Score — exact scoreline" />
-          <ColTip label="CR" tip="Correct Result — right outcome, wrong score" />
-          <ColTip label="Awds" tip="Award prediction points" />
+          <ColTip label="CS"   fullLabel="Correct Score"  tip="Correct Score — exact scoreline" />
+          <ColTip label="CR"   fullLabel="Correct Result" tip="Correct Result — right outcome, wrong score" />
+          <ColTip label="Awds" fullLabel="Award Pts"      tip="Award prediction points" />
           <ColTip label="Total" tip="Total points" className="text-right justify-end" />
         </div>
 
