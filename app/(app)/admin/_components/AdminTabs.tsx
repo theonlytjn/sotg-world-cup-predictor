@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import AwardPanel from './AwardPanel';
+import AwardVotesPanel from './AwardVotesPanel';
 import FixturePanel from './FixturePanel';
 import ManualPredictionsPanel from './ManualPredictionsPanel';
 import PollPanel from './PollPanel';
@@ -25,13 +26,14 @@ type Props = {
 };
 
 const TABS = [
-  { key: 'fixtures',  label: 'Fixtures'    },
-  { key: 'manual',    label: 'Manual Picks' },
-  { key: 'awards',    label: 'Awards'      },
-  { key: 'poll',      label: 'Poll'        },
-  { key: 'scoring',   label: 'Scoring'     },
-  { key: 'leagues',   label: 'Leagues'     },
-  { key: 'users',     label: 'Users'       },
+  { key: 'fixtures',   label: 'Fixtures'     },
+  { key: 'manual',     label: 'Manual Picks' },
+  { key: 'awards',     label: 'Awards'       },
+  { key: 'votes',      label: 'Award Votes'  },
+  { key: 'poll',       label: 'Poll'         },
+  { key: 'scoring',    label: 'Scoring'      },
+  { key: 'leagues',    label: 'Leagues'      },
+  { key: 'users',      label: 'Users'        },
 ] as const;
 
 type TabKey = typeof TABS[number]['key'];
@@ -80,6 +82,9 @@ export default function AdminTabs({
             teams={teams}
             players={players}
           />
+        )}
+        {active === 'votes' && (
+          <AwardVotesPanel teams={teams} players={players} />
         )}
         {active === 'poll' && (
           <PollPanel questions={pollQuestions} />
