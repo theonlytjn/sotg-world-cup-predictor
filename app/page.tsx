@@ -120,33 +120,33 @@ export default async function Home() {
               n: '1',
               title: 'Predict the score',
               body: 'Pick the exact scoreline for every group fixture. Change your mind right up until kickoff.',
-              icon: <HugeiconsIcon icon={PencilEdit01Icon} size={24} color="currentColor" strokeWidth={1.5} />,
+              icon: <HugeiconsIcon icon={PencilEdit01Icon} size={42} color="currentColor" strokeWidth={1.4} />,
               delay: '0',
             },
             {
               n: '2',
               title: 'Locks at kickoff',
               body: 'The whistle blows, picks freeze. No sneaky edits, no excuses. Fair game for everyone.',
-              icon: <HugeiconsIcon icon={LockIcon} size={24} color="currentColor" strokeWidth={1.5} />,
+              icon: <HugeiconsIcon icon={LockIcon} size={42} color="currentColor" strokeWidth={1.4} />,
               delay: '100',
             },
             {
               n: '3',
               title: 'Climb the table',
               body: 'Results update automatically. Watch the points land and your name rise — or fall.',
-              icon: <HugeiconsIcon icon={BarChartIcon} size={24} color="currentColor" strokeWidth={1.5} />,
+              icon: <HugeiconsIcon icon={BarChartIcon} size={42} color="currentColor" strokeWidth={1.4} />,
               delay: '200',
             },
           ].map(({ n, title, body, icon, delay }) => (
-            <div key={n} data-aos="fade-up" data-aos-delay={delay} className="bg-pitch-900 border border-[#272727] rounded-[22px] p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 rounded-[14px] bg-lime/12 flex items-center justify-center text-lime">
+            <div key={n} data-aos="fade-up" data-aos-delay={delay} className="bg-pitch-900 border border-[#272727] rounded-[22px] p-7 sm:p-8">
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-20 h-20 rounded-[20px] bg-lime/12 flex items-center justify-center text-lime">
                   {icon}
                 </div>
-                <span className="font-display font-black text-[46px] leading-none text-chalk/12">{n}</span>
+                <span className="font-display font-black text-[52px] leading-none text-chalk/10">{n}</span>
               </div>
-              <h3 className="font-display text-xl uppercase text-chalk mb-2">{title}</h3>
-              <p className="text-chalk/60 text-[15px]">{body}</p>
+              <h3 className="font-display text-xl uppercase text-chalk mb-2.5">{title}</h3>
+              <p className="text-chalk/60 text-[15px] leading-relaxed">{body}</p>
             </div>
           ))}
         </div>
@@ -159,7 +159,7 @@ export default async function Home() {
           Simple, brutal scoring
         </h2>
         <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div data-aos="fade-up" data-aos-delay="0" className="rounded-[22px] p-7 border border-lime/30 bg-gradient-to-br from-lime/14 to-pitch-900">
+          <div data-aos="fade-up" data-aos-delay="0" className="rounded-[22px] p-8 sm:p-10 border border-lime/30 bg-gradient-to-br from-lime/14 to-pitch-900">
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
               {exactPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
             </div>
@@ -170,7 +170,7 @@ export default async function Home() {
               {rulesMap['match_exact']?.description ?? 'Nail the scoreline in 90 minutes — both teams correct.'}
             </p>
           </div>
-          <div data-aos="fade-up" data-aos-delay="100" className="rounded-[22px] p-7 border border-[#272727] bg-pitch-900">
+          <div data-aos="fade-up" data-aos-delay="100" className="rounded-[22px] p-8 sm:p-10 border border-[#272727] bg-pitch-900">
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
               {resultPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> {resultPts === 1 ? 'pt' : 'pts'}</span>
             </div>
@@ -181,7 +181,7 @@ export default async function Home() {
               {rulesMap['match_result']?.description ?? "Right winner or a draw, but the scoreline's off."}
             </p>
           </div>
-          <div data-aos="fade-up" data-aos-delay="200" className="rounded-[22px] p-7 border border-[#272727] bg-pitch-900">
+          <div data-aos="fade-up" data-aos-delay="200" className="rounded-[22px] p-8 sm:p-10 border border-[#272727] bg-pitch-900">
             <div className="font-display font-black text-flame" style={{ fontSize: 64, lineHeight: 1 }}>
               0<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
             </div>

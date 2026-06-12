@@ -54,6 +54,10 @@ body {
 .text-chalk\/55 { color: rgb(244 246 242 / 0.80); }
 .text-chalk\/60 { color: rgb(244 246 242 / 0.85); }
 
+/* hide scrollbar while keeping scroll behaviour — used by Nav on mobile */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* number inputs without spinners — cleaner score boxes */
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {

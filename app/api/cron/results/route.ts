@@ -157,8 +157,11 @@ export async function GET(req: NextRequest) {
 
     for (const sg of standings) {
       if (sg.type !== 'TOTAL' || !sg.group) continue;
-      // "GROUP_A" → "A"
-      const label = sg.group.replace('GROUP_', '');
+      // "Group A" (2026 API) or "GROUP_A" (older) → "A"
+      const label = sg.group
+        .replace(/^GROUP_/i, '')
+        .replace(/^Group\s*/i, '')
+        .trim();
       for (const row of sg.table) {
         const teamId = idByExternal.get(row.team.id);
         if (!teamId) continue;
