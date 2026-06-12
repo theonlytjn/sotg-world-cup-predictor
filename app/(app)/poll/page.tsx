@@ -90,7 +90,7 @@ export default function PollPage() {
   );
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-sm text-chalk/40">Loading…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading…</p>;
   }
 
   if (!anyOpen) {
@@ -117,7 +117,7 @@ export default function PollPage() {
   return (
     <div>
       <h1 className="font-display text-4xl uppercase text-chalk">Opinion Poll</h1>
-      <p className="mt-1 text-sm text-chalk/55">
+      <p className="mt-1 text-base text-chalk/55">
         The final whistle has blown — now tell us how it really went.
       </p>
 
@@ -227,7 +227,7 @@ function QuestionCard({
       <h2 className="font-display text-xl uppercase tracking-wide text-chalk">{question.label}</h2>
 
       {!open ? (
-        <p className="mt-2 font-mono text-sm uppercase tracking-widest text-chalk/40">Not open yet</p>
+        <p className="mt-2 font-mono text-base uppercase tracking-widest text-chalk/40">Not open yet</p>
       ) : (
         <>
           {/* Picker */}
@@ -244,11 +244,11 @@ function QuestionCard({
             <button
               onClick={save}
               disabled={!pick || state === 'saving'}
-              className="rounded-xl bg-lime px-5 py-2.5 font-display text-sm uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
+              className="rounded-xl bg-lime px-5 py-2.5 font-display text-base uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
             >
               {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : myPick ? 'Update' : 'Submit'}
             </button>
-            {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
+            {state === 'error' && <span className="font-mono text-base text-flame">Couldn&apos;t save</span>}
           </div>
 
           {/* Results reveal */}
@@ -265,11 +265,11 @@ function QuestionCard({
                   return (
                     <div key={pickVal}>
                       <div className="flex items-baseline justify-between gap-2">
-                        <span className={`font-display text-sm uppercase tracking-wide ${isMe ? 'text-lime' : 'text-chalk'}`}>
+                        <span className={`font-display text-base uppercase tracking-wide ${isMe ? 'text-lime' : 'text-chalk'}`}>
                           {label}
                           {isMe && <span className="ml-1.5 font-mono text-[10px] text-lime/70">you</span>}
                         </span>
-                        <span className="shrink-0 font-mono text-sm text-chalk/40">{pct}%</span>
+                        <span className="shrink-0 font-mono text-base text-chalk/40">{pct}%</span>
                       </div>
                       <div className="mt-1 h-1.5 w-full rounded-full bg-pitch-700">
                         <div
@@ -301,7 +301,7 @@ function PickSelect({
   teams: Team[];
   playersByTeam: TeamGroup[];
 }) {
-  const base = 'w-full rounded-xl border border-white/15 bg-pitch-800 px-3 py-2.5 font-mono text-sm text-chalk outline-none focus:border-lime/70';
+  const base = 'w-full rounded-xl border border-white/15 bg-pitch-800 px-3 py-2.5 font-mono text-base text-chalk outline-none focus:border-lime/70';
 
   if (kind === 'team') {
     return (

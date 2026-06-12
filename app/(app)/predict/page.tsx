@@ -156,14 +156,14 @@ export default function PredictPage() {
   }
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-sm text-chalk/40">Loading fixtures…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading fixtures…</p>;
   }
 
   if (fixtures.length === 0) {
     return (
       <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-6 text-chalk/70">
         <p className="font-display text-xl uppercase text-chalk">No fixtures yet</p>
-        <p className="mt-2 text-sm">
+        <p className="mt-2 text-base">
           Run <code className="rounded bg-pitch-700 px-1.5 py-0.5 font-mono text-lime">npm run seed</code>{' '}
           to import the World Cup schedule.
         </p>
@@ -178,10 +178,10 @@ export default function PredictPage() {
         <span className="text-lime">
           <HugeiconsIcon icon={DartIcon} size={18} color="currentColor" strokeWidth={1.5} />
         </span>
-        <p className="font-display text-sm tracking-[0.28em] uppercase text-lime">Your picks</p>
+        <p className="font-display text-base tracking-[0.28em] uppercase text-lime">Your picks</p>
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">Predict</h1>
-      <p className="mt-1 text-sm text-chalk/55">
+      <p className="mt-1 text-base text-chalk/55">
         Call the scoreline for every group game. Locks at kickoff — no edits after.
       </p>
 
@@ -238,7 +238,7 @@ export default function PredictPage() {
               <p className="font-display text-base uppercase tracking-widest text-chalk">
                 {activeDayGroup?.label ?? '—'}
               </p>
-              <p className="font-mono text-sm text-chalk/35">
+              <p className="font-mono text-base text-chalk/35">
                 {activeDayGroup?.fixtures.length ?? 0} matches
                 {totalDays > 1 && (
                   <span className="ml-2 text-chalk/25">
@@ -378,12 +378,12 @@ function FixtureRow({
             <button
               onClick={save}
               disabled={home === '' || away === '' || state === 'saving'}
-              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-display text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
             >
               {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
             </button>
           ) : (
-            <span className="flex items-center gap-1.5 font-display text-sm uppercase tracking-widest text-chalk/30">
+            <span className="flex items-center gap-1.5 font-display text-base uppercase tracking-widest text-chalk/30">
               <HugeiconsIcon icon={LockIcon} size={12} color="currentColor" strokeWidth={2} />
               Locked
             </span>
@@ -396,7 +396,7 @@ function FixtureRow({
           )}
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-sm">
+        <div className="flex items-center gap-2 font-mono text-base">
           {finished && (
             <span className="text-chalk/40">
               {fixture.home_score}–{fixture.away_score}

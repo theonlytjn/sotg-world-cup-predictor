@@ -86,7 +86,7 @@ export default function SearchableSelect({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((v) => !v)}
-        className={`w-full rounded-xl border px-3 py-2.5 text-left font-mono text-sm transition
+        className={`w-full rounded-xl border px-3 py-2.5 text-left font-mono text-base transition
           ${open ? 'border-lime/70' : 'border-white/15'}
           bg-pitch-800 text-chalk
           ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-white/30'}`}
@@ -102,7 +102,7 @@ export default function SearchableSelect({
           <span className="text-chalk/35">{placeholder}</span>
         )}
         <span
-          className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-chalk/40 transition-transform text-sm ${
+          className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-chalk/40 transition-transform text-base ${
             open ? 'rotate-180' : ''
           }`}
         >
@@ -121,13 +121,13 @@ export default function SearchableSelect({
                 if (e.key === 'Escape') { setOpen(false); setQuery(''); }
               }}
               placeholder="Search…"
-              className="w-full rounded-lg bg-pitch-700 px-3 py-2 font-mono text-sm text-chalk outline-none placeholder:text-chalk/30"
+              className="w-full rounded-lg bg-pitch-700 px-3 py-2 font-mono text-base text-chalk outline-none placeholder:text-chalk/30"
             />
           </div>
 
           <div className="max-h-64 overflow-y-auto overscroll-contain">
             {totalVisible === 0 && (
-              <p className="px-3 py-4 text-center font-mono text-sm text-chalk/35">
+              <p className="px-3 py-4 text-center font-mono text-base text-chalk/35">
                 No results for &ldquo;{query}&rdquo;
               </p>
             )}
@@ -136,7 +136,7 @@ export default function SearchableSelect({
               <button
                 type="button"
                 onClick={() => select('')}
-                className="w-full px-3 py-2 text-left font-mono text-sm text-chalk/30 hover:bg-white/5"
+                className="w-full px-3 py-2 text-left font-mono text-base text-chalk/30 hover:bg-white/5"
               >
                 — clear selection —
               </button>
@@ -158,7 +158,7 @@ export default function SearchableSelect({
                       opt.value === value ? 'bg-lime/10 text-lime' : 'text-chalk'
                     }`}
                   >
-                    <span className="font-mono text-sm">{opt.label}</span>
+                    <span className="font-mono text-base">{opt.label}</span>
                     {opt.sublabel && (
                       <span className="ml-2 shrink-0 font-mono text-[10px] text-chalk/35">
                         {opt.sublabel}

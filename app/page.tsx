@@ -45,7 +45,7 @@ export default async function Home() {
             alt="SOTG '26"
             className="h-16 w-auto object-contain mb-6"
           />
-          <span className="inline-flex items-center gap-2.5 font-display font-semibold text-sm tracking-[0.28em] uppercase text-lime border border-lime/25 rounded-full px-3.5 py-1.5 bg-lime/5">
+          <span className="inline-flex items-center gap-2.5 font-display font-semibold text-base tracking-[0.28em] uppercase text-lime border border-lime/25 rounded-full px-3.5 py-1.5 bg-lime/5">
             <span className="w-1.5 h-1.5 rounded-full bg-flame live-ping" />
             Group stage · live now
           </span>
@@ -100,7 +100,7 @@ export default async function Home() {
       >
         <div className="marquee-track flex gap-8 w-max">
           {[...NATIONS, ...NATIONS].map(([flag, tla], i) => (
-            <span key={i} className="inline-flex items-center gap-2.5 font-display font-semibold text-sm tracking-[0.12em] uppercase text-chalk/60 whitespace-nowrap">
+            <span key={i} className="inline-flex items-center gap-2.5 font-display font-semibold text-base tracking-[0.12em] uppercase text-chalk/60 whitespace-nowrap">
               <span className="text-xl">{flag}</span>
               {tla}
             </span>
@@ -110,7 +110,7 @@ export default async function Home() {
 
       {/* ── HOW IT WORKS ─────────────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
-        <p className="font-display font-bold text-sm tracking-[0.3em] uppercase text-lime mb-3.5">How it works</p>
+        <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">How it works</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Three taps to glory
         </h2>
@@ -154,7 +154,7 @@ export default async function Home() {
 
       {/* ── SCORING ──────────────────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
-        <p className="font-display font-bold text-sm tracking-[0.3em] uppercase text-lime mb-3.5">The points</p>
+        <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">The points</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Simple, brutal scoring
         </h2>
@@ -166,7 +166,7 @@ export default async function Home() {
             <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">
               {rulesMap['match_exact']?.label ?? 'Exact score'}
             </h3>
-            <p className="text-chalk/60 text-sm">
+            <p className="text-chalk/60 text-base">
               {rulesMap['match_exact']?.description ?? 'Nail the scoreline in 90 minutes — both teams correct.'}
             </p>
           </div>
@@ -177,7 +177,7 @@ export default async function Home() {
             <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">
               {rulesMap['match_result']?.label ?? 'Correct result'}
             </h3>
-            <p className="text-chalk/60 text-sm">
+            <p className="text-chalk/60 text-base">
               {rulesMap['match_result']?.description ?? "Right winner or a draw, but the scoreline's off."}
             </p>
           </div>
@@ -186,10 +186,10 @@ export default async function Home() {
               0<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
             </div>
             <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">Miss</h3>
-            <p className="text-chalk/60 text-sm">Wrong result. There&apos;s always the next matchday.</p>
+            <p className="text-chalk/60 text-base">Wrong result. There&apos;s always the next matchday.</p>
           </div>
         </div>
-        <p className="mt-6 text-sm text-chalk/40">
+        <p className="mt-6 text-base text-chalk/40">
           Point values are set by the admin and may change. See the{' '}
           <Link href="/rules" className="text-lime/70 hover:text-lime transition">full rules page</Link>{' '}
           for all categories.
@@ -198,7 +198,7 @@ export default async function Home() {
 
       {/* ── LEADERBOARD TEASER ───────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
-        <p className="font-display font-bold text-sm tracking-[0.3em] uppercase text-lime mb-3.5">The race</p>
+        <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">The race</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
           Where will you land?
         </h2>
@@ -224,7 +224,7 @@ export default async function Home() {
               ))
             ) : (
               <div className="px-7 py-8">
-                <p className="text-chalk/55 text-sm">No predictions yet — be the first!</p>
+                <p className="text-chalk/55 text-base">No predictions yet — be the first!</p>
               </div>
             )}
             {/* Fade overlay hinting at more rows below */}
@@ -236,7 +236,7 @@ export default async function Home() {
 
           {/* Claim-it CTA */}
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-dashed border-lime/40 px-6 py-4">
-            <span className="text-sm text-chalk/65">
+            <span className="text-base text-chalk/65">
               {loggedIn ? 'Your picks are being scored…' : 'Your name should be up there.'}
             </span>
             <Link
@@ -286,10 +286,10 @@ export default async function Home() {
 
       {/* ── FOOTER ───────────────────────────────────────── */}
       <footer className="text-center pb-14 pt-6 border-t border-[#272727]">
-        <p className="text-chalk/40 font-display font-semibold text-sm tracking-[0.18em] uppercase">
+        <p className="text-chalk/40 font-display font-semibold text-base tracking-[0.18em] uppercase">
           All rights reserved Students of the Game
         </p>
-        <p className="mt-1.5 text-chalk/30 font-display text-sm tracking-[0.15em] uppercase">
+        <p className="mt-1.5 text-chalk/30 font-display text-base tracking-[0.15em] uppercase">
           Crafted by{' '}
           <a
             href="https://www.theonlytjn.com"

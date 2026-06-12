@@ -169,7 +169,7 @@ export default function TicketCarousel() {
           <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-chalk/35">
             Your prediction · {OUTCOME_LABEL[f.kind]}
           </p>
-          <p className="mt-0.5 font-display text-sm font-semibold uppercase tracking-wide text-chalk/70 truncate">
+          <p className="mt-0.5 font-display text-base font-semibold uppercase tracking-wide text-chalk/70 truncate">
             {f.ht} {f.phs} – {f.pas} {f.at}
           </p>
         </div>

@@ -187,7 +187,7 @@ export default function LeaderboardPage() {
   }, [rows, liveBonus, isLive]);
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-sm text-chalk/40">Loading…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading…</p>;
   }
 
   return (
@@ -197,7 +197,7 @@ export default function LeaderboardPage() {
         <span className="text-lime">
           <HugeiconsIcon icon={BarChartIcon} size={18} color="currentColor" strokeWidth={1.5} />
         </span>
-        <p className="font-display text-sm uppercase tracking-[0.28em] text-lime">
+        <p className="font-display text-base uppercase tracking-[0.28em] text-lime">
           {isLive ? 'Live standings' : 'Standings'}
         </p>
         {isLive && (
@@ -214,7 +214,7 @@ export default function LeaderboardPage() {
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">The Table</h1>
       {isLive && (
-        <p className="mt-1 text-sm text-chalk/55">
+        <p className="mt-1 text-base text-chalk/55">
           Live projected scores shown in orange — updates every 30 seconds.
         </p>
       )}
@@ -231,7 +231,7 @@ export default function LeaderboardPage() {
         </div>
 
         {displayRows.length === 0 && (
-          <p className="px-4 py-10 text-center text-sm text-chalk/40">
+          <p className="px-4 py-10 text-center text-base text-chalk/40">
             No players yet — be the first to make a pick.
           </p>
         )}
@@ -274,9 +274,9 @@ export default function LeaderboardPage() {
                 )}
               </span>
 
-              <span className="text-center font-mono text-sm text-chalk/60">{r.exact_scores}</span>
-              <span className="text-center font-mono text-sm text-chalk/60">{r.correct_results}</span>
-              <span className="text-center font-mono text-sm text-chalk/60">{r.award_points}</span>
+              <span className="text-center font-mono text-base text-chalk/60">{r.exact_scores}</span>
+              <span className="text-center font-mono text-base text-chalk/60">{r.correct_results}</span>
+              <span className="text-center font-mono text-base text-chalk/60">{r.award_points}</span>
 
               {/* Total + live bonus */}
               <div className="flex flex-col items-end">
@@ -324,7 +324,7 @@ function StandingsChart({
   if (!matchdays.length || !players.length) {
     return (
       <div className="flex h-44 items-center justify-center">
-        <p className="font-mono text-sm text-chalk/30">Chart available once the first matchday is settled</p>
+        <p className="font-mono text-base text-chalk/30">Chart available once the first matchday is settled</p>
       </div>
     );
   }

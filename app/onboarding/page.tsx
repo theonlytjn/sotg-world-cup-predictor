@@ -78,24 +78,24 @@ export default function OnboardingPage() {
   if (!ready) {
     return (
       <main className="flex min-h-dvh items-center justify-center">
-        <p className="font-mono text-sm text-chalk/40">Loading…</p>
+        <p className="font-mono text-base text-chalk/40">Loading…</p>
       </main>
     );
   }
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-16">
-      <p className="font-mono text-sm uppercase tracking-[0.35em] text-lime">Welcome</p>
+      <p className="font-mono text-base uppercase tracking-[0.35em] text-lime">Welcome</p>
       <h1 className="mt-4 font-display text-5xl uppercase leading-none text-chalk">
         Choose your nickname
       </h1>
-      <p className="mt-3 text-sm text-chalk/55">
+      <p className="mt-3 text-base text-chalk/55">
         This is how you&apos;ll appear on the leaderboard. Pick something good — you can&apos;t
         change it later without asking the admin.
       </p>
 
       <div className="mt-8">
-        <label className="font-mono text-sm uppercase tracking-widest text-chalk/50">Nickname</label>
+        <label className="font-mono text-base uppercase tracking-widest text-chalk/50">Nickname</label>
         <input
           type="text"
           value={nickname}
@@ -106,8 +106,8 @@ export default function OnboardingPage() {
           autoFocus
           className="mt-2 w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3 text-chalk outline-none placeholder:text-chalk/30 focus:border-lime/60"
         />
-        {error && <p className="mt-2 text-sm text-flame">{error}</p>}
-        <p className="mt-1 font-mono text-sm text-chalk/30">Max 24 characters · must be unique</p>
+        {error && <p className="mt-2 text-base text-flame">{error}</p>}
+        <p className="mt-1 font-mono text-base text-chalk/30">Max 24 characters · must be unique</p>
 
         <button
           onClick={save}

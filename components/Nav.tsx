@@ -76,7 +76,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                   key={t.href}
                   href={t.href}
                   className={[
-                    'flex h-11 items-center gap-2 rounded-full px-4 font-display text-sm uppercase transition',
+                    'flex h-11 items-center gap-2 rounded-full px-4 font-display text-base uppercase transition',
                     active ? 'bg-lime text-pitch-950' : 'text-chalk/60 hover:text-chalk',
                   ].join(' ')}
                 >
@@ -89,7 +89,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
               <Link
                 href="/admin"
                 className={[
-                  'flex h-11 items-center gap-2 rounded-full px-4 font-display text-sm uppercase transition',
+                  'flex h-11 items-center gap-2 rounded-full px-4 font-display text-base uppercase transition',
                   pathname === '/admin' || pathname.startsWith('/admin/')
                     ? 'bg-flame text-chalk'
                     : 'text-flame/70 hover:text-flame',

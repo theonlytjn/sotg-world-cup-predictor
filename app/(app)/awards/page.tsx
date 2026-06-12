@@ -167,13 +167,13 @@ export default function AwardsPage() {
   }, [categories]);
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-sm text-chalk/40">Loading…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading…</p>;
   }
 
   return (
     <div>
       <h1 className="font-display text-4xl uppercase text-chalk">Awards picks</h1>
-      <p className="mt-1 text-sm text-chalk/55">
+      <p className="mt-1 text-base text-chalk/55">
         Two picks per category — your first choice scores more. Locks at tournament start.
       </p>
 
@@ -190,7 +190,7 @@ export default function AwardsPage() {
               </h2>
               <span className="h-px flex-1 bg-white/10" />
             </div>
-            {description && <p className="mb-4 text-sm text-chalk/55">{description}</p>}
+            {description && <p className="mb-4 text-base text-chalk/55">{description}</p>}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {cats.map((cat) => (
                 <CategoryRow
@@ -214,7 +214,7 @@ export default function AwardsPage() {
 
       {/* Points breakdown — opinion section excluded (0 pts) */}
       <div className="mt-10 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
-        <p className="font-display text-sm uppercase tracking-wide text-chalk/50">Points breakdown</p>
+        <p className="font-display text-base uppercase tracking-wide text-chalk/50">Points breakdown</p>
         <div className="mt-3 space-y-3">
           {SECTIONS.filter((s) => s.key !== 'opinion').map(({ key, label }) => {
             const cats = bySection.get(key);
@@ -224,7 +224,7 @@ export default function AwardsPage() {
                 <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-chalk/30">{label}</p>
                 <div className="grid gap-1">
                   {cats.map((cat) => (
-                    <div key={cat.id} className="flex items-center justify-between font-mono text-sm text-chalk/60">
+                    <div key={cat.id} className="flex items-center justify-between font-mono text-base text-chalk/60">
                       <span>{cat.label}</span>
                       <span className="text-lime">
                         {cat.pts_pick_1}<span className="text-chalk/30"> / </span>{cat.pts_pick_2}
@@ -326,7 +326,7 @@ function CategoryRow({
         <div className="mb-4">
           <div className="mb-2 flex items-start justify-between gap-2">
             <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>
-            <span className="shrink-0 rounded-full border border-gold/30 px-3 py-1 font-display text-sm uppercase text-gold/70">
+            <span className="shrink-0 rounded-full border border-gold/30 px-3 py-1 font-display text-base uppercase text-gold/70">
               Poll
             </span>
           </div>
@@ -346,10 +346,10 @@ function CategoryRow({
                 return (
                   <div key={pick}>
                     <div className="mb-1 flex items-center justify-between">
-                      <span className={['text-sm', isMyVote ? 'text-gold' : 'text-chalk/80'].join(' ')}>
+                      <span className={['text-base', isMyVote ? 'text-gold' : 'text-chalk/80'].join(' ')}>
                         {getPickLabel(pick)}{isMyVote ? ' ✓' : ''}
                       </span>
-                      <span className="font-mono text-sm text-chalk/40">{count} · {pct}%</span>
+                      <span className="font-mono text-base text-chalk/40">{count} · {pct}%</span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
                       <div
@@ -377,11 +377,11 @@ function CategoryRow({
               <button
                 onClick={save}
                 disabled={!pick1 || state === 'saving'}
-                className="rounded-full bg-gold/15 px-4 py-1.5 font-display text-sm uppercase tracking-wide text-gold transition hover:bg-gold/25 disabled:opacity-30"
+                className="rounded-full bg-gold/15 px-4 py-1.5 font-display text-base uppercase tracking-wide text-gold transition hover:bg-gold/25 disabled:opacity-30"
               >
                 {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Voted ✓' : pred?.pick_1 ? 'Update vote' : 'Submit vote'}
               </button>
-              {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
+              {state === 'error' && <span className="font-mono text-base text-flame">Couldn&apos;t save</span>}
             </div>
           </>
         )}
@@ -396,12 +396,12 @@ function CategoryRow({
         <div className="mb-2 flex items-start justify-between gap-2">
           <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>
           {settled && (
-            <span className="shrink-0 rounded-full bg-lime/20 px-3 py-1 font-display text-sm uppercase text-lime">
+            <span className="shrink-0 rounded-full bg-lime/20 px-3 py-1 font-display text-base uppercase text-lime">
               +{pred!.points}
             </span>
           )}
           {locked && !settled && (
-            <span className="shrink-0 font-mono text-sm uppercase tracking-widest text-chalk/40">Locked</span>
+            <span className="shrink-0 font-mono text-base uppercase tracking-widest text-chalk/40">Locked</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -442,11 +442,11 @@ function CategoryRow({
           <button
             onClick={save}
             disabled={(!pick1 && !pick2) || state === 'saving'}
-            className="rounded-full bg-lime/15 px-4 py-1.5 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+            className="rounded-full bg-lime/15 px-4 py-1.5 font-display text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
           >
             {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save picks'}
           </button>
-          {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
+          {state === 'error' && <span className="font-mono text-base text-flame">Couldn&apos;t save</span>}
         </div>
       )}
     </div>
