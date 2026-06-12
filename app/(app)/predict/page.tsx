@@ -336,7 +336,7 @@ function FixtureRow({
   const koTime = ko.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className={`rounded-2xl border p-4 transition-colors ${
+    <div className={`rounded-2xl border p-5 sm:p-6 transition-colors ${
       live
         ? 'border-lime/25 bg-pitch-900/80'
         : finished
@@ -378,7 +378,7 @@ function FixtureRow({
             <button
               onClick={save}
               disabled={home === '' || away === '' || state === 'saving'}
-              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-display text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-body text-base tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
             >
               {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
             </button>

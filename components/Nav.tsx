@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -37,6 +37,15 @@ export default function Nav({ userEmail }: { userEmail: string }) {
   const router = useRouter();
   const [logoErr, setLogoErr] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const check = () => setIsDark(!document.documentElement.classList.contains('light'));
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
 
   async function signOut() {
     const supabase = createClient();
@@ -56,7 +65,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
           <Link href="/predict" className="shrink-0" onClick={closeMenu}>
             {!logoErr ? (
               <img
-                src="/logo.svg"
+                src={isDark ? '/logo-dark.svg' : '/logo.svg'}
                 alt="SOTG '26"
                 className="h-10 sm:h-14 w-auto object-contain"
                 onError={() => setLogoErr(true)}

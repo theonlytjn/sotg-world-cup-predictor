@@ -220,8 +220,8 @@ export default function LeaderboardPage() {
       )}
 
       {/* Table */}
-      <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
-        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-b border-white/8 bg-pitch-800 px-4 py-3 font-display text-sm font-bold uppercase tracking-widest text-chalk">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-white/20">
+        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-b border-white/20 bg-pitch-800 px-5 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-chalk">
           <span>#</span>
           <span>Player</span>
           <span className="text-center">5pt</span>
@@ -231,7 +231,7 @@ export default function LeaderboardPage() {
         </div>
 
         {displayRows.length === 0 && (
-          <p className="px-4 py-10 text-center text-base text-chalk">
+          <p className="px-5 py-10 text-center text-base text-chalk">
             No players yet — be the first to make a pick.
           </p>
         )}
@@ -246,7 +246,7 @@ export default function LeaderboardPage() {
             <div
               key={r.user_id}
               className={[
-                'grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-t border-white/5 px-4 py-3.5 transition-colors',
+                'grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-t border-white/15 px-5 py-4 transition-colors',
                 isMe ? 'bg-lime/5' : i < 3 ? 'bg-pitch-900/40' : '',
               ].join(' ')}
             >
@@ -261,22 +261,22 @@ export default function LeaderboardPage() {
                 )}
               </div>
 
-              {/* Name */}
+              {/* Name — Boldonse, slightly smaller */}
               <span className={[
-                'truncate font-display text-base font-bold uppercase tracking-wide',
+                'truncate font-display text-sm font-bold uppercase tracking-wide',
                 rankStyle ? rankStyle.text : 'text-chalk',
               ].join(' ')}>
                 {r.display_name}
                 {isMe && (
-                  <span className="ml-2 rounded-full bg-lime/20 px-2 py-0.5 font-display text-sm font-bold uppercase tracking-widest text-lime">
+                  <span className="ml-2 rounded-full bg-lime/20 px-2 py-0.5 font-display text-xs font-bold uppercase tracking-widest text-lime">
                     you
                   </span>
                 )}
               </span>
 
-              <span className="text-center font-mono text-base text-chalk">{r.exact_scores}</span>
-              <span className="text-center font-mono text-base text-chalk">{r.correct_results}</span>
-              <span className="text-center font-mono text-base text-chalk">{r.award_points}</span>
+              <span className="text-center font-display font-black text-base text-chalk">{r.exact_scores}</span>
+              <span className="text-center font-display font-black text-base text-chalk">{r.correct_results}</span>
+              <span className="text-center font-display font-black text-base text-chalk">{r.award_points}</span>
 
               {/* Total + live bonus */}
               <div className="flex flex-col items-end">
