@@ -32,8 +32,12 @@ export default function FixturePanel({ fixtures }: { fixtures: Fixture[] }) {
 
   const [filter, setFilter] = useState<'all' | 'pending'>('pending');
   const filtered = useMemo(() => {
-    if (filter === 'all') return byMatchday;
-    return byMatchday
+    // Always hide groups where every fixture is still TBD (no teams assigned yet)
+    const withTeams = byMatchday
+      .map(([md, list]) => [md, list.filter((f) => f.home_team || f.away_team)] as [number, Fixture[]])
+      .filter(([, list]) => list.length > 0);
+    if (filter === 'all') return withTeams;
+    return withTeams
       .map(([md, list]) => [md, list.filter((f) => !DONE.has(f.status))] as [number, Fixture[]])
       .filter(([, list]) => list.length > 0);
   }, [byMatchday, filter]);
