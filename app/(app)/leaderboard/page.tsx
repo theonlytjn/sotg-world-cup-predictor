@@ -77,6 +77,7 @@ export default function LeaderboardPage() {
       { data: u },
       { data: lb },
       { data: lf },
+      { data: rules },
     ] = await Promise.all([
       supabase.auth.getUser(),
       supabase
@@ -88,9 +89,18 @@ export default function LeaderboardPage() {
         .from('fixtures')
         .select('id, home_score, away_score')
         .eq('status', 'IN_PLAY'),
+      supabase
+        .from('scoring_rules')
+        .select('key, points'),
     ]);
 
     if (u.user) setMyId(u.user.id);
+
+    const rulesMap = Object.fromEntries(
+      ((rules ?? []) as { key: string; points: number }[]).map((r) => [r.key, r.points])
+    );
+    const exactPts  = rulesMap['match_exact']  ?? 3;
+    const resultPts = rulesMap['match_result'] ?? 1;
 
     const rowData = (lb as Row[]) ?? [];
     setRows(rowData);
@@ -103,14 +113,14 @@ export default function LeaderboardPage() {
       const liveIds = liveFixtures.map((f) => f.id);
       const { data: livePreds } = await supabase
         .from('match_predictions')
-        .select('user_id, fixture_id, home_pred, away_pred')
+        .select('user_id, fixture_id, home_pred, away_pred, is_banker')
         .in('fixture_id', liveIds);
 
       const bonus: Record<string, number> = {};
-      for (const p of (livePreds as RawPred[]) ?? []) {
+      for (const p of (livePreds as (RawPred & { is_banker?: boolean })[]) ?? []) {
         const fix = liveFixtures.find((f) => f.id === p.fixture_id);
         if (!fix || fix.home_score == null || fix.away_score == null) continue;
-        const pts = scorePrediction(p.home_pred, p.away_pred, fix.home_score, fix.away_score);
+        const pts = scorePrediction(p.home_pred, p.away_pred, fix.home_score, fix.away_score, exactPts, resultPts, p.is_banker ?? false);
         bonus[p.user_id] = (bonus[p.user_id] ?? 0) + pts;
       }
       setLiveBonus(bonus);
@@ -273,8 +283,8 @@ export default function LeaderboardPage() {
                 </span>
                 {isLive && bonus !== 0 && (
                   <span className={[
-                    'font-mono text-[9px] font-semibold',
-                    bonus > 0 ? 'text-flame' : 'text-chalk',
+                    'font-display text-[10px] sm:text-xs font-black',
+                    bonus > 0 ? 'text-lime' : 'text-chalk',
                   ].join(' ')}>
                     {bonus > 0 ? `+${bonus}` : bonus}
                   </span>
