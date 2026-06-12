@@ -12,10 +12,10 @@ const SECTION_LABEL: Record<string, string> = {
 };
 
 const PICK_KIND_LABEL: Record<string, string> = {
-  team:          'Pick two teams',
-  player:        'Pick two players',
-  confederation: 'Pick two confederations',
-  stage:         'Pick a tournament stage',
+  team:          'Back two teams. First choice pays more.',
+  player:        'Back two players. First choice pays more.',
+  confederation: 'Back two confederations. First choice pays more.',
+  stage:         'Call the stage. One shot.',
 };
 
 export default async function RulesPage() {
@@ -39,9 +39,9 @@ export default async function RulesPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl uppercase text-chalk">Rules &amp; Points</h1>
+      <h1 className="font-display text-4xl uppercase text-chalk">How Points Work</h1>
       <p className="mt-1 text-base text-chalk">
-        Every point source in the predictor — live from the database.
+        Know the rules. Know the points. No excuses on matchday.
       </p>
 
       {/* ── Match Predictions ── */}
@@ -63,8 +63,8 @@ export default async function RulesPage() {
           ))}
           {/* Wrong prediction — always 0 */}
           <div className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
-            <p className="font-display text-lg uppercase text-chalk">Wrong</p>
-            <p className="mt-1 flex-1 text-base text-chalk">Score and result both wrong — no points.</p>
+            <p className="font-display text-lg uppercase text-chalk">Sent to the stands</p>
+            <p className="mt-1 flex-1 text-base text-chalk">Wrong result. No points. Move on to the next fixture.</p>
             <p className="mt-4 font-mono text-4xl font-semibold text-chalk">
               0<span className="ml-1.5 text-base">pts</span>
             </p>
@@ -89,7 +89,7 @@ export default async function RulesPage() {
                 <div key={cat.slug} className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
                   <p className="font-display text-lg uppercase leading-tight text-chalk">{cat.label}</p>
                   <p className="mt-1 flex-1 text-base text-chalk">
-                    {PICK_KIND_LABEL[cat.pick_kind] ?? 'Make a prediction'}
+                    {PICK_KIND_LABEL[cat.pick_kind] ?? 'Call your shot.'}
                   </p>
                   <div className="mt-4 flex items-end gap-4">
                     <div>
@@ -122,7 +122,7 @@ export default async function RulesPage() {
         </div>
         <div className="rounded-2xl border border-gold/20 bg-pitch-900/60 p-5">
           <p className="text-base text-chalk">
-            Five open-ended opinion votes — no points, no deadline. Vote on anything from the Breakthrough Star to the Worst Team. Results are tallied and revealed when the tournament ends.
+            Five open-ended votes — no points, no deadline. Breakthrough Star to Worst Team. Have your say. Results revealed when the final whistle blows.
           </p>
         </div>
       </section>
@@ -130,15 +130,15 @@ export default async function RulesPage() {
       {/* ── How it works ── */}
       <section className="mt-8">
         <div className="mb-3 flex items-center gap-3">
-          <h2 className="font-display text-2xl uppercase text-lime">How it works</h2>
+          <h2 className="font-display text-2xl uppercase text-lime">The rules</h2>
           <span className="h-px flex-1 bg-white/10" />
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { title: 'Predict',    body: 'Enter your score predictions before each game kicks off. Predictions lock 15 minutes before kick-off.' },
-            { title: 'Live',       body: 'The table updates in real time as games are played. Live projected points show during in-progress games.' },
-            { title: 'Awards',     body: 'Award predictions lock at the tournament deadline set by the admin. Two choices per category.' },
-            { title: 'Win',        body: 'Most total points at the end of the tournament wins. Exact scores beat correct results in tie-breaking.' },
+            { title: 'Call your shot',    body: 'Back a scoreline for every fixture before kick-off. Change your mind right up until the whistle.' },
+            { title: 'Whistle means locked', body: 'Kick-off hits, predictions freeze. No edits. No second chances. Own every call you made.' },
+            { title: 'Awards deadline',   body: 'Award predictions lock at the tournament deadline. Back your first and second choice — first always pays more.' },
+            { title: 'Champions',         body: 'Most points when the final whistle blows wins the table. Exact scores beat correct results in any tie.' },
           ].map(({ title, body }) => (
             <div key={title} className="rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
               <p className="font-display text-lg uppercase text-chalk">{title}</p>
