@@ -14,6 +14,7 @@ const SECTIONS: { key: AwardCategory['section']; label: string }[] = [
   { key: 'main',     label: 'Awards' },
   { key: 'specials', label: 'SOTG Specials' },
   { key: 'xtra',     label: 'SOTG Xtra' },
+  { key: 'tott',     label: 'Team of Tournament XI' },
 ];
 
 type PlayerGroup = { team: Team; players: Player[] };
@@ -90,6 +91,7 @@ export default function AwardPanel({
               <h3 className="font-display text-lg uppercase text-lime">{label}</h3>
               <span className="h-px flex-1 bg-white/10" />
             </div>
+            {key === 'tott' && <TottDeadlineControl categories={cats} />}
             <div className="space-y-2">
               {cats.map((cat) => (
                 <CategoryCard
@@ -379,5 +381,67 @@ function ResultPick({
       <option value="">— select confederation —</option>
       {CONFEDERATIONS.map((c) => <option key={c} value={c}>{c}</option>)}
     </select>
+  );
+}
+
+function TottDeadlineControl({ categories }: { categories: AwardCategory[] }) {
+  const [datetime, setDatetime] = useState('');
+  const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  const allLocked = categories.every(
+    (c) => c.deadline !== null && new Date(c.deadline).getTime() <= Date.now()
+  );
+
+  async function setAll(deadline: string | null) {
+    setState('saving');
+    const res = await fetch('/api/admin/set-section-deadline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ section: 'tott', deadline }),
+    });
+    if (res.ok) {
+      setState('saved');
+      setTimeout(() => { setState('idle'); window.location.reload(); }, 1200);
+    } else {
+      setState('error');
+    }
+  }
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-lime/20 bg-lime/5 px-4 py-3">
+      <span className="font-mono text-sm uppercase tracking-widest text-lime/80">All 11 slots</span>
+      <input
+        type="datetime-local"
+        value={datetime}
+        onChange={(e) => setDatetime(e.target.value)}
+        className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-sm text-chalk outline-none focus:border-lime/60"
+      />
+      <button
+        onClick={() => setAll(datetime ? new Date(datetime).toISOString() : null)}
+        disabled={state === 'saving' || !datetime}
+        className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-chalk/70 transition hover:bg-pitch-600 disabled:opacity-40"
+      >
+        {state === 'saving' ? '…' : state === 'saved' ? 'Saved ✓' : 'Set deadline'}
+      </button>
+      {!allLocked && (
+        <button
+          onClick={() => setAll(new Date().toISOString())}
+          disabled={state === 'saving'}
+          className="rounded-lg bg-flame/15 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-flame transition hover:bg-flame/25 disabled:opacity-40"
+        >
+          Lock all now
+        </button>
+      )}
+      {allLocked && (
+        <button
+          onClick={() => setAll(null)}
+          disabled={state === 'saving'}
+          className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-chalk/50 transition hover:bg-pitch-600 disabled:opacity-40"
+        >
+          Unlock all
+        </button>
+      )}
+      {state === 'error' && <span className="font-mono text-sm text-flame">Error</span>}
+    </div>
   );
 }

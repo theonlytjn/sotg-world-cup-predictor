@@ -38,7 +38,7 @@ const SECTIONS: { key: AwardCategory['section']; label: string; description?: st
   { key: 'specials', label: 'SOTG Specials' },
   { key: 'xtra',     label: 'SOTG Xtra' },
   { key: 'opinion',  label: 'Opinion Poll', description: 'No points — just your gut feeling. Votes are tallied when the tournament ends.' },
-  { key: 'tott',     label: 'Team of the Tournament XI', description: 'Pick your 4-3-3 XI — 5pts per correct player (1st choice), 3pts (2nd pick per slot).' },
+  { key: 'tott',     label: 'Team of the Tournament XI', description: 'Pick your 4-3-3 XI — 5pts per correct player in the official tournament XI.' },
 ];
 
 // Formation rows: top → bottom = attack → defence
@@ -547,14 +547,13 @@ function TottSlot({
   onSaved: (p: AwardPrediction) => void;
 }) {
   const locked = category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
-  const [pick1, setPick1] = useState(pred?.pick_1 ?? '');
-  const [pick2, setPick2] = useState(pred?.pick_2 ?? '');
+  const [pick, setPick] = useState(pred?.pick_1 ?? '');
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   async function save() {
-    if (!pick1 && !pick2) return;
+    if (!pick) return;
     setState('saving');
-    const row = { user_id: userId, category_id: category.id, pick_1: pick1 || null, pick_2: pick2 || null };
+    const row = { user_id: userId, category_id: category.id, pick_1: pick || null, pick_2: null };
     const { error } = await supabase
       .from('award_predictions')
       .upsert(row, { onConflict: 'user_id,category_id' });
@@ -583,34 +582,19 @@ function TottSlot({
         )}
       </div>
 
-      <div className="space-y-2">
-        <div>
-          <p className="mb-1 font-mono text-xs uppercase tracking-widest text-chalk/60">1st · {category.pts_pick_1}pts</p>
-          <SearchableSelect
-            value={pick1}
-            onChange={setPick1}
-            disabled={locked}
-            placeholder="— pick a player —"
-            groups={playerGroups}
-          />
-        </div>
-        <div>
-          <p className="mb-1 font-mono text-xs uppercase tracking-widest text-chalk/60">2nd · {category.pts_pick_2}pts</p>
-          <SearchableSelect
-            value={pick2}
-            onChange={setPick2}
-            disabled={locked}
-            placeholder="— pick a player —"
-            groups={playerGroups}
-          />
-        </div>
-      </div>
+      <SearchableSelect
+        value={pick}
+        onChange={setPick}
+        disabled={locked}
+        placeholder="— pick a player —"
+        groups={playerGroups}
+      />
 
       {!locked && (
         <div className="mt-3 flex items-center gap-3">
           <button
             onClick={save}
-            disabled={(!pick1 && !pick2) || state === 'saving'}
+            disabled={!pick || state === 'saving'}
             className="rounded-full bg-lime/15 px-4 py-1.5 font-body font-bold text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
           >
             {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred?.pick_1 ? 'Update' : 'Save pick'}
