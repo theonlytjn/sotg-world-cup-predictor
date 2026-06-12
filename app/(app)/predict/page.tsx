@@ -65,6 +65,8 @@ export default function PredictPage() {
   const [preds, setPreds] = useState<Record<number, Pred>>({});
   const [localEdits, setLocalEdits] = useState<Record<number, {home: string; away: string}>>({});
   const [saveAllState, setSaveAllState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [exactPts, setExactPts] = useState(5);
+  const [resultPts, setResultPts] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<number | null>(null);
@@ -74,6 +76,15 @@ export default function PredictPage() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
     setUserId(u.user.id);
+
+    const { data: rules } = await supabase
+      .from('scoring_rules')
+      .select('key, points');
+    const rulesMap = Object.fromEntries(
+      ((rules ?? []) as { key: string; points: number }[]).map((r) => [r.key, r.points])
+    );
+    setExactPts(rulesMap['match_exact'] ?? 5);
+    setResultPts(rulesMap['match_result'] ?? 1);
 
     const { data: fx } = await supabase
       .from('fixtures')
@@ -385,6 +396,14 @@ export default function PredictPage() {
 
           {activeGroup && (
             <div className="mt-6">
+              {activeGroup.finishedCount > 0 && (
+                <MatchdayRecap
+                  matchdayGroup={activeGroup}
+                  preds={preds}
+                  exactPts={exactPts}
+                  resultPts={resultPts}
+                />
+              )}
               <div className="flex items-center gap-4">
                 <button
                   onClick={prevDay}
@@ -467,6 +486,21 @@ export default function PredictPage() {
             </p>
           ) : (
             <>
+              {knockoutFixtures.some((f) => f.status === 'FINISHED') && (
+                <MatchdayRecap
+                  matchdayGroup={{
+                    matchday: 0,
+                    dateGroups: [{ dateKey: '', label: STAGE_LABELS[activeStage!] ?? activeStage!, fixtures: knockoutFixtures }],
+                    liveCount: knockoutFixtures.filter((f) => LIVE.has(f.status)).length,
+                    finishedCount: knockoutFixtures.filter((f) => f.status === 'FINISHED').length,
+                    totalCount: knockoutFixtures.length,
+                  }}
+                  preds={preds}
+                  exactPts={exactPts}
+                  resultPts={resultPts}
+                  stageLabel={STAGE_LABELS[activeStage!] ?? activeStage!}
+                />
+              )}
               <div className="space-y-2.5">
                 {knockoutFixtures.map((f) => (
                   <FixtureRow
@@ -686,6 +720,79 @@ function ScoreBox({ value, setValue, disabled, onCommit }: {
       className="h-12 w-12 rounded-xl border-2 border-white/15 bg-pitch-800 text-center font-display text-xl text-chalk outline-none transition focus:border-gold disabled:opacity-50"
       placeholder="–"
     />
+  );
+}
+
+function MatchdayRecap({
+  matchdayGroup,
+  preds,
+  exactPts,
+  resultPts,
+  stageLabel,
+}: {
+  matchdayGroup: MatchdayGroup;
+  preds: Record<number, Pred>;
+  exactPts: number;
+  resultPts: number;
+  stageLabel?: string;
+}) {
+  const allFixtures = matchdayGroup.dateGroups.flatMap((dg) => dg.fixtures);
+  const finished = allFixtures.filter((f) => f.status === 'FINISHED');
+  if (finished.length === 0) return null;
+
+  const settledPreds = finished.map((f) => preds[f.id]).filter(Boolean);
+  const totalPts = settledPreds.reduce((s, p) => s + (p.points ?? 0), 0);
+  const exact   = settledPreds.filter((p) => p.points === exactPts).length;
+  const correct = settledPreds.filter((p) => p.points === resultPts).length;
+  const missed  = settledPreds.filter((p) => p.points === 0).length;
+  const noPick  = finished.length - settledPreds.length;
+  const allDone = matchdayGroup.finishedCount === matchdayGroup.totalCount;
+
+  const bestFixture = finished.find((f) => preds[f.id]?.points === exactPts);
+  const bestPred    = bestFixture ? preds[bestFixture.id] : null;
+
+  const heading = stageLabel
+    ? `${stageLabel} · ${allDone ? 'complete' : `${finished.length}/${matchdayGroup.totalCount} settled`}`
+    : `Matchday ${matchdayGroup.matchday} · ${allDone ? 'complete' : `${finished.length}/${matchdayGroup.totalCount} settled`}`;
+
+  return (
+    <div className="mb-5 rounded-2xl border border-lime/20 bg-lime/5 px-5 py-4">
+      <div className="flex items-center justify-between">
+        <p className="font-display text-sm uppercase tracking-widest text-lime">{heading}</p>
+        <span className="font-display text-2xl text-chalk">
+          {totalPts > 0 ? `+${totalPts}` : totalPts}pts
+        </span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {exact > 0 && (
+          <span className="rounded-full bg-lime/15 px-3 py-1 font-mono text-sm text-lime">
+            {exact} exact {exact === 1 ? 'score' : 'scores'}
+          </span>
+        )}
+        {correct > 0 && (
+          <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-sm text-chalk">
+            {correct} correct {correct === 1 ? 'result' : 'results'}
+          </span>
+        )}
+        {missed > 0 && (
+          <span className="rounded-full bg-flame/15 px-3 py-1 font-mono text-sm text-flame">
+            {missed} {missed === 1 ? 'miss' : 'misses'}
+          </span>
+        )}
+        {noPick > 0 && (
+          <span className="rounded-full bg-white/5 px-3 py-1 font-mono text-sm text-chalk">
+            {noPick} no pick
+          </span>
+        )}
+      </div>
+
+      {bestFixture && bestPred && (
+        <p className="mt-3 font-display text-sm uppercase tracking-wide text-lime">
+          ⚡ Nailed {bestPred.home_pred}–{bestPred.away_pred} · {bestFixture.home_team?.name ?? 'TBD'} vs {bestFixture.away_team?.name ?? 'TBD'}
+        </p>
+      )}
+    </div>
   );
 }
 
