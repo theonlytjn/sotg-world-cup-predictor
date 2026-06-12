@@ -59,7 +59,7 @@ export default function AwardsPage() {
       supabase.from('award_categories').select('*').order('sort_order', { ascending: true }),
       supabase.from('teams').select('id, name, tla, confederation').order('name', { ascending: true }),
       supabase.from('players').select('id, name, position, team_id')
-        .order('team_id', { ascending: true }).order('name', { ascending: true }),
+        .order('team_id', { ascending: true }).order('name', { ascending: true }).limit(2000),
       supabase.from('award_predictions').select('*').eq('user_id', u.user.id),
     ]);
 

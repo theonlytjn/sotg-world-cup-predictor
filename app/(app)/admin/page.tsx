@@ -32,7 +32,7 @@ export default async function AdminPage() {
     db.from('award_categories').select('*').order('sort_order'),
     db.from('award_results').select('*'),
     db.from('teams').select('id, name, tla, confederation').order('name'),
-    db.from('players').select('id, name, position, team_id').order('name'),
+    db.from('players').select('id, name, position, team_id').order('name').limit(2000),
     db.from('fixtures').select(`
       id, matchday, stage, group_label, kickoff, status, home_score, away_score,
       home_team:teams!fixtures_home_team_id_fkey (id, name, tla),
