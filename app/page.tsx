@@ -54,13 +54,13 @@ export default async function Home() {
             className="mt-5 font-display uppercase text-chalk"
             style={{ fontSize: 'clamp(44px, 7vw, 88px)', lineHeight: 1.5 }}
           >
-            Predict<br />every game.<br />
-            <span className="text-lime">Own the table.</span>
+            Champions<br />predict.<br />
+            <span className="text-lime">Everyone else guesses.</span>
           </h1>
 
           <p className="mt-5 text-chalk max-w-[30ch]" style={{ fontSize: 'clamp(16px, 1.5vw, 19px)' }}>
-            Call the score on all 72 group games, bank the points, and settle who
-            actually knows their football. The SOTG table doesn&apos;t lie.
+            Make your calls. Climb the table. Earn the bragging rights.<br /><br />
+            Anyone can talk football. The table decides who actually knows it.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -68,14 +68,14 @@ export default async function Home() {
               href={loggedIn ? '/predict' : '/login'}
               className="inline-flex items-center gap-2 font-display font-bold uppercase tracking-wide text-base rounded-full bg-lime text-pitch-950 px-6 py-3.5 transition hover:brightness-110 hover:-translate-y-0.5"
             >
-              Make your picks
+              Start Predicting
               <span>→</span>
             </Link>
             <Link
               href="/leaderboard"
               className="inline-flex items-center font-display font-bold uppercase tracking-wide text-base rounded-full border border-pitch-700 text-chalk px-6 py-3.5 transition hover:border-lime/60"
             >
-              See the table
+              View the Table
             </Link>
           </div>
         </div>
@@ -112,28 +112,28 @@ export default async function Home() {
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">How it works</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
-          Three taps to glory
+          Three taps to glory.
         </h2>
         <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
               n: '1',
-              title: 'Predict the score',
-              body: 'Pick the exact scoreline for every group fixture. Change your mind right up until kickoff.',
+              title: 'Call your shot',
+              body: 'Back every scoreline before kick-off. Change your mind right up until the whistle.',
               icon: <HugeiconsIcon icon={PencilEdit01Icon} size={42} color="currentColor" strokeWidth={1.4} />,
               delay: '0',
             },
             {
               n: '2',
-              title: 'Locks at kickoff',
-              body: 'The whistle blows, picks freeze. No sneaky edits, no excuses. Fair game for everyone.',
+              title: 'Whistle means locked',
+              body: 'Kick-off arrives. Predictions freeze. No edits. No second chances.',
               icon: <HugeiconsIcon icon={LockIcon} size={42} color="currentColor" strokeWidth={1.4} />,
               delay: '100',
             },
             {
               n: '3',
-              title: 'Climb the table',
-              body: 'Results update automatically. Watch the points land and your name rise — or fall.',
+              title: 'Rise through the ranks',
+              body: 'Points land automatically. Watch your mates disappear below you.',
               icon: <HugeiconsIcon icon={BarChartIcon} size={42} color="currentColor" strokeWidth={1.4} />,
               delay: '200',
             },
@@ -156,7 +156,7 @@ export default async function Home() {
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">The points</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
-          Simple, brutal scoring
+          Simple. Brutal. Fair.
         </h2>
         <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div data-aos="fade-up" data-aos-delay="0" className="rounded-[22px] p-8 sm:p-10 border border-lime/30 bg-gradient-to-br from-lime/14 to-pitch-900">
@@ -167,7 +167,7 @@ export default async function Home() {
               {rulesMap['match_exact']?.label ?? 'Exact score'}
             </h3>
             <p className="text-chalk text-base">
-              {rulesMap['match_exact']?.description ?? 'Nail the scoreline in 90 minutes — both teams correct.'}
+              Hat-trick territory. Call it exactly — both goals, both sides. Take all three points.
             </p>
           </div>
           <div data-aos="fade-up" data-aos-delay="100" className="rounded-[22px] p-8 sm:p-10 border border-pitch-700 bg-pitch-900">
@@ -178,15 +178,15 @@ export default async function Home() {
               {rulesMap['match_result']?.label ?? 'Correct result'}
             </h3>
             <p className="text-chalk text-base">
-              {rulesMap['match_result']?.description ?? "Right winner or a draw, but the scoreline's off."}
+              You saw it coming. Right result, wrong score. It still counts.
             </p>
           </div>
           <div data-aos="fade-up" data-aos-delay="200" className="rounded-[22px] p-8 sm:p-10 border border-pitch-700 bg-pitch-900">
             <div className="font-display font-black text-flame" style={{ fontSize: 64, lineHeight: 1 }}>
               0<span className="text-[18px] text-chalk font-semibold ml-1"> pts</span>
             </div>
-            <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">Miss</h3>
-            <p className="text-chalk text-base">Wrong result. There&apos;s always the next matchday.</p>
+            <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">Sent to the stands</h3>
+            <p className="text-chalk text-base">Wrong result. No points. There&apos;s always the next fixture.</p>
           </div>
         </div>
         <p className="mt-6 text-base text-chalk">
@@ -200,7 +200,7 @@ export default async function Home() {
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">The race</p>
         <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
-          Where will you land?
+          The table doesn&apos;t lie.
         </h2>
         <div className="mt-9">
           {/* Full-width table — top 3 with fade below */}
@@ -236,7 +236,7 @@ export default async function Home() {
           {/* Claim-it CTA */}
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-dashed border-lime/40 px-6 py-4">
             <span className="text-base text-chalk">
-              {loggedIn ? 'Your picks are being scored…' : 'Your name should be up there.'}
+              {loggedIn ? 'Every fixture moves you up or down.' : 'You&apos;re either chasing first place or defending it.'}
             </span>
             <Link
               href={loggedIn ? '/leaderboard' : '/login'}
@@ -269,16 +269,16 @@ export default async function Home() {
             className="relative font-display uppercase text-pitch-950"
             style={{ fontSize: 'clamp(32px, 5vw, 60px)' }}
           >
-            The whistle&apos;s gone.<br />Get your picks in.
+            Kick-off is coming.<br />Get your picks in.
           </h2>
           <p className="relative mt-3.5 mb-7 mx-auto max-w-[42ch] font-semibold text-pitch-950/65">
-            Group stage is live. Sign in, set your nickname, and make your first call before the next kickoff.
+            One scoreline could be the difference between lifting the trophy and finishing mid-table.
           </p>
           <Link
             href={loggedIn ? '/predict' : '/login'}
             className="relative inline-flex items-center gap-2 font-display uppercase text-base rounded-full bg-pitch-950 text-lime px-7 py-3.5 transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            Start predicting →
+            Start Predicting →
           </Link>
         </div>
       </div>
