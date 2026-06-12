@@ -1,10 +1,12 @@
 # Polls the results endpoint every 5 min (Tier 1 football-data.org).
 # Also pulls goal scorers and group standings on each run.
-# Vercel Hobby only allows once-daily crons, so GitHub Actions drives this.
+#
+# PRIMARY cron: cron-job.org (external — reliable 5-min schedule)
+# BACKUP  cron: this workflow (GitHub may throttle scheduled runs on low-activity repos)
 #
 # Repo secrets needed (Settings → Secrets and variables → Actions):
-#   APP_URL     = https://your-app.vercel.app
-#   CRON_SECRET = same value as in Vercel env
+#   APP_URL     = https://sotg.app
+#   CRON_SECRET = same value as in Vercel env CRON_SECRET
 name: Poll World Cup results
 on:
   schedule:
@@ -17,6 +19,14 @@ jobs:
     steps:
       - name: Hit the results endpoint
         run: |
-          curl -sS -m 60 \
-            "${{ secrets.APP_URL }}/api/cron/results?secret=${{ secrets.CRON_SECRET }}" \
-            && echo "" && echo "poll complete"
+          RESPONSE=$(curl -sS -w "\n%{http_code}" -m 60 \
+            "${{ secrets.APP_URL }}/api/cron/results?secret=${{ secrets.CRON_SECRET }}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "HTTP $HTTP_CODE"
+          echo "$BODY"
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "ERROR: unexpected HTTP status $HTTP_CODE"
+            exit 1
+          fi
+          echo "poll complete"
