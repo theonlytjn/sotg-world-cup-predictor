@@ -23,6 +23,22 @@ type Member = {
   award_points: number;
 };
 
+type H2HFixture = {
+  fixtureName: string;
+  myPick: string;
+  theirPick: string;
+  myPoints: number;
+  theirPoints: number;
+};
+
+type H2HData = {
+  myWins: number;
+  theirWins: number;
+  ties: number;
+  shared: number;
+  fixtures: H2HFixture[];
+};
+
 const RANK_STYLES = [
   { text: 'text-gold',      crown: 'text-gold' },
   { text: 'text-[#cfd6da]', crown: 'text-[#cfd6da]' },
@@ -45,6 +61,9 @@ export default function LeaguePage() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [leaveConfirm, setLeaveConfirm] = useState(false);
+  const [h2hTarget, setH2hTarget] = useState<Member | null>(null);
+  const [h2hData, setH2hData] = useState<H2HData | null>(null);
+  const [h2hLoading, setH2hLoading] = useState(false);
 
   const load = useCallback(async () => {
     const { data: u } = await supabase.auth.getUser();
@@ -115,6 +134,70 @@ export default function LeaguePage() {
   }, [supabase, id]);
 
   useEffect(() => { load(); }, [load]);
+
+  async function loadH2H(target: Member) {
+    setH2hTarget(target);
+    setH2hData(null);
+    setH2hLoading(true);
+
+    const [{ data: myPreds }, { data: theirPreds }] = await Promise.all([
+      supabase.from('match_predictions').select('fixture_id, home_pred, away_pred, points')
+        .eq('user_id', userId).not('points', 'is', null),
+      supabase.from('match_predictions').select('fixture_id, home_pred, away_pred, points')
+        .eq('user_id', target.user_id).not('points', 'is', null),
+    ]);
+
+    type PredRow = { fixture_id: number; home_pred: number; away_pred: number; points: number };
+    const myMap = new Map<number, PredRow>(
+      ((myPreds ?? []) as PredRow[]).map((p) => [p.fixture_id, p])
+    );
+    const theirMap = new Map<number, PredRow>(
+      ((theirPreds ?? []) as PredRow[]).map((p) => [p.fixture_id, p])
+    );
+
+    const sharedIds = [...myMap.keys()].filter((id) => theirMap.has(id));
+    let myWins = 0, theirWins = 0, ties = 0;
+    for (const id of sharedIds) {
+      const mp = myMap.get(id)!.points;
+      const tp = theirMap.get(id)!.points;
+      if (mp > tp) myWins++;
+      else if (tp > mp) theirWins++;
+      else ties++;
+    }
+
+    const recentIds = sharedIds.slice(-10).reverse();
+    const { data: fxData } = await supabase
+      .from('fixtures')
+      .select('id, kickoff, home_team:teams!fixtures_home_team_id_fkey(name), away_team:teams!fixtures_away_team_id_fkey(name)')
+      .in('id', recentIds)
+      .order('kickoff', { ascending: false });
+
+    type FxRow = { id: number; kickoff: string; home_team: { name: string }[] | { name: string } | null; away_team: { name: string }[] | { name: string } | null };
+    const fxMap = new Map<number, FxRow>(
+      ((fxData ?? []) as unknown as FxRow[]).map((f) => [f.id, f])
+    );
+
+    const fixtures: H2HFixture[] = recentIds
+      .map((id) => {
+        const f = fxMap.get(id);
+        const mp = myMap.get(id)!;
+        const tp = theirMap.get(id)!;
+        if (!f) return null;
+        const homeName = Array.isArray(f.home_team) ? f.home_team[0]?.name : (f.home_team as { name: string } | null)?.name;
+        const awayName = Array.isArray(f.away_team) ? f.away_team[0]?.name : (f.away_team as { name: string } | null)?.name;
+        return {
+          fixtureName: `${homeName ?? '?'} vs ${awayName ?? '?'}`,
+          myPick: `${mp.home_pred}–${mp.away_pred}`,
+          theirPick: `${tp.home_pred}–${tp.away_pred}`,
+          myPoints: mp.points,
+          theirPoints: tp.points,
+        };
+      })
+      .filter((x): x is H2HFixture => x !== null);
+
+    setH2hData({ myWins, theirWins, ties, shared: sharedIds.length, fixtures });
+    setH2hLoading(false);
+  }
 
   function copyCode() {
     if (!league) return;
@@ -248,13 +331,16 @@ export default function LeaguePage() {
         {members.map((m, i) => {
           const isMe = m.user_id === userId;
           const rankStyle = RANK_STYLES[i];
+          const isH2hActive = h2hTarget?.user_id === m.user_id;
 
           return (
             <div
               key={m.user_id}
+              onClick={() => !isMe && loadH2H(m)}
               className={[
                 `${GRID} items-center border-t border-white/15 px-3 py-2.5 sm:px-5 sm:py-4`,
-                isMe ? 'bg-lime/5' : i < 3 ? 'bg-pitch-900/40' : '',
+                isMe ? 'bg-lime/5' : 'cursor-pointer hover:bg-white/5 transition-colors',
+                isH2hActive ? 'bg-lime/10' : i < 3 && !isMe ? 'bg-pitch-900/40' : '',
               ].join(' ')}
             >
               <div className="flex items-center justify-center">
@@ -292,6 +378,109 @@ export default function LeaguePage() {
           );
         })}
       </div>
+
+      {members.length > 1 && !h2hTarget && (
+        <p className="mt-3 font-mono text-xs uppercase tracking-widest text-chalk/40 text-center">
+          Tap a rival to see head-to-head
+        </p>
+      )}
+
+      {/* H2H panel */}
+      {h2hTarget && (
+        <div className="mt-6 rounded-2xl border-2 border-white/15 bg-pitch-900/60 p-6">
+          <div className="mb-5 flex items-center justify-between">
+            <p className="font-display text-sm uppercase tracking-widest text-lime">
+              Head-to-head
+            </p>
+            <button
+              onClick={() => { setH2hTarget(null); setH2hData(null); }}
+              className="font-mono text-sm text-chalk/40 hover:text-chalk transition"
+            >
+              ✕ Close
+            </button>
+          </div>
+
+          {/* Name plates */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 mb-5">
+            <div className="text-left">
+              <p className="font-display text-base uppercase tracking-wide text-lime">You</p>
+              <p className="font-display text-3xl font-black text-chalk">{members.find(m => m.user_id === userId)?.total_points ?? 0}</p>
+              <p className="font-mono text-sm text-chalk/60">total pts</p>
+            </div>
+            <span className="font-display text-xl text-chalk/30">vs</span>
+            <div className="text-right">
+              <p className="font-display text-base uppercase tracking-wide text-chalk">{h2hTarget.display_name}</p>
+              <p className="font-display text-3xl font-black text-chalk">{h2hTarget.total_points}</p>
+              <p className="font-mono text-sm text-chalk/60">total pts</p>
+            </div>
+          </div>
+
+          {h2hLoading && (
+            <p className="py-4 text-center font-mono text-sm text-chalk/40">Loading matchup…</p>
+          )}
+
+          {!h2hLoading && h2hData && (
+            <>
+              {/* W/D/L record */}
+              <div className="grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-pitch-800/60 p-4 mb-5">
+                <div className="text-center">
+                  <p className="font-display text-3xl font-black text-lime">{h2hData.myWins}</p>
+                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/50">Your wins</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-display text-3xl font-black text-chalk">{h2hData.ties}</p>
+                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/50">Tied</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-display text-3xl font-black text-flame">{h2hData.theirWins}</p>
+                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/50">Their wins</p>
+                </div>
+              </div>
+              <p className="mb-4 text-center font-mono text-xs uppercase tracking-widest text-chalk/40">
+                {h2hData.shared} shared {h2hData.shared === 1 ? 'fixture' : 'fixtures'} · per-fixture points compared
+              </p>
+
+              {/* Recent fixtures */}
+              {h2hData.fixtures.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/40 mb-2">Recent fixtures</p>
+                  {h2hData.fixtures.map((f, i) => {
+                    const youWon = f.myPoints > f.theirPoints;
+                    const tied   = f.myPoints === f.theirPoints;
+                    return (
+                      <div key={i} className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl border border-white/8 bg-pitch-900/40 px-3 py-2.5">
+                        <div className="text-left">
+                          <span className={`font-display text-sm uppercase ${youWon ? 'text-lime' : tied ? 'text-chalk' : 'text-chalk/50'}`}>
+                            {f.myPick}
+                          </span>
+                          <span className={`ml-1.5 font-mono text-xs ${youWon ? 'text-lime' : 'text-chalk/40'}`}>
+                            +{f.myPoints}
+                          </span>
+                        </div>
+                        <p className="truncate text-center font-mono text-xs text-chalk/40 px-1">{f.fixtureName}</p>
+                        <div className="text-right">
+                          <span className={`font-mono text-xs ${f.theirPoints > f.myPoints ? 'text-flame' : 'text-chalk/40'}`}>
+                            +{f.theirPoints}
+                          </span>
+                          <span className={`ml-1.5 font-display text-sm uppercase ${f.theirPoints > f.myPoints ? 'text-flame' : tied ? 'text-chalk' : 'text-chalk/50'}`}>
+                            {f.theirPick}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {h2hData.shared === 0 && (
+                <p className="py-4 text-center font-mono text-sm text-chalk/40">
+                  No shared settled fixtures yet — check back once games are played.
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {/* Leave / delete */}
       <div className="mt-6 flex items-center gap-4">
