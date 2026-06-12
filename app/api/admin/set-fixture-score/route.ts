@@ -28,11 +28,11 @@ export async function POST(req: NextRequest) {
 
   const { data: preds } = await db
     .from('match_predictions')
-    .select('id, home_pred, away_pred')
+    .select('id, home_pred, away_pred, is_banker')
     .eq('fixture_id', fixture_id);
 
   for (const p of preds ?? []) {
-    const pts = scorePrediction(p.home_pred, p.away_pred, home_score, away_score, exactPts, resultPts);
+    const pts = scorePrediction(p.home_pred, p.away_pred, home_score, away_score, exactPts, resultPts, p.is_banker ?? false);
     await db.from('match_predictions').update({ points: pts }).eq('id', p.id);
   }
 

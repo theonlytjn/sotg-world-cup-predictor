@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { LockIcon, DartIcon } from '@hugeicons-pro/core-stroke-rounded';
@@ -18,7 +18,7 @@ type Fixture = {
   home_team: Team | null;
   away_team: Team | null;
 };
-type Pred = { fixture_id: number; home_pred: number; away_pred: number; points: number | null };
+type Pred = { fixture_id: number; home_pred: number; away_pred: number; points: number | null; is_banker: boolean };
 
 const LIVE = new Set(['IN_PLAY', 'PAUSED']);
 const LOCK_BEFORE_MS = 15 * 60_000;
@@ -97,12 +97,12 @@ export default function PredictPage() {
 
     const { data: mp } = await supabase
       .from('match_predictions')
-      .select('fixture_id, home_pred, away_pred, points')
+      .select('fixture_id, home_pred, away_pred, points, is_banker')
       .eq('user_id', u.user.id);
 
     setFixtures((fx as unknown as Fixture[]) ?? []);
     const map: Record<number, Pred> = {};
-    for (const p of (mp as Pred[]) ?? []) map[p.fixture_id] = p;
+    for (const p of (mp as Pred[]) ?? []) map[p.fixture_id] = { ...p, is_banker: p.is_banker ?? false };
     setPreds(map);
     const initEdits: Record<number, {home: string; away: string}> = {};
     for (const p of (mp as Pred[]) ?? []) {
@@ -113,6 +113,57 @@ export default function PredictPage() {
   }, [supabase]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Feature 10: live score polling — refetch fixtures every 30s when any match is in progress
+  const isLive = useMemo(() => fixtures.some((f) => LIVE.has(f.status)), [fixtures]);
+  const isLiveRef = useRef(isLive);
+  useEffect(() => { isLiveRef.current = isLive; }, [isLive]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (!isLiveRef.current) return;
+      const { data: fx } = await supabase
+        .from('fixtures')
+        .select(
+          `id, stage, matchday, group_label, kickoff, status, home_score, away_score,
+           home_team:teams!fixtures_home_team_id_fkey (id, name, tla, crest),
+           away_team:teams!fixtures_away_team_id_fkey (id, name, tla, crest)`
+        )
+        .order('kickoff', { ascending: true });
+      if (fx) setFixtures(fx as unknown as Fixture[]);
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [supabase]);
+
+  // Feature 11: banker toggle — enforces one banker per matchday/stage
+  async function handleBankerToggle(targetFixture: Fixture) {
+    if (!userId) return;
+    const res = await fetch('/api/predictions/banker', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fixture_id: targetFixture.id }),
+    });
+    if (!res.ok) return;
+    const { is_banker } = await res.json() as { is_banker: boolean };
+    setPreds((prev) => {
+      const next = { ...prev };
+      if (next[targetFixture.id]) {
+        next[targetFixture.id] = { ...next[targetFixture.id], is_banker };
+      }
+      if (is_banker) {
+        // Mirror the server's clearing of siblings in same matchday/stage
+        for (const f of fixtures) {
+          if (f.id === targetFixture.id) continue;
+          const sameMD = targetFixture.matchday !== null && f.matchday === targetFixture.matchday;
+          const sameStage = targetFixture.matchday === null && f.stage === targetFixture.stage;
+          if ((sameMD || sameStage) && next[f.id]) {
+            next[f.id] = { ...next[f.id], is_banker: false };
+          }
+        }
+      }
+      return next;
+    });
+  }
 
   // Group fixtures by stage
   const stageGroups = useMemo((): StageGroup[] => {
@@ -257,6 +308,7 @@ export default function PredictPage() {
           home_pred: row.home_pred,
           away_pred: row.away_pred,
           points: prev[row.fixture_id]?.points ?? null,
+          is_banker: prev[row.fixture_id]?.is_banker ?? false,
         };
       }
       return next;
@@ -310,6 +362,19 @@ export default function PredictPage() {
           <p className="font-display text-base uppercase tracking-wide text-flame">
             {unpredictedCount} fixture{unpredictedCount !== 1 ? 's' : ''} without a prediction
             {unpredictedCount === 1 ? ' — get your call in before the whistle.' : ' — get your calls in before kick-off.'}
+          </p>
+        </div>
+      )}
+
+      {/* Live banner */}
+      {isLive && (
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-lime/30 bg-lime/10 px-4 py-3">
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-lime" />
+          </span>
+          <p className="font-display text-base uppercase tracking-wide text-lime">
+            Matches in progress — scores refreshing every 30s
           </p>
         </div>
       )}
@@ -460,10 +525,12 @@ export default function PredictPage() {
                     pred={preds[f.id]}
                     userId={userId!}
                     supabase={supabase}
-                    onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
+                    onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: { ...p, is_banker: prev[f.id]?.is_banker ?? false } }))}
                     onEdit={(id, h, a) => setLocalEdits((prev) => ({ ...prev, [id]: { home: h, away: a } }))}
                     exactPts={exactPts}
                     resultPts={resultPts}
+                    isBanker={preds[f.id]?.is_banker ?? false}
+                    onBankerToggle={handleBankerToggle}
                   />
                 ))}
               </div>
@@ -511,10 +578,12 @@ export default function PredictPage() {
                     pred={preds[f.id]}
                     userId={userId!}
                     supabase={supabase}
-                    onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
+                    onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: { ...p, is_banker: prev[f.id]?.is_banker ?? false } }))}
                     onEdit={(id, h, a) => setLocalEdits((prev) => ({ ...prev, [id]: { home: h, away: a } }))}
                     exactPts={exactPts}
                     resultPts={resultPts}
+                    isBanker={preds[f.id]?.is_banker ?? false}
+                    onBankerToggle={handleBankerToggle}
                   />
                 ))}
               </div>
@@ -534,7 +603,7 @@ export default function PredictPage() {
 }
 
 function FixtureRow({
-  fixture, pred, userId, supabase, onSaved, onEdit, exactPts, resultPts,
+  fixture, pred, userId, supabase, onSaved, onEdit, exactPts, resultPts, isBanker = false, onBankerToggle,
 }: {
   fixture: Fixture;
   pred?: Pred;
@@ -544,6 +613,8 @@ function FixtureRow({
   onEdit?: (fixtureId: number, home: string, away: string) => void;
   exactPts?: number;
   resultPts?: number;
+  isBanker?: boolean;
+  onBankerToggle?: (fixture: Fixture) => void;
 }) {
   const { locked, locksInMin } = getLockStatus(fixture.kickoff);
   const finished = fixture.status === 'FINISHED';
@@ -573,7 +644,7 @@ function FixtureRow({
       setState('error');
     } else {
       setState('saved');
-      onSaved({ ...row, points: pred?.points ?? null });
+      onSaved({ ...row, points: pred?.points ?? null, is_banker: pred?.is_banker ?? false });
       setTimeout(() => setState('idle'), 1500);
     }
   }
@@ -583,7 +654,9 @@ function FixtureRow({
 
   return (
     <div className={`rounded-2xl border-2 p-10 transition-colors focus-within:border-gold/60 ${
-      live
+      isBanker
+        ? 'border-gold/40 bg-pitch-900/70'
+        : live
         ? 'border-lime/25 bg-pitch-900/80'
         : finished
         ? 'border-white/8 bg-pitch-900/30'
@@ -634,17 +707,37 @@ function FixtureRow({
       <div className="mt-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {!locked ? (
-            <button
-              onClick={save}
-              disabled={home === '' || away === '' || state === 'saving'}
-              className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-body text-base tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
-            >
-              {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
-            </button>
+            <>
+              <button
+                onClick={save}
+                disabled={home === '' || away === '' || state === 'saving'}
+                className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-body text-base tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+              >
+                {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
+              </button>
+              {pred && (
+                <button
+                  onClick={() => onBankerToggle?.(fixture)}
+                  title={isBanker ? 'Remove banker — currently doubles your points' : 'Set as banker — doubles points if correct'}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                    isBanker
+                      ? 'bg-gold/20 text-gold'
+                      : 'border border-white/10 text-chalk hover:border-gold/40 hover:text-gold'
+                  }`}
+                >
+                  {isBanker ? '⭐' : '☆'}
+                </button>
+              )}
+            </>
           ) : (
             <span className="flex items-center gap-1.5 font-display text-base uppercase tracking-widest text-chalk">
               <HugeiconsIcon icon={LockIcon} size={12} color="currentColor" strokeWidth={2} />
               Locked
+            </span>
+          )}
+          {locked && isBanker && (
+            <span className="flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 font-mono text-sm text-gold">
+              ⭐ Banker
             </span>
           )}
           {closingWarning && (
@@ -661,12 +754,19 @@ function FixtureRow({
               {fixture.home_score}–{fixture.away_score}
             </span>
           )}
-          {finished && <PointsBadge points={pred?.points ?? null} hasPick={!!pred} exactPts={exactPts} resultPts={resultPts} />}
+          {finished && <PointsBadge points={pred?.points ?? null} hasPick={!!pred} exactPts={exactPts} resultPts={resultPts} isBanker={isBanker} />}
           {state === 'error' && <span className="text-flame">Couldn&apos;t save</span>}
         </div>
       </div>
 
-      {locked && <CommunityPicks fixtureId={fixture.id} supabase={supabase} />}
+      {locked && (
+        <CommunityPicks
+          fixtureId={fixture.id}
+          supabase={supabase}
+          myHome={pred?.home_pred}
+          myAway={pred?.away_pred}
+        />
+      )}
     </div>
   );
 }
@@ -751,13 +851,16 @@ function MatchdayRecap({
 
   const settledPreds = finished.map((f) => preds[f.id]).filter(Boolean);
   const totalPts = settledPreds.reduce((s, p) => s + (p.points ?? 0), 0);
-  const exact   = settledPreds.filter((p) => p.points === exactPts).length;
-  const correct = settledPreds.filter((p) => p.points === resultPts).length;
+  const exact   = settledPreds.filter((p) => p.is_banker ? p.points === exactPts * 2 : p.points === exactPts).length;
+  const correct = settledPreds.filter((p) => p.is_banker ? p.points === resultPts * 2 : p.points === resultPts).length;
   const missed  = settledPreds.filter((p) => p.points === 0).length;
   const noPick  = finished.length - settledPreds.length;
   const allDone = matchdayGroup.finishedCount === matchdayGroup.totalCount;
 
-  const bestFixture = finished.find((f) => preds[f.id]?.points === exactPts);
+  const bestFixture = finished.find((f) => {
+    const p = preds[f.id];
+    return p && (p.is_banker ? p.points === exactPts * 2 : p.points === exactPts);
+  });
   const bestPred    = bestFixture ? preds[bestFixture.id] : null;
 
   const heading = stageLabel
@@ -768,8 +871,10 @@ function MatchdayRecap({
     const grid = finished.map((f) => {
       const p = preds[f.id];
       if (!p) return '⬜';
-      if (p.points === exactPts) return '🟩';
-      if (p.points === resultPts) return '🟨';
+      const isExact = p.is_banker ? p.points === exactPts * 2 : p.points === exactPts;
+      const isResult = p.is_banker ? p.points === resultPts * 2 : p.points === resultPts;
+      if (isExact) return p.is_banker ? '⭐' : '🟩';
+      if (isResult) return '🟨';
       return '🟥';
     }).join('');
 
@@ -848,12 +953,19 @@ function MatchdayRecap({
 function CommunityPicks({
   fixtureId,
   supabase,
+  myHome,
+  myAway,
 }: {
   fixtureId: number;
   supabase: ReturnType<typeof createClient>;
+  myHome?: number;
+  myAway?: number;
 }) {
   const [picks, setPicks] = useState<{ label: string; count: number; pct: number }[] | null>(null);
   const [total, setTotal] = useState(0);
+  const [myMatchCount, setMyMatchCount] = useState(0);
+
+  const myLabel = myHome != null && myAway != null ? `${myHome}–${myAway}` : null;
 
   useEffect(() => {
     supabase
@@ -869,6 +981,7 @@ function CommunityPicks({
         }
         const tot = data.length;
         setTotal(tot);
+        if (myLabel) setMyMatchCount((counts[myLabel] ?? 1) - 1);
         setPicks(
           Object.entries(counts)
             .sort((a, b) => b[1] - a[1])
@@ -876,7 +989,7 @@ function CommunityPicks({
             .map(([label, count]) => ({ label, count, pct: Math.round((count / tot) * 100) }))
         );
       });
-  }, [fixtureId, supabase]);
+  }, [fixtureId, supabase, myLabel]);
 
   if (picks === null) return (
     <div className="mt-4 border-t border-white/10 pt-3">
@@ -891,33 +1004,52 @@ function CommunityPicks({
         Community picks <span className="text-chalk">· {total} prediction{total !== 1 ? 's' : ''}</span>
       </p>
       <div className="space-y-2">
-        {picks.map(({ label, pct }, i) => (
-          <div key={label} className="flex items-center gap-3">
-            <span className={`w-10 shrink-0 font-display text-base uppercase ${i === 0 ? 'text-lime' : 'text-chalk'}`}>
-              {label}
-            </span>
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-              <div
-                className={`h-full rounded-full transition-all ${i === 0 ? 'bg-lime' : 'bg-white/30'}`}
-                style={{ width: `${pct}%` }}
-              />
+        {picks.map(({ label, pct }, i) => {
+          const isMyPick = label === myLabel;
+          const highlight = isMyPick ? true : !myLabel && i === 0;
+          return (
+            <div key={label} className="flex items-center gap-3">
+              <span className={`w-10 shrink-0 font-display text-base uppercase ${highlight ? 'text-lime' : 'text-chalk'}`}>
+                {label}
+              </span>
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className={`h-full rounded-full transition-all ${highlight ? 'bg-lime' : 'bg-white/30'}`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className={`w-9 shrink-0 text-right font-mono text-sm ${highlight ? 'text-lime' : 'text-chalk'}`}>
+                {pct}%
+              </span>
+              {isMyPick && (
+                <span className="shrink-0 rounded-full bg-lime/15 px-2 py-0.5 font-mono text-xs text-lime">you</span>
+              )}
             </div>
-            <span className={`w-9 shrink-0 text-right font-mono text-sm ${i === 0 ? 'text-lime' : 'text-chalk'}`}>
-              {pct}%
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
+      {myLabel && (
+        <p className="mt-3 font-mono text-sm text-chalk">
+          {myMatchCount > 0
+            ? `👥 ${myMatchCount} other${myMatchCount !== 1 ? 's' : ''} also picked ${myLabel}`
+            : `Only you picked ${myLabel}`
+          }
+        </p>
+      )}
     </div>
   );
 }
 
-function PointsBadge({ points, hasPick, exactPts = 5, resultPts = 1 }: { points: number | null; hasPick: boolean; exactPts?: number; resultPts?: number }) {
+function PointsBadge({ points, hasPick, exactPts = 5, resultPts = 1, isBanker = false }: {
+  points: number | null; hasPick: boolean; exactPts?: number; resultPts?: number; isBanker?: boolean;
+}) {
   if (!hasPick) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk">No pick</span>;
   if (points === null) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk">Pending</span>;
+  const m = isBanker ? 2 : 1;
   const tone =
-    points === exactPts ? 'bg-lime text-pitch-950 font-bold'
-    : points === resultPts ? 'bg-lime/20 text-lime'
+    points === exactPts * m ? 'bg-lime text-pitch-950 font-bold'
+    : points === resultPts * m ? 'bg-lime/20 text-lime'
     : 'bg-flame/20 text-flame';
-  return <span className={`rounded-full px-2.5 py-0.5 font-display ${tone}`}>+{points}</span>;
+  const label = isBanker && points > 0 ? `⭐ +${points}` : `+${points}`;
+  return <span className={`rounded-full px-2.5 py-0.5 font-display ${tone}`}>{label}</span>;
 }

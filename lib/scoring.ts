@@ -38,8 +38,10 @@ export function scorePrediction(
   actualAway: number,
   exactPts: number = EXACT_SCORE_POINTS,
   resultPts: number = CORRECT_RESULT_POINTS,
+  isBanker = false,
 ): number {
-  if (predHome === actualHome && predAway === actualAway) return exactPts;
-  if (outcome(predHome, predAway) === outcome(actualHome, actualAway)) return resultPts;
-  return 0;
+  let base = 0;
+  if (predHome === actualHome && predAway === actualAway) base = exactPts;
+  else if (outcome(predHome, predAway) === outcome(actualHome, actualAway)) base = resultPts;
+  return isBanker && base > 0 ? base * 2 : base;
 }

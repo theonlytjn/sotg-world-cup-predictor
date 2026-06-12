@@ -214,7 +214,7 @@ export default function MePage() {
         />
       </div>
 
-      {/* Streak row */}
+      {/* Streak row — only shown once there's something to display */}
       {longestStreak > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-6">
@@ -229,6 +229,15 @@ export default function MePage() {
           </div>
         </div>
       )}
+
+      {/* Achievements */}
+      <BadgesSection
+        picks={picks}
+        exact={stats?.exact ?? 0}
+        correct={stats?.results ?? 0}
+        longestStreak={longestStreak}
+        rank={rank}
+      />
 
       <div className="mt-3 flex items-center justify-between">
         <p className="font-mono text-base uppercase tracking-widest text-chalk">
@@ -287,6 +296,72 @@ export default function MePage() {
             : 'Send reset link'}
         </button>
       </div>
+    </div>
+  );
+}
+
+const BADGE_DEFS = [
+  { key: 'first_pick',    emoji: '🎯', label: 'First Pick',    desc: 'Made your first prediction' },
+  { key: 'sharp_shooter', emoji: '⚡', label: 'Sharp Shooter', desc: 'Got an exact scoreline' },
+  { key: 'hat_trick',     emoji: '🎩', label: 'Hat Trick',     desc: '3 exact scores' },
+  { key: 'golden_eye',    emoji: '👁️', label: 'Golden Eye',    desc: '5 exact scores' },
+  { key: 'on_fire',       emoji: '🔥', label: 'On Fire',       desc: '3+ correct in a row' },
+  { key: 'unstoppable',   emoji: '💥', label: 'Unstoppable',   desc: '5+ correct in a row' },
+  { key: 'committed',     emoji: '📊', label: 'Committed',     desc: '20+ predictions made' },
+  { key: 'consistent',    emoji: '✅', label: 'Consistent',    desc: '10+ correct results or exacts' },
+  { key: 'top_gun',       emoji: '🏆', label: 'Top Gun',       desc: 'Reach #1 on the leaderboard' },
+];
+
+function BadgesSection({
+  picks, exact, correct, longestStreak, rank,
+}: {
+  picks: number; exact: number; correct: number; longestStreak: number; rank: number | null;
+}) {
+  const earned = new Set<string>();
+  if (picks > 0)                       earned.add('first_pick');
+  if (exact >= 1)                      earned.add('sharp_shooter');
+  if (exact >= 3)                      earned.add('hat_trick');
+  if (exact >= 5)                      earned.add('golden_eye');
+  if (longestStreak >= 3)              earned.add('on_fire');
+  if (longestStreak >= 5)              earned.add('unstoppable');
+  if (picks >= 20)                     earned.add('committed');
+  if ((exact + correct) >= 10)         earned.add('consistent');
+  if (rank === 1)                      earned.add('top_gun');
+
+  const earnedCount = BADGE_DEFS.filter((b) => earned.has(b.key)).length;
+
+  return (
+    <div className="mt-4 rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="font-display text-sm font-bold uppercase tracking-widest text-chalk">Achievements</p>
+        <span className="font-mono text-sm text-chalk">{earnedCount} / {BADGE_DEFS.length}</span>
+      </div>
+      <div className="grid grid-cols-3 gap-2.5">
+        {BADGE_DEFS.map((b) => {
+          const isEarned = earned.has(b.key);
+          return (
+            <div
+              key={b.key}
+              title={b.desc}
+              className={`flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition-all ${
+                isEarned
+                  ? 'border border-lime/20 bg-lime/5'
+                  : 'border border-white/5 bg-pitch-800/30 opacity-30'
+              }`}
+            >
+              <span className="text-2xl leading-none">{b.emoji}</span>
+              <span className="font-display text-xs uppercase leading-tight tracking-wide text-chalk">
+                {b.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {earnedCount === 0 && (
+        <p className="mt-4 text-center font-mono text-sm text-chalk">
+          Start predicting to unlock achievements.
+        </p>
+      )}
     </div>
   );
 }

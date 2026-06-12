@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-export default function OnboardingPage() {
+function OnboardingForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const destination = searchParams.get('next') ?? '/predict';
@@ -200,5 +200,13 @@ export default function OnboardingPage() {
         </button>
       </div>
     </main>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<main className="flex min-h-dvh items-center justify-center"><p className="font-mono text-base text-chalk">Loading…</p></main>}>
+      <OnboardingForm />
+    </Suspense>
   );
 }
