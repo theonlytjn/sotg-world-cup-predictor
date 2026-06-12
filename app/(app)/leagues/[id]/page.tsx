@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { scorePrediction } from '@/lib/scoring';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -66,6 +67,8 @@ export default function LeaguePage() {
   const [h2hTarget, setH2hTarget] = useState<Member | null>(null);
   const [h2hData, setH2hData] = useState<H2HData | null>(null);
   const [h2hLoading, setH2hLoading] = useState(false);
+  const [isLive, setIsLive] = useState(false);
+  const [liveBonus, setLiveBonus] = useState<Record<string, number>>({});
 
   const load = useCallback(async () => {
     const { data: u } = await supabase.auth.getUser();
@@ -107,7 +110,7 @@ export default function LeaguePage() {
 
     const memberIds = (memberList ?? []).map((m: { user_id: string }) => m.user_id);
 
-    const [{ data: lb }, { data: profiles }] = await Promise.all([
+    const [{ data: lb }, { data: profiles }, { data: lf }, { data: rules }] = await Promise.all([
       supabase
         .from('leaderboard')
         .select('user_id, total_points, exact_scores, correct_results, award_points')
@@ -116,7 +119,20 @@ export default function LeaguePage() {
         .from('profiles')
         .select('id, display_name')
         .in('id', memberIds),
+      supabase
+        .from('fixtures')
+        .select('id, home_score, away_score')
+        .in('status', ['IN_PLAY', 'PAUSED']),
+      supabase
+        .from('scoring_rules')
+        .select('key, points'),
     ]);
+
+    const rulesMap = Object.fromEntries(
+      ((rules ?? []) as { key: string; points: number }[]).map((r) => [r.key, r.points])
+    );
+    const exactPts  = rulesMap['match_exact']  ?? 3;
+    const resultPts = rulesMap['match_result'] ?? 1;
 
     const nameMap = new Map(
       (profiles ?? []).map((p: { id: string; display_name: string | null }) => [p.id, p.display_name ?? 'Unknown'])
@@ -134,8 +150,33 @@ export default function LeaguePage() {
       award_points: r.award_points,
     }));
 
+    // Live bonus calculation
+    const liveFixtures = (lf as { id: number; home_score: number | null; away_score: number | null }[]) ?? [];
+    const hasLive = liveFixtures.length > 0;
+    setIsLive(hasLive);
+
+    let bonusMap: Record<string, number> = {};
+    if (hasLive) {
+      const liveIds = liveFixtures.map((f) => f.id);
+      const { data: livePreds } = await supabase
+        .from('match_predictions')
+        .select('user_id, fixture_id, home_pred, away_pred, is_banker')
+        .in('fixture_id', liveIds)
+        .in('user_id', memberIds);
+
+      for (const p of (livePreds as { user_id: string; fixture_id: number; home_pred: number; away_pred: number; is_banker?: boolean }[]) ?? []) {
+        const fix = liveFixtures.find((f) => f.id === p.fixture_id);
+        if (!fix || fix.home_score == null || fix.away_score == null) continue;
+        const pts = scorePrediction(p.home_pred, p.away_pred, fix.home_score, fix.away_score, exactPts, resultPts, p.is_banker ?? false);
+        bonusMap[p.user_id] = (bonusMap[p.user_id] ?? 0) + pts;
+      }
+    }
+    setLiveBonus(bonusMap);
+
     rows.sort((a, b) => {
-      if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+      const totalA = a.total_points + (bonusMap[a.user_id] ?? 0);
+      const totalB = b.total_points + (bonusMap[b.user_id] ?? 0);
+      if (totalB !== totalA) return totalB - totalA;
       return b.exact_scores - a.exact_scores;
     });
 
@@ -407,12 +448,19 @@ export default function LeaguePage() {
               <span className="text-center font-display font-black text-[11px] sm:text-sm text-chalk">{m.exact_scores}</span>
               <span className="text-center font-display font-black text-[11px] sm:text-sm text-chalk">{m.correct_results}</span>
               <span className="text-center font-display font-black text-[11px] sm:text-sm text-chalk">{m.award_points}</span>
-              <span className={[
-                'text-right font-display font-black text-[11px] sm:text-sm',
-                rankStyle ? rankStyle.text : 'text-chalk',
-              ].join(' ')}>
-                {m.total_points}
-              </span>
+              <div className="flex items-baseline justify-end gap-1">
+                <span className={[
+                  'font-display font-black text-[11px] sm:text-sm',
+                  rankStyle ? rankStyle.text : 'text-chalk',
+                ].join(' ')}>
+                  {isLive ? m.total_points + (liveBonus[m.user_id] ?? 0) : m.total_points}
+                </span>
+                {isLive && (liveBonus[m.user_id] ?? 0) !== 0 && (
+                  <span className="font-display font-black text-[10px] sm:text-xs text-lime">
+                    +{liveBonus[m.user_id]}
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}
