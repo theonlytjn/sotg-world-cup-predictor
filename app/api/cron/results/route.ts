@@ -233,12 +233,90 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // 6) ESPN fallback — rescue stale fixtures (TIMED/SCHEDULED, kickoff > 2h ago)
+  //    football-data.org sometimes lags flipping match status; ESPN is usually faster.
+  let espnFallback = 0;
+  const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  const { data: stale } = await db
+    .from('fixtures')
+    .select('id, kickoff, home_team_id, away_team_id')
+    .not('status', 'in', '("FINISHED","IN_PLAY","PAUSED")')
+    .lt('kickoff', cutoff);
+
+  if (stale && stale.length > 0) {
+    const { data: allTeams } = await db.from('teams').select('id, tla, name');
+    const teamById = new Map<number, { tla: string; name: string }>();
+    for (const t of allTeams ?? []) teamById.set(t.id, { tla: t.tla ?? '', name: t.name ?? '' });
+
+    type EspnComp = { homeAway: string; team: { abbreviation: string; displayName: string }; score: string };
+    type EspnEvent = { competitions: [{ status: { type: { completed: boolean } }; competitors: EspnComp[] }] };
+
+    // Group by UTC date so we fetch ESPN once per day, not once per fixture
+    const byDate = new Map<string, typeof stale>();
+    for (const fx of stale) {
+      const d = new Date(fx.kickoff);
+      const key = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
+      if (!byDate.has(key)) byDate.set(key, []);
+      byDate.get(key)!.push(fx);
+    }
+
+    for (const [dateStr, fxList] of byDate) {
+      const espnRes = await fetch(
+        `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${dateStr}`,
+        { cache: 'no-store' }
+      ).catch(() => null);
+      if (!espnRes?.ok) continue;
+
+      const body = await espnRes.json().catch(() => null);
+      const events: EspnEvent[] = body?.events ?? [];
+      if (events.length === 0) continue;
+
+      for (const fx of fxList) {
+        const homeTeam = teamById.get(fx.home_team_id);
+        const awayTeam = teamById.get(fx.away_team_id);
+        if (!homeTeam || !awayTeam) continue;
+
+        const event = events.find((ev) => {
+          const comp = ev.competitions?.[0];
+          if (!comp?.status?.type?.completed) return false;
+          const h = comp.competitors.find((c) => c.homeAway === 'home');
+          const a = comp.competitors.find((c) => c.homeAway === 'away');
+          if (!h || !a) return false;
+          const tlaMatch =
+            h.team.abbreviation.toUpperCase() === homeTeam.tla.toUpperCase() &&
+            a.team.abbreviation.toUpperCase() === awayTeam.tla.toUpperCase();
+          const nameMatch =
+            h.team.displayName.toLowerCase().includes(homeTeam.name.toLowerCase().split(' ')[0]) &&
+            a.team.displayName.toLowerCase().includes(awayTeam.name.toLowerCase().split(' ')[0]);
+          return tlaMatch || nameMatch;
+        });
+
+        if (!event) continue;
+
+        const comp = event.competitions[0];
+        const h = comp.competitors.find((c) => c.homeAway === 'home')!;
+        const a = comp.competitors.find((c) => c.homeAway === 'away')!;
+        const homeScore = parseInt(h.score, 10);
+        const awayScore = parseInt(a.score, 10);
+        if (isNaN(homeScore) || isNaN(awayScore)) continue;
+
+        const { data: rows } = await db
+          .from('fixtures')
+          .update({ status: 'FINISHED', home_score: homeScore, away_score: awayScore })
+          .eq('id', fx.id)
+          .select('id');
+        if (rows?.length) espnFallback++;
+      }
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     fixtures_updated: updated,
     predictions_settled: settled,
     standings_upserted: standingsUpserted,
     scorers_upserted: scorersUpserted,
+    espn_fallback: espnFallback,
     ran_at: new Date().toISOString(),
   });
 }
