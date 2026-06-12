@@ -45,7 +45,7 @@ const RANK_STYLES = [
   { text: 'text-[#e0a86b]', crown: 'text-[#e0a86b]' },
 ];
 
-const GRID = 'grid grid-cols-[1.25rem_1fr_2.25rem_2.25rem_2.25rem_2.75rem] gap-1 sm:grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem] sm:gap-2';
+const GRID = 'grid grid-cols-[1.25rem_1fr_2.25rem_2.25rem_2.25rem_2.75rem] gap-1 sm:grid-cols-[2rem_1fr_8rem_8.5rem_5.5rem_4rem] sm:gap-3';
 
 export default function LeaguePage() {
   const { id } = useParams<{ id: string }>();
@@ -344,9 +344,20 @@ export default function LeaguePage() {
         <div className={`${GRID} items-center border-b border-white/20 bg-pitch-800 px-3 py-3 sm:px-5 sm:py-3.5 font-display text-[10px] sm:text-xs font-bold uppercase tracking-widest text-chalk`}>
           <span>#</span>
           <span>Player</span>
-          <span className="text-center">CS</span>
-          <span className="text-center">CR</span>
-          <span className="text-center">Awds</span>
+          {/* CS — tiebreaker column; full label on desktop */}
+          <span className="flex items-center justify-center gap-1">
+            <span className="sm:hidden">CS</span>
+            <span className="hidden sm:inline">Correct Score</span>
+            <span className="text-gold leading-none" title="Tiebreaker">·</span>
+          </span>
+          <span className="flex items-center justify-center">
+            <span className="sm:hidden">CR</span>
+            <span className="hidden sm:inline">Correct Result</span>
+          </span>
+          <span className="flex items-center justify-center">
+            <span className="sm:hidden">Awds</span>
+            <span className="hidden sm:inline">Award Pts</span>
+          </span>
           <span className="text-right">Total</span>
         </div>
 
@@ -407,8 +418,12 @@ export default function LeaguePage() {
         })}
       </div>
 
+      <p className="mt-2 text-center font-mono text-xs text-chalk/35">
+        Tied on points<span className="text-gold">·</span> Correct Scores (CS) decides the order
+      </p>
+
       {members.length > 1 && !h2hTarget && canInteract && (
-        <p className="mt-3 font-mono text-xs uppercase tracking-widest text-chalk/40 text-center">
+        <p className="mt-2 font-mono text-xs uppercase tracking-widest text-chalk/40 text-center">
           Tap a rival to see head-to-head
         </p>
       )}
