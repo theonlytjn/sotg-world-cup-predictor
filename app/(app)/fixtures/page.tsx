@@ -16,6 +16,7 @@ type GoalEvent = {
 };
 type Fixture = {
   id: number;
+  stage: string;
   matchday: number | null;
   group_label: string | null;
   kickoff: string;
@@ -44,6 +45,17 @@ type StandingRow = {
 
 type DateGroup = { dateKey: string; label: string; fixtures: Fixture[] };
 type MatchdayGroup = { matchday: number; dateGroups: DateGroup[] };
+type StageGroup = { stage: string; fixtures: Fixture[] };
+
+const STAGE_ORDER = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'FINAL'];
+const STAGE_LABELS: Record<string, string> = {
+  GROUP_STAGE:    'Groups',
+  ROUND_OF_32:    'Rd 32',
+  ROUND_OF_16:    'Rd 16',
+  QUARTER_FINALS: 'QF',
+  SEMI_FINALS:    'SF',
+  FINAL:          'Final',
+};
 
 function formatDateLabel(dateKey: string): string {
   return new Date(dateKey + 'T12:00:00Z').toLocaleDateString('en-GB', {
@@ -56,6 +68,7 @@ export default function FixturesPage() {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [standings, setStandings] = useState<StandingRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeStage, setActiveStage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<number | null>(null);
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const [showStandings, setShowStandings] = useState(false);
@@ -65,12 +78,11 @@ export default function FixturesPage() {
       supabase
         .from('fixtures')
         .select(
-          `id, matchday, group_label, kickoff, status, home_score, away_score, goals,
+          `id, stage, matchday, group_label, kickoff, status, home_score, away_score, goals,
            home_team_id, away_team_id,
            home_team:teams!fixtures_home_team_id_fkey (name, tla, crest),
            away_team:teams!fixtures_away_team_id_fkey (name, tla, crest)`
         )
-        .eq('stage', 'GROUP_STAGE')
         .order('kickoff', { ascending: true }),
       supabase
         .from('group_standings')
@@ -85,9 +97,41 @@ export default function FixturesPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const matchdayGroups = useMemo((): MatchdayGroup[] => {
-    const byMd = new Map<number, Map<string, Fixture[]>>();
+  // Group fixtures by stage
+  const stageGroups = useMemo((): StageGroup[] => {
+    const byStage = new Map<string, Fixture[]>();
     for (const f of fixtures) {
+      if (!byStage.has(f.stage)) byStage.set(f.stage, []);
+      byStage.get(f.stage)!.push(f);
+    }
+    return STAGE_ORDER.filter((s) => byStage.has(s)).map((s) => ({ stage: s, fixtures: byStage.get(s)! }));
+  }, [fixtures]);
+
+  // Auto-select stage
+  useEffect(() => {
+    if (activeStage !== null || stageGroups.length === 0) return;
+    const live = stageGroups.find((sg) => sg.fixtures.some((f) => f.status === 'IN_PLAY' || f.status === 'PAUSED'));
+    if (live) { setActiveStage(live.stage); return; }
+    const gs = stageGroups.find((sg) => sg.stage === 'GROUP_STAGE');
+    setActiveStage(gs ? 'GROUP_STAGE' : stageGroups[0].stage);
+  }, [stageGroups, activeStage]);
+
+  // Reset tabs when stage changes
+  useEffect(() => {
+    setActiveTab(null);
+    setActiveDay(null);
+  }, [activeStage]);
+
+  const isGroupStage = activeStage === 'GROUP_STAGE';
+  const activeStageFixtures = useMemo(
+    () => stageGroups.find((sg) => sg.stage === activeStage)?.fixtures ?? [],
+    [stageGroups, activeStage]
+  );
+
+  const matchdayGroups = useMemo((): MatchdayGroup[] => {
+    if (!isGroupStage) return [];
+    const byMd = new Map<number, Map<string, Fixture[]>>();
+    for (const f of activeStageFixtures) {
       const md = f.matchday ?? 0;
       const day = f.kickoff.slice(0, 10);
       if (!byMd.has(md)) byMd.set(md, new Map());
@@ -106,9 +150,14 @@ export default function FixturesPage() {
             fixtures: [...fxs].sort((a, b) => a.kickoff.localeCompare(b.kickoff)),
           })),
       }));
-  }, [fixtures]);
+  }, [activeStageFixtures, isGroupStage]);
 
-  // Auto-select matchday: nearest with live/upcoming game
+  const knockoutFixtures = useMemo(() => {
+    if (isGroupStage) return [];
+    return [...activeStageFixtures].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+  }, [activeStageFixtures, isGroupStage]);
+
+  // Auto-select matchday within group stage
   useEffect(() => {
     if (activeTab !== null || !matchdayGroups.length) return;
     const now = Date.now();
@@ -161,9 +210,11 @@ export default function FixturesPage() {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-3">
           <span className="text-lime"><HugeiconsIcon icon={Calendar1Icon} size={18} color="currentColor" strokeWidth={1.5} /></span>
-          <p className="font-display text-base tracking-[0.28em] uppercase text-lime">Group stage</p>
+          <p className="font-display text-base tracking-[0.28em] uppercase text-lime">
+            {STAGE_LABELS[activeStage ?? ''] ?? 'Fixtures'}
+          </p>
         </div>
-        {byGroup.length > 0 && (
+        {isGroupStage && byGroup.length > 0 && (
           <button
             onClick={() => setShowStandings((v) => !v)}
             className="font-mono text-base uppercase tracking-widest text-chalk hover:text-lime transition"
@@ -175,8 +226,38 @@ export default function FixturesPage() {
       <h1 className="font-display text-4xl uppercase text-chalk">Fixtures</h1>
       <p className="mt-1 text-chalk">Scores update automatically as results come in.</p>
 
-      {/* Group standings (toggleable) */}
-      {showStandings && byGroup.length > 0 && (
+      {/* Stage tabs — only shown when multiple stages have fixtures */}
+      {stageGroups.length > 1 && (
+        <div className="mt-6 flex w-full border-b border-white/10">
+          {stageGroups.map((sg) => {
+            const active = sg.stage === activeStage;
+            const liveCount = sg.fixtures.filter((f) => f.status === 'IN_PLAY' || f.status === 'PAUSED').length;
+            const doneCount = sg.fixtures.filter((f) => f.status === 'FINISHED').length;
+            const remaining = sg.fixtures.length - liveCount - doneCount;
+            return (
+              <button
+                key={sg.stage}
+                onClick={() => setActiveStage(sg.stage)}
+                className={['flex flex-1 flex-col items-center pb-3 pt-2 relative transition-colors', active ? 'text-lime' : 'text-chalk hover:text-lime'].join(' ')}
+              >
+                <span className="font-display text-base uppercase tracking-wide">{STAGE_LABELS[sg.stage] ?? sg.stage}</span>
+                <span className="mt-0.5 font-mono text-sm">
+                  {liveCount > 0 ? (
+                    <span className="flex items-center gap-1 text-flame">
+                      <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />{liveCount} live
+                    </span>
+                  ) : remaining === 0 ? <span className="text-chalk">Done</span>
+                    : <span className="text-chalk">{remaining} left</span>}
+                </span>
+                {active && <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-lime" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Group standings (toggleable, group stage only) */}
+      {isGroupStage && showStandings && byGroup.length > 0 && (
         <section className="mt-6">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {byGroup.map(([label, rows]) => (
@@ -220,39 +301,41 @@ export default function FixturesPage() {
         </section>
       )}
 
-      {/* Matchday tabs */}
-      <div className="mt-6 flex w-full border-b border-white/10">
-        {matchdayGroups.map((mg) => {
-          const active = mg.matchday === activeTab;
-          const allDone = mg.dateGroups.flatMap((d) => d.fixtures).every((f) => f.status === 'FINISHED');
-          const liveCount = mg.dateGroups.flatMap((d) => d.fixtures).filter((f) => f.status === 'IN_PLAY' || f.status === 'PAUSED').length;
-          const total = mg.dateGroups.flatMap((d) => d.fixtures).length;
-          const finished = mg.dateGroups.flatMap((d) => d.fixtures).filter((f) => f.status === 'FINISHED').length;
-          const upcoming = total - liveCount - finished;
-          return (
-            <button
-              key={mg.matchday}
-              onClick={() => setActiveTab(mg.matchday)}
-              className={['flex flex-1 flex-col items-center pb-4 pt-3 relative transition-colors', active ? 'text-lime' : 'text-chalk hover:text-chalk'].join(' ')}
-            >
-              <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
-              <span className="font-display text-3xl">{mg.matchday}</span>
-              <span className="mt-1 font-mono text-sm">
-                {liveCount > 0 ? (
-                  <span className="flex items-center gap-1 text-flame">
-                    <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />{liveCount} live
-                  </span>
-                ) : allDone ? <span className="text-chalk">Done</span>
-                  : <span className="text-chalk">{upcoming} left</span>}
-              </span>
-              {active && <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-lime" />}
-            </button>
-          );
-        })}
-      </div>
+      {/* GROUP STAGE: matchday tabs + day cycler */}
+      {isGroupStage && (
+        <div className="mt-6 flex w-full border-b border-white/10">
+          {matchdayGroups.map((mg) => {
+            const active = mg.matchday === activeTab;
+            const allDone = mg.dateGroups.flatMap((d) => d.fixtures).every((f) => f.status === 'FINISHED');
+            const liveCount = mg.dateGroups.flatMap((d) => d.fixtures).filter((f) => f.status === 'IN_PLAY' || f.status === 'PAUSED').length;
+            const total = mg.dateGroups.flatMap((d) => d.fixtures).length;
+            const finished = mg.dateGroups.flatMap((d) => d.fixtures).filter((f) => f.status === 'FINISHED').length;
+            const upcoming = total - liveCount - finished;
+            return (
+              <button
+                key={mg.matchday}
+                onClick={() => setActiveTab(mg.matchday)}
+                className={['flex flex-1 flex-col items-center pb-4 pt-3 relative transition-colors', active ? 'text-lime' : 'text-chalk hover:text-chalk'].join(' ')}
+              >
+                <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
+                <span className="font-display text-3xl">{mg.matchday}</span>
+                <span className="mt-1 font-mono text-sm">
+                  {liveCount > 0 ? (
+                    <span className="flex items-center gap-1 text-flame">
+                      <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />{liveCount} live
+                    </span>
+                  ) : allDone ? <span className="text-chalk">Done</span>
+                    : <span className="text-chalk">{upcoming} left</span>}
+                </span>
+                {active && <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-lime" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Day cycler */}
-      {activeGroup && (
+      {/* Day cycler — group stage only */}
+      {isGroupStage && activeGroup && (
         <div className="mt-6">
           <div className="flex items-center gap-4">
             <button
@@ -282,10 +365,24 @@ export default function FixturesPage() {
               ))}
             </div>
           )}
-
           <div className="mt-6 space-y-2">
             {activeDayGroup?.fixtures.map((f) => <FixtureRow key={f.id} f={f} />)}
           </div>
+        </div>
+      )}
+
+      {/* KNOCKOUT STAGE: flat list */}
+      {!isGroupStage && (
+        <div className="mt-6">
+          {knockoutFixtures.length === 0 ? (
+            <p className="py-10 text-center text-base text-chalk">
+              Fixtures for this round will appear once the previous round is complete.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {knockoutFixtures.map((f) => <FixtureRow key={f.id} f={f} />)}
+            </div>
+          )}
         </div>
       )}
     </div>

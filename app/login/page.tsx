@@ -75,7 +75,7 @@ export default function LoginPage() {
   }
 
   const inputClass =
-    'w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3.5 text-chalk text-base outline-none placeholder:text-chalk focus:border-lime/60';
+    'w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3.5 text-chalk text-base outline-none placeholder:text-chalk focus:border-gold';
 
   if (mode === 'sent') {
     return (

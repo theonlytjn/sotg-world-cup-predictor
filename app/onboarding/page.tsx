@@ -104,7 +104,7 @@ export default function OnboardingPage() {
           placeholder="e.g. GoalMachine"
           maxLength={24}
           autoFocus
-          className="mt-2 w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3 text-chalk outline-none placeholder:text-chalk focus:border-lime/60"
+          className="mt-2 w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3 text-base text-chalk outline-none placeholder:text-chalk focus:border-gold"
         />
         {error && <p className="mt-2 text-base text-flame">{error}</p>}
         <p className="mt-1 font-mono text-base text-chalk">Max 24 characters · must be unique</p>

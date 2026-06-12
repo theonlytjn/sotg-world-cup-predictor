@@ -8,6 +8,7 @@ import { LockIcon, DartIcon } from '@hugeicons-pro/core-stroke-rounded';
 type Team = { id: number; name: string; tla: string | null; crest: string | null };
 type Fixture = {
   id: number;
+  stage: string;
   matchday: number | null;
   group_label: string | null;
   kickoff: string;
@@ -20,7 +21,17 @@ type Fixture = {
 type Pred = { fixture_id: number; home_pred: number; away_pred: number; points: number | null };
 
 const LIVE = new Set(['IN_PLAY', 'PAUSED']);
-const LOCK_BEFORE_MS = 15 * 60_000; // predictions lock 15 min before kickoff
+const LOCK_BEFORE_MS = 15 * 60_000;
+
+const STAGE_ORDER = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'FINAL'];
+const STAGE_LABELS: Record<string, string> = {
+  GROUP_STAGE:    'Groups',
+  ROUND_OF_32:    'Rd 32',
+  ROUND_OF_16:    'Rd 16',
+  QUARTER_FINALS: 'QF',
+  SEMI_FINALS:    'SF',
+  FINAL:          'Final',
+};
 
 function getLockStatus(kickoff: string): { locked: boolean; locksInMin: number | null } {
   const lockAt = new Date(kickoff).getTime() - LOCK_BEFORE_MS;
@@ -37,6 +48,7 @@ type MatchdayGroup = {
   finishedCount: number;
   totalCount: number;
 };
+type StageGroup = { stage: string; fixtures: Fixture[] };
 
 function formatDateLabel(dateKey: string): string {
   const d = new Date(dateKey + 'T12:00:00Z');
@@ -51,6 +63,7 @@ export default function PredictPage() {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [preds, setPreds] = useState<Record<number, Pred>>({});
   const [loading, setLoading] = useState(true);
+  const [activeStage, setActiveStage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<number | null>(null);
   const [activeDay, setActiveDay] = useState<string | null>(null);
 
@@ -62,11 +75,10 @@ export default function PredictPage() {
     const { data: fx } = await supabase
       .from('fixtures')
       .select(
-        `id, matchday, group_label, kickoff, status, home_score, away_score,
+        `id, stage, matchday, group_label, kickoff, status, home_score, away_score,
          home_team:teams!fixtures_home_team_id_fkey (id, name, tla, crest),
          away_team:teams!fixtures_away_team_id_fkey (id, name, tla, crest)`
       )
-      .eq('stage', 'GROUP_STAGE')
       .order('kickoff', { ascending: true });
 
     const { data: mp } = await supabase
@@ -83,9 +95,45 @@ export default function PredictPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const matchdayGroups = useMemo((): MatchdayGroup[] => {
-    const byMd = new Map<number, Map<string, Fixture[]>>();
+  // Group fixtures by stage
+  const stageGroups = useMemo((): StageGroup[] => {
+    const byStage = new Map<string, Fixture[]>();
     for (const f of fixtures) {
+      if (!byStage.has(f.stage)) byStage.set(f.stage, []);
+      byStage.get(f.stage)!.push(f);
+    }
+    return STAGE_ORDER
+      .filter((s) => byStage.has(s))
+      .map((s) => ({ stage: s, fixtures: byStage.get(s)! }));
+  }, [fixtures]);
+
+  // Auto-select stage: default GROUP_STAGE, or first stage with live games
+  useEffect(() => {
+    if (activeStage !== null || stageGroups.length === 0) return;
+    for (const sg of stageGroups) {
+      if (sg.fixtures.some((f) => LIVE.has(f.status))) { setActiveStage(sg.stage); return; }
+    }
+    const gs = stageGroups.find((sg) => sg.stage === 'GROUP_STAGE');
+    setActiveStage(gs ? 'GROUP_STAGE' : stageGroups[0].stage);
+  }, [stageGroups, activeStage]);
+
+  // Reset matchday/day tabs when stage changes
+  useEffect(() => {
+    setActiveTab(null);
+    setActiveDay(null);
+  }, [activeStage]);
+
+  const isGroupStage = activeStage === 'GROUP_STAGE';
+  const activeStageFixtures = useMemo(
+    () => stageGroups.find((sg) => sg.stage === activeStage)?.fixtures ?? [],
+    [stageGroups, activeStage]
+  );
+
+  // Group stage: group by matchday → date
+  const matchdayGroups = useMemo((): MatchdayGroup[] => {
+    if (!isGroupStage) return [];
+    const byMd = new Map<number, Map<string, Fixture[]>>();
+    for (const f of activeStageFixtures) {
       const md = f.matchday ?? 0;
       const day = f.kickoff.slice(0, 10);
       if (!byMd.has(md)) byMd.set(md, new Map());
@@ -110,7 +158,13 @@ export default function PredictPage() {
             })),
         };
       });
-  }, [fixtures]);
+  }, [activeStageFixtures, isGroupStage]);
+
+  // Knockout: just sorted by kickoff
+  const knockoutFixtures = useMemo(() => {
+    if (isGroupStage) return [];
+    return [...activeStageFixtures].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+  }, [activeStageFixtures, isGroupStage]);
 
   // Auto-select matchday: live → nearest upcoming → last
   useEffect(() => {
@@ -129,7 +183,7 @@ export default function PredictPage() {
 
   const activeGroup = matchdayGroups.find((mg) => mg.matchday === activeTab);
 
-  // Reset active day whenever matchday changes
+  // Reset active day when matchday changes
   useEffect(() => {
     if (!activeGroup) return;
     const days = activeGroup.dateGroups;
@@ -182,111 +236,177 @@ export default function PredictPage() {
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">Predict</h1>
       <p className="mt-1 text-base text-chalk">
-        Call the scoreline for every group game. Locks at kickoff — no edits after.
+        Call the scoreline for every game. Locks at kickoff — no edits after.
       </p>
 
-      {/* Evenly-spaced matchday tabs */}
-      <div className="mt-6 flex w-full border-b border-white/10">
-        {matchdayGroups.map((mg) => {
-          const active = mg.matchday === activeTab;
-          const done = mg.finishedCount === mg.totalCount;
-          const upcoming = mg.totalCount - mg.liveCount - mg.finishedCount;
-          return (
-            <button
-              key={mg.matchday}
-              onClick={() => setActiveTab(mg.matchday)}
-              className={[
-                'flex flex-1 flex-col items-center pb-4 pt-3 transition-colors relative',
-                active ? 'text-lime' : 'text-chalk hover:text-chalk',
-              ].join(' ')}
-            >
-              <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
-              <span className="font-display text-3xl">{mg.matchday}</span>
-              <span className="mt-1 font-mono text-sm">
-                {mg.liveCount > 0 ? (
-                  <span className="flex items-center gap-1 text-flame">
-                    <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
-                    {mg.liveCount} live
-                  </span>
-                ) : done ? (
-                  <span className="text-chalk">Done</span>
-                ) : (
-                  <span className="text-chalk">{upcoming} left</span>
+      {/* Stage tabs — only shown when multiple stages have fixtures */}
+      {stageGroups.length > 1 && (
+        <div className="mt-6 flex w-full border-b border-white/10">
+          {stageGroups.map((sg) => {
+            const active = sg.stage === activeStage;
+            const liveCount = sg.fixtures.filter((f) => LIVE.has(f.status)).length;
+            const doneCount = sg.fixtures.filter((f) => f.status === 'FINISHED').length;
+            const remaining = sg.fixtures.length - liveCount - doneCount;
+            return (
+              <button
+                key={sg.stage}
+                onClick={() => setActiveStage(sg.stage)}
+                className={[
+                  'flex flex-1 flex-col items-center pb-3 pt-2 relative transition-colors',
+                  active ? 'text-lime' : 'text-chalk hover:text-lime',
+                ].join(' ')}
+              >
+                <span className="font-display text-base uppercase tracking-wide">
+                  {STAGE_LABELS[sg.stage] ?? sg.stage}
+                </span>
+                <span className="mt-0.5 font-mono text-sm">
+                  {liveCount > 0 ? (
+                    <span className="flex items-center gap-1 text-flame">
+                      <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
+                      {liveCount} live
+                    </span>
+                  ) : remaining === 0 ? (
+                    <span className="text-chalk">Done</span>
+                  ) : (
+                    <span className="text-chalk">{remaining} left</span>
+                  )}
+                </span>
+                {active && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-lime" />
                 )}
-              </span>
-              {active && (
-                <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-lime" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Day cycler */}
-      {activeGroup && (
-        <div className="mt-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={prevDay}
-              disabled={activeDayIdx <= 0}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
-              aria-label="Previous day"
-            >
-              ←
-            </button>
-            <div className="flex-1 text-center">
-              <p className="font-display text-base uppercase tracking-widest text-chalk">
-                {activeDayGroup?.label ?? '—'}
-              </p>
-              <p className="font-mono text-base text-chalk">
-                {activeDayGroup?.fixtures.length ?? 0} matches
-                {totalDays > 1 && (
-                  <span className="ml-2 text-chalk">
-                    Day {activeDayIdx + 1} of {totalDays}
+      {/* GROUP STAGE: matchday tabs + day cycler */}
+      {isGroupStage && (
+        <>
+          <div className={`flex w-full border-b border-white/10 ${stageGroups.length > 1 ? 'mt-4' : 'mt-6'}`}>
+            {matchdayGroups.map((mg) => {
+              const active = mg.matchday === activeTab;
+              const done = mg.finishedCount === mg.totalCount;
+              const upcoming = mg.totalCount - mg.liveCount - mg.finishedCount;
+              return (
+                <button
+                  key={mg.matchday}
+                  onClick={() => setActiveTab(mg.matchday)}
+                  className={[
+                    'flex flex-1 flex-col items-center pb-4 pt-3 transition-colors relative',
+                    active ? 'text-lime' : 'text-chalk hover:text-chalk',
+                  ].join(' ')}
+                >
+                  <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
+                  <span className="font-display text-3xl">{mg.matchday}</span>
+                  <span className="mt-1 font-mono text-sm">
+                    {mg.liveCount > 0 ? (
+                      <span className="flex items-center gap-1 text-flame">
+                        <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
+                        {mg.liveCount} live
+                      </span>
+                    ) : done ? (
+                      <span className="text-chalk">Done</span>
+                    ) : (
+                      <span className="text-chalk">{upcoming} left</span>
+                    )}
                   </span>
-                )}
-              </p>
-            </div>
-            <button
-              onClick={nextDay}
-              disabled={activeDayIdx >= totalDays - 1}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
-              aria-label="Next day"
-            >
-              →
-            </button>
+                  {active && (
+                    <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-lime" />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Dot indicators */}
-          {totalDays > 1 && (
-            <div className="mt-3 flex justify-center gap-1.5">
-              {activeGroup.dateGroups.map((dg, i) => (
+          {activeGroup && (
+            <div className="mt-6">
+              <div className="flex items-center gap-4">
                 <button
-                  key={dg.dateKey}
-                  onClick={() => setActiveDay(dg.dateKey)}
-                  className={[
-                    'h-1.5 rounded-full transition-all',
-                    i === activeDayIdx ? 'w-6 bg-lime' : 'w-1.5 bg-white/20 hover:bg-white/40',
-                  ].join(' ')}
-                  aria-label={dg.label}
+                  onClick={prevDay}
+                  disabled={activeDayIdx <= 0}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 disabled:opacity-20"
+                  aria-label="Previous day"
+                >
+                  ←
+                </button>
+                <div className="flex-1 text-center">
+                  <p className="font-display text-base uppercase tracking-widest text-chalk">
+                    {activeDayGroup?.label ?? '—'}
+                  </p>
+                  <p className="font-mono text-base text-chalk">
+                    {activeDayGroup?.fixtures.length ?? 0} matches
+                    {totalDays > 1 && (
+                      <span className="ml-2 text-chalk">
+                        Day {activeDayIdx + 1} of {totalDays}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  onClick={nextDay}
+                  disabled={activeDayIdx >= totalDays - 1}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 disabled:opacity-20"
+                  aria-label="Next day"
+                >
+                  →
+                </button>
+              </div>
+
+              {totalDays > 1 && (
+                <div className="mt-3 flex justify-center gap-1.5">
+                  {activeGroup.dateGroups.map((dg, i) => (
+                    <button
+                      key={dg.dateKey}
+                      onClick={() => setActiveDay(dg.dateKey)}
+                      className={[
+                        'h-1.5 rounded-full transition-all',
+                        i === activeDayIdx ? 'w-6 bg-lime' : 'w-1.5 bg-white/20 hover:bg-white/40',
+                      ].join(' ')}
+                      aria-label={dg.label}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-6 space-y-2.5">
+                {activeDayGroup?.fixtures.map((f) => (
+                  <FixtureRow
+                    key={f.id}
+                    fixture={f}
+                    pred={preds[f.id]}
+                    userId={userId!}
+                    supabase={supabase}
+                    onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* KNOCKOUT STAGE: flat list */}
+      {!isGroupStage && (
+        <div className="mt-6">
+          {knockoutFixtures.length === 0 ? (
+            <p className="py-10 text-center text-base text-chalk">
+              Fixtures for this round will appear once the previous round is complete.
+            </p>
+          ) : (
+            <div className="space-y-2.5">
+              {knockoutFixtures.map((f) => (
+                <FixtureRow
+                  key={f.id}
+                  fixture={f}
+                  pred={preds[f.id]}
+                  userId={userId!}
+                  supabase={supabase}
+                  onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
                 />
               ))}
             </div>
           )}
-
-          {/* Fixtures for the active day */}
-          <div className="mt-6 space-y-2.5">
-            {activeDayGroup?.fixtures.map((f) => (
-              <FixtureRow
-                key={f.id}
-                fixture={f}
-                pred={preds[f.id]}
-                userId={userId!}
-                supabase={supabase}
-                onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
-              />
-            ))}
-          </div>
         </div>
       )}
     </div>
