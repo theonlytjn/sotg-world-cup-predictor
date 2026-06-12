@@ -93,7 +93,7 @@ export default function MePage() {
 
       {/* display name form */}
       <div className="mt-8 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
-        <label className="block font-display text-[11px] font-bold uppercase tracking-widest text-chalk/50 mb-2">
+        <label className="block font-display text-sm font-bold uppercase tracking-widest text-chalk/50 mb-2">
           Display name
         </label>
         <p className="mb-3 text-base text-chalk/40">Shown on the leaderboard.</p>
@@ -132,7 +132,7 @@ function StatCard({
       <div className={`mt-2 font-display text-4xl font-black ${accent ? 'text-lime' : 'text-chalk'}`}>
         {value}
       </div>
-      <div className="mt-1 font-display text-[10px] font-bold uppercase tracking-widest text-chalk/40">{label}</div>
+      <div className="mt-1 font-display text-sm font-bold uppercase tracking-widest text-chalk/40">{label}</div>
     </div>
   );
 }

@@ -95,7 +95,7 @@ export default function SearchableSelect({
           <span className="flex items-center justify-between gap-2">
             <span className="truncate">{selectedLabel.label}</span>
             {selectedLabel.sublabel && (
-              <span className="shrink-0 text-[10px] text-chalk/35">{selectedLabel.sublabel}</span>
+              <span className="shrink-0 text-sm text-chalk/35">{selectedLabel.sublabel}</span>
             )}
           </span>
         ) : (
@@ -145,7 +145,7 @@ export default function SearchableSelect({
             {filteredGroups.map((g, gi) => (
               <div key={gi}>
                 {g.label && (
-                  <div className="sticky top-0 border-b border-white/5 bg-pitch-750 px-3 py-1.5 font-display text-[10px] uppercase tracking-widest text-chalk/40">
+                  <div className="sticky top-0 border-b border-white/5 bg-pitch-750 px-3 py-1.5 font-display text-sm uppercase tracking-widest text-chalk/40">
                     {g.label}
                   </div>
                 )}
@@ -160,7 +160,7 @@ export default function SearchableSelect({
                   >
                     <span className="font-mono text-base">{opt.label}</span>
                     {opt.sublabel && (
-                      <span className="ml-2 shrink-0 font-mono text-[10px] text-chalk/35">
+                      <span className="ml-2 shrink-0 font-mono text-sm text-chalk/35">
                         {opt.sublabel}
                       </span>
                     )}

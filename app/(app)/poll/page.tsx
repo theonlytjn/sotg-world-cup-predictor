@@ -254,7 +254,7 @@ function QuestionCard({
           {/* Results reveal */}
           {tally.length > 0 && (
             <div className="mt-5 border-t border-white/5 pt-4">
-              <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
+              <p className="mb-3 font-mono text-sm uppercase tracking-widest text-chalk/40">
                 {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
               </p>
               <div className="space-y-3">
@@ -267,7 +267,7 @@ function QuestionCard({
                       <div className="flex items-baseline justify-between gap-2">
                         <span className={`font-display text-base uppercase tracking-wide ${isMe ? 'text-lime' : 'text-chalk'}`}>
                           {label}
-                          {isMe && <span className="ml-1.5 font-mono text-[10px] text-lime/70">you</span>}
+                          {isMe && <span className="ml-1.5 font-mono text-sm text-lime/70">you</span>}
                         </span>
                         <span className="shrink-0 font-mono text-base text-chalk/40">{pct}%</span>
                       </div>
@@ -277,7 +277,7 @@ function QuestionCard({
                           style={{ width: `${barPct}%` }}
                         />
                       </div>
-                      <p className="mt-0.5 font-mono text-[10px] text-chalk/35">
+                      <p className="mt-0.5 font-mono text-sm text-chalk/35">
                         {voters.join(', ')}
                       </p>
                     </div>

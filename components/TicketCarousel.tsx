@@ -89,7 +89,7 @@ export default function TicketCarousel() {
         <div className="flex items-center justify-between">
           <span
             ref={(el) => { flipRef.current[2] = el; }}
-            className="font-display text-[11px] font-semibold uppercase tracking-[0.22em] text-chalk/55"
+            className="font-display text-sm font-semibold uppercase tracking-[0.22em] text-chalk/55"
           >
             {f.grp}
           </span>

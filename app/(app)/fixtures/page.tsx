@@ -214,7 +214,7 @@ export default function FixturesPage() {
               </div>
             ))}
           </div>
-          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-chalk/25">
+          <p className="mt-2 font-mono text-sm uppercase tracking-widest text-chalk/25">
             Top 2 from each group advance
           </p>
         </section>
@@ -235,9 +235,9 @@ export default function FixturesPage() {
               onClick={() => setActiveTab(mg.matchday)}
               className={['flex flex-1 flex-col items-center pb-4 pt-3 relative transition-colors', active ? 'text-lime' : 'text-chalk/50 hover:text-chalk'].join(' ')}
             >
-              <span className="font-display text-[10px] uppercase tracking-[0.2em]">Matchday</span>
+              <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
               <span className="font-display text-3xl">{mg.matchday}</span>
-              <span className="mt-1 font-mono text-[10px]">
+              <span className="mt-1 font-mono text-sm">
                 {liveCount > 0 ? (
                   <span className="flex items-center gap-1 text-flame">
                     <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />{liveCount} live
@@ -310,7 +310,7 @@ function FixtureRow({ f }: { f: Fixture }) {
             : <span className="font-mono text-base text-chalk/40">{koTime}</span>}
         </div>
         <Side t={f.away_team} reverse />
-        <span className="w-10 shrink-0 text-right font-display text-[10px] uppercase tracking-widest">
+        <span className="w-10 shrink-0 text-right font-display text-sm uppercase tracking-widest">
           {live ? (
             <span className="flex items-center justify-end gap-1 text-flame">
               <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />Live

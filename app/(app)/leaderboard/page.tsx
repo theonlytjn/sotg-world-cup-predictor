@@ -203,11 +203,11 @@ export default function LeaderboardPage() {
         {isLive && (
           <span className="flex items-center gap-1.5 rounded-full bg-flame/15 px-2.5 py-0.5">
             <span className="live-dot h-1.5 w-1.5 rounded-full bg-flame" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-flame">Live</span>
+            <span className="font-mono text-sm uppercase tracking-widest text-flame">Live</span>
           </span>
         )}
         {lastUpdated && !isLive && (
-          <span className="ml-auto font-mono text-[10px] text-chalk/25">
+          <span className="ml-auto font-mono text-sm text-chalk/25">
             Refreshes every 30s
           </span>
         )}
@@ -221,7 +221,7 @@ export default function LeaderboardPage() {
 
       {/* Table */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
-        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-b border-white/8 bg-pitch-800 px-4 py-3 font-display text-[10px] font-bold uppercase tracking-widest text-chalk/40">
+        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-b border-white/8 bg-pitch-800 px-4 py-3 font-display text-sm font-bold uppercase tracking-widest text-chalk/40">
           <span>#</span>
           <span>Player</span>
           <span className="text-center">5pt</span>
@@ -268,7 +268,7 @@ export default function LeaderboardPage() {
               ].join(' ')}>
                 {r.display_name}
                 {isMe && (
-                  <span className="ml-2 rounded-full bg-lime/20 px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-lime">
+                  <span className="ml-2 rounded-full bg-lime/20 px-2 py-0.5 font-display text-sm font-bold uppercase tracking-widest text-lime">
                     you
                   </span>
                 )}
@@ -288,7 +288,7 @@ export default function LeaderboardPage() {
                 </span>
                 {isLive && bonus !== 0 && (
                   <span className={[
-                    'font-mono text-[11px] font-semibold',
+                    'font-mono text-sm font-semibold',
                     bonus > 0 ? 'text-flame' : 'text-chalk/30',
                   ].join(' ')}>
                     {bonus > 0 ? `+${bonus}` : bonus} live

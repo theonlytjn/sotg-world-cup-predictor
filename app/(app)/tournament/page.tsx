@@ -105,7 +105,7 @@ export default async function TournamentPage() {
                   </div>
 
                   {/* Column headers */}
-                  <div className="grid grid-cols-[1.5rem_1fr_2rem_2rem_2rem_2rem_2.5rem] gap-x-1 border-b border-white/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
+                  <div className="grid grid-cols-[1.5rem_1fr_2rem_2rem_2rem_2rem_2.5rem] gap-x-1 border-b border-white/5 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-chalk/40">
                     <span />
                     <span>Team</span>
                     <span className="text-center">P</span>
@@ -153,7 +153,7 @@ export default async function TournamentPage() {
 
                   <div className="flex items-center gap-1.5 border-t border-white/5 px-3 py-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-lime/50" />
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-chalk/35">Qualify</span>
+                    <span className="font-mono text-sm uppercase tracking-widest text-chalk/35">Qualify</span>
                   </div>
                 </div>
               );

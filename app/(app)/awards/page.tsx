@@ -221,7 +221,7 @@ export default function AwardsPage() {
             if (!cats?.length) return null;
             return (
               <div key={key}>
-                <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-chalk/30">{label}</p>
+                <p className="mb-1.5 font-mono text-sm uppercase tracking-widest text-chalk/30">{label}</p>
                 <div className="grid gap-1">
                   {cats.map((cat) => (
                     <div key={cat.id} className="flex items-center justify-between font-mono text-base text-chalk/60">
@@ -330,7 +330,7 @@ function CategoryRow({
               Poll
             </span>
           </div>
-          <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
+          <p className="font-mono text-sm uppercase tracking-widest text-chalk/40">
             Opinion · No points
           </p>
         </div>
@@ -405,11 +405,11 @@ function CategoryRow({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-chalk/40">
+          <p className="font-mono text-sm uppercase tracking-widest text-chalk/40">
             {category.pts_pick_1}pts · {category.pts_pick_2}pts
           </p>
           {confLabel && (
-            <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-chalk/40">
+            <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-sm uppercase tracking-widest text-chalk/40">
               {confLabel} only
             </span>
           )}
@@ -468,7 +468,7 @@ function PickInput({
 
   return (
     <div>
-      <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-chalk/40">{label}</p>
+      <p className="mb-1 font-mono text-sm uppercase tracking-widest text-chalk/40">{label}</p>
 
       {kind === 'team' && (
         <SearchableSelect

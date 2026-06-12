@@ -76,8 +76,8 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                   key={t.href}
                   href={t.href}
                   className={[
-                    'flex h-11 items-center gap-2 rounded-full px-4 font-display text-base uppercase transition',
-                    active ? 'bg-lime text-pitch-950' : 'text-chalk/60 hover:text-chalk',
+                    'flex items-center gap-2 px-3 py-2 font-display text-base uppercase transition',
+                    active ? 'text-lime' : 'text-chalk/55 hover:text-chalk',
                   ].join(' ')}
                 >
                   <HugeiconsIcon icon={t.icon} size={18} color="currentColor" strokeWidth={1.8} />
@@ -89,10 +89,10 @@ export default function Nav({ userEmail }: { userEmail: string }) {
               <Link
                 href="/admin"
                 className={[
-                  'flex h-11 items-center gap-2 rounded-full px-4 font-display text-base uppercase transition',
+                  'flex items-center gap-2 px-3 py-2 font-display text-base uppercase transition',
                   pathname === '/admin' || pathname.startsWith('/admin/')
-                    ? 'bg-flame text-chalk'
-                    : 'text-flame/70 hover:text-flame',
+                    ? 'text-flame'
+                    : 'text-flame/50 hover:text-flame',
                 ].join(' ')}
               >
                 <HugeiconsIcon icon={Settings01Icon} size={18} color="currentColor" strokeWidth={1.8} />
@@ -137,10 +137,8 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                   href={t.href}
                   onClick={closeMenu}
                   className={[
-                    'flex w-full items-center gap-4 rounded-2xl px-5 py-4 mb-2 font-display text-base uppercase tracking-wide transition',
-                    active
-                      ? 'bg-lime text-pitch-950'
-                      : 'bg-pitch-900 text-chalk/75 hover:text-chalk hover:bg-pitch-800',
+                    'flex w-full items-center gap-4 rounded-2xl px-5 py-4 mb-2 bg-pitch-900 font-display text-base uppercase tracking-wide transition hover:bg-pitch-800',
+                    active ? 'text-lime' : 'text-chalk/75 hover:text-chalk',
                   ].join(' ')}
                 >
                   <HugeiconsIcon icon={t.icon} size={24} color="currentColor" strokeWidth={1.7} />
@@ -156,8 +154,8 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                 className={[
                   'flex w-full items-center gap-4 rounded-2xl px-5 py-4 mb-2 font-display text-base uppercase tracking-wide transition',
                   pathname === '/admin' || pathname.startsWith('/admin/')
-                    ? 'bg-flame text-chalk'
-                    : 'bg-pitch-900 text-flame/70 hover:text-flame hover:bg-pitch-800',
+                    ? 'text-flame'
+                    : 'text-flame/50 hover:text-flame',
                 ].join(' ')}
               >
                 <HugeiconsIcon icon={Settings01Icon} size={24} color="currentColor" strokeWidth={1.7} />

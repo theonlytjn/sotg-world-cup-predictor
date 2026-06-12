@@ -200,9 +200,9 @@ export default function PredictPage() {
                 active ? 'text-lime' : 'text-chalk/50 hover:text-chalk',
               ].join(' ')}
             >
-              <span className="font-display text-[10px] uppercase tracking-[0.2em]">Matchday</span>
+              <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
               <span className="font-display text-3xl">{mg.matchday}</span>
-              <span className="mt-1 font-mono text-[10px]">
+              <span className="mt-1 font-mono text-sm">
                 {mg.liveCount > 0 ? (
                   <span className="flex items-center gap-1 text-flame">
                     <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
@@ -345,10 +345,10 @@ function FixtureRow({
     }`}>
       {/* Top bar: group + status/time */}
       <div className="mb-3 flex items-center justify-between">
-        <span className="font-display text-[11px] uppercase tracking-[0.22em] text-chalk/40">
+        <span className="font-display text-sm uppercase tracking-[0.22em] text-chalk/40">
           {fixture.group_label ? `Group ${fixture.group_label}` : ''}
         </span>
-        <span className="flex items-center gap-1.5 font-display text-[11px] uppercase tracking-widest text-chalk/40">
+        <span className="flex items-center gap-1.5 font-display text-sm uppercase tracking-widest text-chalk/40">
           {live && <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />}
           {live ? (
             <span className="text-flame">Live</span>
@@ -389,7 +389,7 @@ function FixtureRow({
             </span>
           )}
           {closingWarning && (
-            <span className="flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 font-mono text-[10px] text-gold">
+            <span className="flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 font-mono text-sm text-gold">
               <HugeiconsIcon icon={LockIcon} size={10} color="currentColor" strokeWidth={2} />
               Locks in {locksInMin}m
             </span>
@@ -439,7 +439,7 @@ function ScoreBox({ value, setValue, disabled, onCommit }: {
       disabled={disabled}
       onChange={(e) => setValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
       onBlur={onCommit}
-      className="h-12 w-12 rounded-xl border border-white/15 bg-pitch-800 text-center font-mono text-xl text-chalk outline-none transition focus:border-lime/70 disabled:opacity-50"
+      className="h-12 w-12 rounded-xl border border-white/15 bg-pitch-800 text-center font-display text-xl text-chalk outline-none transition focus:border-lime/70 disabled:opacity-50"
       placeholder="–"
     />
   );
