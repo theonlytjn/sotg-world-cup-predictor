@@ -70,7 +70,7 @@ export interface AwardCategory {
   slug: string;
   label: string;
   pick_kind: 'team' | 'player' | 'confederation' | 'stage';
-  section: 'main' | 'specials' | 'xtra' | 'opinion';
+  section: 'main' | 'specials' | 'xtra' | 'opinion' | 'tott';
   deadline: string | null;
   pts_pick_1: number;
   pts_pick_2: number;

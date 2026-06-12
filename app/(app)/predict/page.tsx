@@ -23,13 +23,14 @@ type Pred = { fixture_id: number; home_pred: number; away_pred: number; points: 
 const LIVE = new Set(['IN_PLAY', 'PAUSED']);
 const LOCK_BEFORE_MS = 15 * 60_000;
 
-const STAGE_ORDER = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'FINAL'];
+const STAGE_ORDER = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL'];
 const STAGE_LABELS: Record<string, string> = {
   GROUP_STAGE:    'Groups',
   ROUND_OF_32:    'Rd 32',
   ROUND_OF_16:    'Rd 16',
   QUARTER_FINALS: 'QF',
   SEMI_FINALS:    'SF',
+  THIRD_PLACE:    '3rd Place',
   FINAL:          'Final',
 };
 

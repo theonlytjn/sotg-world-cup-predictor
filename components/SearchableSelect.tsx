@@ -19,6 +19,7 @@ interface Props {
   disabled?: boolean;
   placeholder?: string;
   groups: SelectGroup[];
+  compact?: boolean;
 }
 
 export default function SearchableSelect({
@@ -27,6 +28,7 @@ export default function SearchableSelect({
   disabled,
   placeholder = '— select —',
   groups,
+  compact = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -86,20 +88,21 @@ export default function SearchableSelect({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((v) => !v)}
-        className={`w-full rounded-xl border px-3 py-2.5 text-left font-mono text-base transition
+        className={`w-full rounded-xl border text-left font-mono transition
+          ${compact ? 'px-2 py-1.5 text-[11px]' : 'px-3 py-2.5 text-base'}
           ${open ? 'border-lime/70' : 'border-white/15'}
           bg-pitch-800 text-chalk
           ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-white/30'}`}
       >
         {selectedLabel ? (
-          <span className="flex items-center justify-between gap-2">
-            <span className="truncate">{selectedLabel.label}</span>
-            {selectedLabel.sublabel && (
+          <span className="flex items-center justify-between gap-1">
+            <span className="truncate">{compact ? (selectedLabel.label.split(' ')[0]) : selectedLabel.label}</span>
+            {!compact && selectedLabel.sublabel && (
               <span className="shrink-0 text-sm text-chalk">{selectedLabel.sublabel}</span>
             )}
           </span>
         ) : (
-          <span className="text-chalk">{placeholder}</span>
+          <span className="text-chalk/50">{placeholder}</span>
         )}
         <span
           className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-chalk transition-transform text-base ${

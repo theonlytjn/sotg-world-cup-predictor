@@ -38,6 +38,15 @@ const SECTIONS: { key: AwardCategory['section']; label: string; description?: st
   { key: 'specials', label: 'SOTG Specials' },
   { key: 'xtra',     label: 'SOTG Xtra' },
   { key: 'opinion',  label: 'Opinion Poll', description: 'No points — just your gut feeling. Votes are tallied when the tournament ends.' },
+  { key: 'tott',     label: 'Team of the Tournament XI', description: 'Pick your 4-3-3 XI — 5pts per correct player (1st choice), 3pts (2nd pick per slot).' },
+];
+
+// Formation rows: top → bottom = attack → defence
+const TOTT_ROWS: { pos: string; slugs: string[] }[] = [
+  { pos: 'FWD', slugs: ['tott_fwd1', 'tott_fwd2', 'tott_fwd3'] },
+  { pos: 'MID', slugs: ['tott_mid1', 'tott_mid2', 'tott_mid3'] },
+  { pos: 'DEF', slugs: ['tott_def1', 'tott_def2', 'tott_def3', 'tott_def4'] },
+  { pos: 'GK',  slugs: ['tott_gk'] },
 ];
 
 export default function AwardsPage() {
@@ -183,34 +192,68 @@ export default function AwardsPage() {
       {SECTIONS.map(({ key, label, description }) => {
         const cats = bySection.get(key);
         if (!cats?.length) return null;
-        const isMain    = key === 'main';
         const isOpinion = key === 'opinion';
+        const isTott    = key === 'tott';
+
         return (
           <section key={key} className="mt-8">
             <div className="mb-1 flex items-center gap-3">
-              <h2 className={['font-display text-2xl uppercase', isOpinion ? 'text-gold' : 'text-lime'].join(' ')}>
+              <h2 className={['font-display text-2xl uppercase', isOpinion ? 'text-gold' : isTott ? 'text-lime' : 'text-lime'].join(' ')}>
                 {label}
               </h2>
               <span className="h-px flex-1 bg-white/10" />
             </div>
             {description && <p className="mb-4 text-base text-chalk">{description}</p>}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {cats.map((cat) => (
-                <CategoryRow
-                  key={cat.id}
-                  category={cat}
-                  teams={teams}
-                  teamGroups={teamGroups}
-                  playerGroups={playerGroups}
-                  pred={preds[cat.id]}
-                  userId={userId!}
-                  supabase={supabase}
-                  onSaved={(p) => setPreds((prev) => ({ ...prev, [cat.id]: p }))}
-                  isOpinion={isOpinion}
-                  tally={isOpinion && cat.results_visible ? tallies[cat.id] : undefined}
-                />
-              ))}
-            </div>
+
+            {isTott ? (
+              /* ---- 4-3-3 formation picker ---- */
+              <div className="rounded-2xl border-2 border-white/10 overflow-hidden"
+                style={{ background: 'linear-gradient(to top, #0d2410 0%, #153318 50%, #0d2410 100%)' }}>
+                {/* Pitch centre line */}
+                <div className="mx-auto my-0 h-px w-3/4 bg-white/10" />
+                <div className="px-4 py-6 space-y-4">
+                  {TOTT_ROWS.map(({ pos, slugs }) => {
+                    const rowCats = slugs
+                      .map((slug) => cats.find((c) => c.slug === slug))
+                      .filter(Boolean) as AwardCategory[];
+                    return (
+                      <div key={pos} className="flex items-start justify-center gap-2 sm:gap-4">
+                        {rowCats.map((cat) => (
+                          <TottSlot
+                            key={cat.id}
+                            category={cat}
+                            pos={pos}
+                            playerGroups={playerGroups}
+                            pred={preds[cat.id]}
+                            userId={userId!}
+                            supabase={supabase}
+                            onSaved={(p) => setPreds((prev) => ({ ...prev, [cat.id]: p }))}
+                          />
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {cats.map((cat) => (
+                  <CategoryRow
+                    key={cat.id}
+                    category={cat}
+                    teams={teams}
+                    teamGroups={teamGroups}
+                    playerGroups={playerGroups}
+                    pred={preds[cat.id]}
+                    userId={userId!}
+                    supabase={supabase}
+                    onSaved={(p) => setPreds((prev) => ({ ...prev, [cat.id]: p }))}
+                    isOpinion={isOpinion}
+                    tally={isOpinion && cat.results_visible ? tallies[cat.id] : undefined}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         );
       })}
@@ -472,6 +515,80 @@ function CategoryRow({
           {state === 'error' && <span className="font-mono text-base text-flame">Couldn&apos;t save</span>}
         </div>
       )}
+    </div>
+  );
+}
+
+// ---- TOTT Formation Slot ----
+const POS_COLOURS: Record<string, string> = {
+  GK:  'bg-gold/20 text-gold border-gold/30',
+  DEF: 'bg-lime/15 text-lime border-lime/30',
+  MID: 'bg-[#60a5fa]/15 text-[#60a5fa] border-[#60a5fa]/30',
+  FWD: 'bg-flame/15 text-flame border-flame/30',
+};
+
+function TottSlot({
+  category, pos, playerGroups, pred, userId, supabase, onSaved,
+}: {
+  category: AwardCategory;
+  pos: string;
+  playerGroups: SelectGroup[];
+  pred?: AwardPrediction;
+  userId: string;
+  supabase: ReturnType<typeof createClient>;
+  onSaved: (p: AwardPrediction) => void;
+}) {
+  const locked = category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
+  const [pick, setPick] = useState(pred?.pick_1 ?? '');
+  const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  const playerName = useMemo(() => {
+    for (const g of playerGroups) {
+      const o = g.options.find((o) => o.value === pick);
+      if (o) return o.label;
+    }
+    return null;
+  }, [pick, playerGroups]);
+
+  async function save(v: string) {
+    setState('saving');
+    const row = { user_id: userId, category_id: category.id, pick_1: v || null, pick_2: null };
+    const { error } = await supabase
+      .from('award_predictions')
+      .upsert(row, { onConflict: 'user_id,category_id' });
+    if (error) { setState('error'); return; }
+    setState('saved');
+    onSaved({ ...(pred ?? { id: 0, points: null }), ...row });
+    setTimeout(() => setState('idle'), 1200);
+  }
+
+  const settled = pred?.points !== null && pred?.points !== undefined;
+  const colour = POS_COLOURS[pos] ?? 'bg-white/10 text-chalk border-white/10';
+
+  return (
+    <div className="flex flex-col items-center gap-1.5 w-[4.5rem] sm:w-24">
+      <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest ${colour}`}>
+        {pos}
+      </span>
+      <div className={`w-full rounded-xl border-2 bg-pitch-900/80 p-2 text-center transition ${settled ? 'border-lime/40' : state === 'saved' ? 'border-lime/60' : 'border-white/10'}`}>
+        {locked ? (
+          <p className="font-display text-[10px] sm:text-xs uppercase text-chalk leading-tight min-h-[2rem] flex items-center justify-center">
+            {playerName ?? <span className="text-chalk/30">TBD</span>}
+          </p>
+        ) : (
+          <SearchableSelect
+            value={pick}
+            onChange={(v) => { setPick(v); save(v); }}
+            disabled={locked}
+            placeholder="Pick"
+            groups={playerGroups}
+            compact
+          />
+        )}
+        {settled && (
+          <span className="mt-1 block font-mono text-[9px] text-lime">+{pred!.points}pt</span>
+        )}
+      </div>
     </div>
   );
 }
