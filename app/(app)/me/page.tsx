@@ -21,6 +21,8 @@ export default function MePage() {
   const [picks, setPicks] = useState(0);
   const [rank, setRank] = useState<number | null>(null);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
   const [exactPts, setExactPts] = useState(3);
   const [resultPts, setResultPts] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -34,7 +36,7 @@ export default function MePage() {
       if (!u.user) return;
       setEmail(u.user.email ?? '');
 
-      const [{ data: profile }, { data: allLb }, { count }, { data: rules }] = await Promise.all([
+      const [{ data: profile }, { data: allLb }, { count }, { data: rules }, { data: predHistory }] = await Promise.all([
         supabase.from('profiles').select('display_name').eq('id', u.user.id).single(),
         supabase
           .from('leaderboard')
@@ -46,6 +48,11 @@ export default function MePage() {
           .select('id', { count: 'exact', head: true })
           .eq('user_id', u.user.id),
         supabase.from('scoring_rules').select('key, points'),
+        supabase
+          .from('match_predictions')
+          .select('points, fixtures!inner(kickoff)')
+          .eq('user_id', u.user.id)
+          .not('points', 'is', null),
       ]);
 
       if (profile) setDisplayName(profile.display_name ?? '');
@@ -71,6 +78,25 @@ export default function MePage() {
       }
 
       setPicks(count ?? 0);
+
+      // Calculate streaks from settled predictions sorted by kickoff
+      type PH = { points: number; fixtures: { kickoff: string } | { kickoff: string }[] };
+      const sorted = ((predHistory ?? []) as PH[])
+        .map((p) => ({
+          points: p.points,
+          kickoff: Array.isArray(p.fixtures) ? p.fixtures[0]?.kickoff : p.fixtures?.kickoff,
+        }))
+        .filter((p) => p.kickoff)
+        .sort((a, b) => a.kickoff!.localeCompare(b.kickoff!));
+
+      let running = 0;
+      let longest = 0;
+      for (const p of sorted) {
+        if (p.points > 0) { running++; longest = Math.max(longest, running); }
+        else { running = 0; }
+      }
+      setCurrentStreak(running);
+      setLongestStreak(longest);
     })();
   }, [supabase]);
 
@@ -187,6 +213,22 @@ export default function MePage() {
           value={stats?.awards ?? 0}
         />
       </div>
+
+      {/* Streak row */}
+      {longestStreak > 0 && (
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-6">
+            <div className="mt-0 font-display text-4xl font-black text-chalk">
+              {currentStreak > 0 ? `🔥 ${currentStreak}` : '—'}
+            </div>
+            <div className="mt-1 font-display text-sm font-bold uppercase tracking-widest text-chalk">Current streak</div>
+          </div>
+          <div className="rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-6">
+            <div className="mt-0 font-display text-4xl font-black text-chalk">{longestStreak}</div>
+            <div className="mt-1 font-display text-sm font-bold uppercase tracking-widest text-chalk">Longest streak</div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-3 flex items-center justify-between">
         <p className="font-mono text-base uppercase tracking-widest text-chalk">

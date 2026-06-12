@@ -148,7 +148,7 @@ export default async function AdminPage() {
           </div>
 
           <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-            <LeaguesAdminPanel leagues={leagueRows} />
+            <LeaguesAdminPanel leagues={leagueRows} users={userRows.map((u) => ({ id: u.id, display_name: u.display_name }))} />
           </div>
 
           <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">

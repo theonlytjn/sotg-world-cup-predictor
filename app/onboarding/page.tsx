@@ -10,8 +10,13 @@ export default function OnboardingPage() {
   const [nickname, setNickname] = useState('');
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [ready, setReady] = useState(false);
+  const [step, setStep] = useState<'nickname' | 'league'>('nickname');
+
+  // League step state
+  const [leagueCode, setLeagueCode] = useState('');
+  const [leagueJoining, setLeagueJoining] = useState(false);
+  const [leagueError, setLeagueError] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -32,7 +37,7 @@ export default function OnboardingPage() {
     })();
   }, [router]);
 
-  async function save() {
+  async function saveNickname() {
     const name = nickname.trim();
     if (!name || !userId) return;
     setError(null);
@@ -40,7 +45,6 @@ export default function OnboardingPage() {
 
     const supabase = createClient();
 
-    // Uniqueness check
     const { data: existing } = await supabase
       .from('profiles')
       .select('id')
@@ -62,7 +66,6 @@ export default function OnboardingPage() {
     setChecking(false);
 
     if (updateError) {
-      // Unique constraint violation (race condition)
       if (updateError.code === '23505') {
         setError('That nickname is already taken — pick another.');
       } else {
@@ -71,7 +74,40 @@ export default function OnboardingPage() {
       return;
     }
 
-    setSaved(true);
+    setStep('league');
+  }
+
+  async function joinLeague() {
+    const code = leagueCode.trim().toUpperCase();
+    if (!code || !userId) return;
+    setLeagueJoining(true);
+    setLeagueError(null);
+
+    const supabase = createClient();
+
+    const { data: league } = await supabase
+      .from('leagues')
+      .select('id, name')
+      .eq('invite_code', code)
+      .maybeSingle();
+
+    if (!league) {
+      setLeagueError('No league found with that code. Double-check and try again.');
+      setLeagueJoining(false);
+      return;
+    }
+
+    const { error: joinError } = await supabase
+      .from('league_members')
+      .upsert({ league_id: league.id, user_id: userId }, { onConflict: 'league_id,user_id', ignoreDuplicates: true });
+
+    setLeagueJoining(false);
+
+    if (joinError) {
+      setLeagueError(joinError.message);
+      return;
+    }
+
     router.replace('/predict');
   }
 
@@ -83,9 +119,53 @@ export default function OnboardingPage() {
     );
   }
 
+  if (step === 'league') {
+    return (
+      <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-16">
+        <p className="font-mono text-base uppercase tracking-[0.35em] text-lime">Step 2 of 2</p>
+        <h1 className="mt-4 font-display text-5xl uppercase leading-none text-chalk">
+          Got an invite code?
+        </h1>
+        <p className="mt-3 text-base text-chalk">
+          If someone sent you a league code, enter it now to join their private table. You can always join later from the Leagues page.
+        </p>
+
+        <div className="mt-8">
+          <label className="font-mono text-base uppercase tracking-widest text-chalk">League code</label>
+          <input
+            type="text"
+            value={leagueCode}
+            onChange={(e) => { setLeagueCode(e.target.value.toUpperCase()); setLeagueError(null); }}
+            onKeyDown={(e) => e.key === 'Enter' && leagueCode.trim() && joinLeague()}
+            placeholder="e.g. ABC123"
+            maxLength={12}
+            autoFocus
+            className="mt-2 w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3 font-mono text-base text-chalk outline-none placeholder:text-chalk/40 focus:border-gold tracking-widest uppercase"
+          />
+          {leagueError && <p className="mt-2 text-base text-flame">{leagueError}</p>}
+
+          <button
+            onClick={joinLeague}
+            disabled={!leagueCode.trim() || leagueJoining}
+            className="mt-5 w-full rounded-xl bg-lime py-3 font-body font-bold text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
+          >
+            {leagueJoining ? 'Joining…' : 'Join league'}
+          </button>
+
+          <button
+            onClick={() => router.replace('/predict')}
+            className="mt-3 w-full rounded-xl border border-white/15 py-3 font-body font-bold text-base uppercase tracking-wide text-chalk transition hover:border-white/40"
+          >
+            Skip — take me to predictions
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-16">
-      <p className="font-mono text-base uppercase tracking-[0.35em] text-lime">Welcome</p>
+      <p className="font-mono text-base uppercase tracking-[0.35em] text-lime">Step 1 of 2</p>
       <h1 className="mt-4 font-display text-5xl uppercase leading-none text-chalk">
         Choose your nickname
       </h1>
@@ -100,7 +180,7 @@ export default function OnboardingPage() {
           type="text"
           value={nickname}
           onChange={(e) => { setNickname(e.target.value); setError(null); }}
-          onKeyDown={(e) => e.key === 'Enter' && nickname.trim() && save()}
+          onKeyDown={(e) => e.key === 'Enter' && nickname.trim() && saveNickname()}
           placeholder="e.g. GoalMachine"
           maxLength={24}
           autoFocus
@@ -110,11 +190,11 @@ export default function OnboardingPage() {
         <p className="mt-1 font-mono text-base text-chalk">Max 24 characters · must be unique</p>
 
         <button
-          onClick={save}
-          disabled={!nickname.trim() || checking || saved}
+          onClick={saveNickname}
+          disabled={!nickname.trim() || checking}
           className="mt-5 w-full rounded-xl bg-lime py-3 font-body font-bold text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
         >
-          {checking ? 'Checking…' : saved ? 'Done ✓' : "Let's go"}
+          {checking ? 'Checking…' : 'Next →'}
         </button>
       </div>
     </main>
