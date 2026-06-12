@@ -118,23 +118,42 @@ export async function GET(req: NextRequest) {
     if (rows?.length) updated += rows.length;
   }
 
-  // 3) rescore all finished predictions
+  // 3) rescore all finished predictions — batched: 3 DB calls total regardless of user count
   const { data: finished } = await db
     .from('fixtures')
     .select('id, home_score, away_score')
     .eq('status', 'FINISHED');
 
   let settled = 0;
-  for (const fx of finished ?? []) {
-    if (fx.home_score == null || fx.away_score == null) continue;
-    const { data: preds } = await db
+  const finishedValid = (finished ?? []).filter(
+    (fx) => fx.home_score != null && fx.away_score != null
+  );
+
+  if (finishedValid.length > 0) {
+    const finishedIds = finishedValid.map((fx) => fx.id);
+    const scoreMap = new Map(finishedValid.map((fx) => [fx.id, fx]));
+
+    const { data: allPreds } = await db
       .from('match_predictions')
-      .select('id, home_pred, away_pred')
-      .eq('fixture_id', fx.id);
-    for (const p of preds ?? []) {
-      const pts = scorePrediction(p.home_pred, p.away_pred, fx.home_score, fx.away_score, exactPts, resultPts);
-      await db.from('match_predictions').update({ points: pts }).eq('id', p.id);
-      settled++;
+      .select('id, fixture_id, home_pred, away_pred')
+      .in('fixture_id', finishedIds);
+
+    const updates = (allPreds ?? []).map((p) => {
+      const fx = scoreMap.get(p.fixture_id)!;
+      return {
+        id: p.id,
+        fixture_id: p.fixture_id,
+        home_pred: p.home_pred,
+        away_pred: p.away_pred,
+        points: scorePrediction(p.home_pred, p.away_pred, fx.home_score!, fx.away_score!, exactPts, resultPts),
+      };
+    });
+
+    if (updates.length > 0) {
+      await db
+        .from('match_predictions')
+        .upsert(updates, { onConflict: 'id' });
+      settled = updates.length;
     }
   }
 
