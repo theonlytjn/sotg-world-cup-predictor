@@ -350,8 +350,8 @@ export default function PredictPage() {
         </span>
         <p className="font-display text-base tracking-[0.28em] uppercase text-lime">Your picks</p>
       </div>
-      <h1 className="font-display text-4xl uppercase text-chalk">Predict</h1>
-      <p className="mt-1 text-base text-chalk">
+      <h1 className="font-display text-3xl sm:text-4xl uppercase text-chalk">Predict</h1>
+      <p className="mt-1 text-sm sm:text-base text-chalk">
         Call the scoreline for every game. Locks at kickoff — no edits after.
       </p>
 
@@ -359,7 +359,7 @@ export default function PredictPage() {
       {unpredictedCount > 0 && (
         <div className="mt-4 flex items-center gap-3 rounded-2xl border border-flame/30 bg-flame/10 px-4 py-3">
           <span className="text-xl">⚠️</span>
-          <p className="font-display text-base uppercase tracking-wide text-flame">
+          <p className="font-display text-[0.825rem] sm:text-base uppercase tracking-wide text-flame">
             {unpredictedCount} fixture{unpredictedCount !== 1 ? 's' : ''} without a prediction
             {unpredictedCount === 1 ? ' — get your call in before the whistle.' : ' — get your calls in before kick-off.'}
           </p>
@@ -373,7 +373,7 @@ export default function PredictPage() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-lime" />
           </span>
-          <p className="font-display text-base uppercase tracking-wide text-lime">
+          <p className="font-display text-[0.825rem] sm:text-base uppercase tracking-wide text-lime">
             Matches in progress — scores refreshing every 30s
           </p>
         </div>
@@ -396,10 +396,10 @@ export default function PredictPage() {
                   active ? 'text-lime' : 'text-chalk hover:text-lime',
                 ].join(' ')}
               >
-                <span className="font-display text-base uppercase tracking-wide">
+                <span className="font-display text-[0.725rem] sm:text-sm uppercase tracking-wide">
                   {STAGE_LABELS[sg.stage] ?? sg.stage}
                 </span>
-                <span className="mt-0.5 font-mono text-sm">
+                <span className="mt-0.5 font-mono text-[0.65rem] sm:text-xs">
                   {liveCount > 0 ? (
                     <span className="flex items-center gap-1 text-flame">
                       <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
@@ -433,13 +433,13 @@ export default function PredictPage() {
                   key={mg.matchday}
                   onClick={() => setActiveTab(mg.matchday)}
                   className={[
-                    'flex flex-1 flex-col items-center pb-4 pt-3 transition-colors relative',
+                    'flex flex-1 flex-col items-center pb-3 pt-2 sm:pb-4 sm:pt-3 transition-colors relative',
                     active ? 'text-lime' : 'text-chalk hover:text-chalk',
                   ].join(' ')}
                 >
-                  <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
-                  <span className="font-display text-3xl">{mg.matchday}</span>
-                  <span className="mt-1 font-mono text-sm">
+                  <span className="font-display text-[0.625rem] sm:text-xs uppercase tracking-[0.2em]">Matchday</span>
+                  <span className="font-display text-2xl sm:text-3xl">{mg.matchday}</span>
+                  <span className="mt-0.5 font-mono text-[0.65rem] sm:text-xs">
                     {mg.liveCount > 0 ? (
                       <span className="flex items-center gap-1 text-flame">
                         <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
@@ -479,10 +479,10 @@ export default function PredictPage() {
                   ←
                 </button>
                 <div className="flex-1 text-center">
-                  <p className="font-display text-base uppercase tracking-widest text-chalk">
+                  <p className="font-display text-sm uppercase tracking-widest text-chalk">
                     {activeDayGroup?.label ?? '—'}
                   </p>
-                  <p className="font-mono text-base text-chalk">
+                  <p className="font-mono text-sm text-chalk">
                     {activeDayGroup?.fixtures.length ?? 0} matches
                     {totalDays > 1 && (
                       <span className="ml-2 text-chalk">
@@ -653,7 +653,7 @@ function FixtureRow({
   const koTime = ko.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className={`rounded-2xl border-2 p-10 transition-colors focus-within:border-gold/60 ${
+    <div className={`rounded-2xl border-2 p-4 sm:p-10 transition-colors focus-within:border-gold/60 ${
       isBanker
         ? 'border-gold/40 bg-pitch-900/70'
         : live
@@ -663,11 +663,11 @@ function FixtureRow({
         : 'border-white/10 bg-pitch-900/60'
     }`}>
       {/* Top bar: group + status/time */}
-      <div className="mb-3 flex items-center justify-between">
-        <span className="font-display text-sm uppercase tracking-[0.22em] text-chalk">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="font-display text-xs uppercase tracking-[0.22em] text-chalk">
           {fixture.group_label ? `Group ${fixture.group_label}` : ''}
         </span>
-        <span className="flex items-center gap-1.5 font-display text-sm uppercase tracking-widest text-chalk">
+        <span className="flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-chalk">
           {live && <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />}
           {live ? (
             <span className="text-flame">Live</span>
@@ -681,14 +681,14 @@ function FixtureRow({
 
       {/* Teams + score inputs */}
       {/* Mobile: full team names on top row, score inputs below */}
-      <div className="mt-2 sm:hidden space-y-3">
+      <div className="mt-1 sm:hidden space-y-2">
         <div className="flex items-center justify-between gap-2">
           <TeamSide team={fixture.home_team} align="left" compact />
           <TeamSide team={fixture.away_team} align="right" compact />
         </div>
         <div className="flex items-center justify-center gap-2">
           <ScoreBox value={home} setValue={handleHomeChange} disabled={locked} onCommit={save} />
-          <span className="font-display text-lg text-chalk">–</span>
+          <span className="font-display text-base text-chalk">–</span>
           <ScoreBox value={away} setValue={handleAwayChange} disabled={locked} onCommit={save} />
         </div>
       </div>
@@ -697,21 +697,21 @@ function FixtureRow({
         <TeamSide team={fixture.home_team} align="left" />
         <div className="flex items-center gap-2">
           <ScoreBox value={home} setValue={handleHomeChange} disabled={locked} onCommit={save} />
-          <span className="font-display text-lg text-chalk">–</span>
+          <span className="font-display text-base text-chalk">–</span>
           <ScoreBox value={away} setValue={handleAwayChange} disabled={locked} onCommit={save} />
         </div>
         <TeamSide team={fixture.away_team} align="right" />
       </div>
 
       {/* Bottom bar: action + result */}
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {!locked ? (
             <>
               <button
                 onClick={save}
                 disabled={home === '' || away === '' || state === 'saving'}
-                className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-body text-base tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+                className="flex h-8 items-center rounded-full bg-lime/15 px-4 font-body text-sm tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
               >
                 {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
               </button>
@@ -730,8 +730,8 @@ function FixtureRow({
               )}
             </>
           ) : (
-            <span className="flex items-center gap-1.5 font-display text-base uppercase tracking-widest text-chalk">
-              <HugeiconsIcon icon={LockIcon} size={12} color="currentColor" strokeWidth={2} />
+            <span className="flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-chalk">
+              <HugeiconsIcon icon={LockIcon} size={10} color="currentColor" strokeWidth={2} />
               Locked
             </span>
           )}
@@ -748,7 +748,7 @@ function FixtureRow({
           )}
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-base">
+        <div className="flex items-center gap-2 font-mono text-sm">
           {finished && (
             <span className="text-chalk">
               {fixture.home_score}–{fixture.away_score}
@@ -776,11 +776,11 @@ function TeamSide({ team, align, compact = false }: { team: Team | null; align: 
     <div className={`flex min-w-0 items-center gap-2 ${align === 'right' ? 'flex-row-reverse text-right' : ''} ${compact ? 'flex-1' : ''}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {team?.crest ? (
-        <img src={team.crest} alt="" className={`shrink-0 object-contain ${compact ? 'h-6 w-6' : 'h-8 w-8'}`} />
+        <img src={team.crest} alt="" className={`shrink-0 object-contain ${compact ? 'h-5 w-5 sm:h-6 sm:w-6' : 'h-8 w-8'}`} />
       ) : (
-        <span className={`shrink-0 rounded-full bg-pitch-700 ${compact ? 'h-6 w-6' : 'h-8 w-8'}`} />
+        <span className={`shrink-0 rounded-full bg-pitch-700 ${compact ? 'h-5 w-5 sm:h-6 sm:w-6' : 'h-8 w-8'}`} />
       )}
-      <span className={`font-display uppercase leading-snug text-chalk ${compact ? 'text-sm' : 'text-base'}`}>
+      <span className={`font-display uppercase leading-snug text-chalk ${compact ? 'text-xs sm:text-sm' : 'text-base'}`}>
         {team?.name || 'TBD'}
       </span>
     </div>
@@ -801,7 +801,7 @@ function SaveAllBar({
       <button
         onClick={() => onSaveAll(fixtures)}
         disabled={state === 'saving'}
-        className="rounded-full border-2 border-lime/30 bg-lime/10 px-8 py-2.5 font-body font-bold text-base uppercase tracking-wide text-lime transition hover:bg-lime/20 disabled:opacity-40"
+        className="rounded-full border-2 border-lime/30 bg-lime/10 px-6 py-2 sm:px-8 sm:py-2.5 font-body font-bold text-sm uppercase tracking-wide text-lime transition hover:bg-lime/20 disabled:opacity-40"
       >
         {state === 'saving' ? 'Saving all…' : state === 'saved' ? 'All saved ✓' : 'Save all picks'}
       </button>
@@ -823,7 +823,7 @@ function ScoreBox({ value, setValue, disabled, onCommit }: {
       disabled={disabled}
       onChange={(e) => setValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
       onBlur={onCommit}
-      className="h-12 w-12 rounded-xl border-2 border-white/15 bg-pitch-800 text-center font-display text-xl text-chalk outline-none transition focus:border-gold disabled:opacity-50"
+      className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-2 border-white/15 bg-pitch-800 text-center font-display text-lg sm:text-xl text-chalk outline-none transition focus:border-gold disabled:opacity-50"
       placeholder="–"
     />
   );
@@ -902,47 +902,47 @@ function MatchdayRecap({
   }
 
   return (
-    <div className="mb-5 rounded-2xl border border-lime/20 bg-lime/5 px-5 py-4">
+    <div className="mb-4 rounded-2xl border border-lime/20 bg-lime/5 px-3 py-3 sm:px-5 sm:py-4">
       <div className="flex items-center justify-between">
-        <p className="font-display text-sm uppercase tracking-widest text-lime">{heading}</p>
-        <div className="flex items-center gap-3">
-          <span className="font-display text-2xl text-chalk">
+        <p className="font-display text-[0.7rem] sm:text-sm uppercase tracking-widest text-lime">{heading}</p>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="font-display text-lg sm:text-2xl text-chalk">
             {totalPts > 0 ? `+${totalPts}` : totalPts}pts
           </span>
           <button
             onClick={share}
-            className="rounded-full border border-lime/30 bg-lime/10 px-3 py-1 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/20"
+            className="rounded-full border border-lime/30 bg-lime/10 px-2.5 py-0.5 font-display text-xs uppercase tracking-wide text-lime transition hover:bg-lime/20"
           >
             {shareState === 'copied' ? 'Copied ✓' : 'Share'}
           </button>
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap gap-1.5">
         {exact > 0 && (
-          <span className="rounded-full bg-lime/15 px-3 py-1 font-mono text-sm text-lime">
+          <span className="rounded-full bg-lime/15 px-2.5 py-0.5 font-mono text-xs text-lime">
             {exact} exact {exact === 1 ? 'score' : 'scores'}
           </span>
         )}
         {correct > 0 && (
-          <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-sm text-chalk">
+          <span className="rounded-full bg-white/10 px-2.5 py-0.5 font-mono text-xs text-chalk">
             {correct} correct {correct === 1 ? 'result' : 'results'}
           </span>
         )}
         {missed > 0 && (
-          <span className="rounded-full bg-flame/15 px-3 py-1 font-mono text-sm text-flame">
+          <span className="rounded-full bg-flame/15 px-2.5 py-0.5 font-mono text-xs text-flame">
             {missed} {missed === 1 ? 'miss' : 'misses'}
           </span>
         )}
         {noPick > 0 && (
-          <span className="rounded-full bg-white/5 px-3 py-1 font-mono text-sm text-chalk">
+          <span className="rounded-full bg-white/5 px-2.5 py-0.5 font-mono text-xs text-chalk">
             {noPick} no pick
           </span>
         )}
       </div>
 
       {bestFixture && bestPred && (
-        <p className="mt-3 font-display text-sm uppercase tracking-wide text-lime">
+        <p className="mt-2 font-display text-xs uppercase tracking-wide text-lime">
           ⚡ Nailed {bestPred.home_pred}–{bestPred.away_pred} · {bestFixture.home_team?.name ?? 'TBD'} vs {bestFixture.away_team?.name ?? 'TBD'}
         </p>
       )}
@@ -1009,7 +1009,7 @@ function CommunityPicks({
           const highlight = isMyPick ? true : !myLabel && i === 0;
           return (
             <div key={label} className="flex items-center gap-3">
-              <span className={`w-10 shrink-0 font-display text-base uppercase ${highlight ? 'text-lime' : 'text-chalk'}`}>
+              <span className={`w-9 shrink-0 font-display text-sm uppercase ${highlight ? 'text-lime' : 'text-chalk'}`}>
                 {label}
               </span>
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
