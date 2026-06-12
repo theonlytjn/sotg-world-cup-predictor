@@ -23,7 +23,8 @@ export default async function AdminPage() {
     { data: categories },
     { data: results },
     { data: teams },
-    { data: players },
+    { data: players1 },
+    { data: players2 },
     { data: fixtures },
     { data: pollQuestions },
     { data: scoringRules },
@@ -32,7 +33,8 @@ export default async function AdminPage() {
     db.from('award_categories').select('*').order('sort_order'),
     db.from('award_results').select('*'),
     db.from('teams').select('id, name, tla, confederation').order('name'),
-    db.from('players').select('id, name, position, team_id').order('name').limit(2000),
+    db.from('players').select('id, name, position, team_id').order('name').range(0, 999),
+    db.from('players').select('id, name, position, team_id').order('name').range(1000, 1999),
     db.from('fixtures').select(`
       id, matchday, stage, group_label, kickoff, status, home_score, away_score,
       home_team:teams!fixtures_home_team_id_fkey (id, name, tla),
@@ -42,6 +44,7 @@ export default async function AdminPage() {
     db.from('scoring_rules').select('key, label, description, points').order('key'),
     db.from('profiles').select('id, display_name, username').order('display_name'),
   ]);
+  const players = [...(players1 ?? []), ...(players2 ?? [])];
 
   const resultsByCategory: Record<number, string> = {};
   for (const r of results ?? []) resultsByCategory[r.category_id] = r.result;

@@ -55,13 +55,16 @@ export default function AwardsPage() {
     if (!u.user) return;
     setUserId(u.user.id);
 
-    const [{ data: cats }, { data: ts }, { data: ps }, { data: ap }] = await Promise.all([
+    const [{ data: cats }, { data: ts }, { data: ps1 }, { data: ps2 }, { data: ap }] = await Promise.all([
       supabase.from('award_categories').select('*').order('sort_order', { ascending: true }),
       supabase.from('teams').select('id, name, tla, confederation').order('name', { ascending: true }),
       supabase.from('players').select('id, name, position, team_id')
-        .order('team_id', { ascending: true }).order('name', { ascending: true }).limit(2000),
+        .order('team_id', { ascending: true }).order('name', { ascending: true }).range(0, 999),
+      supabase.from('players').select('id, name, position, team_id')
+        .order('team_id', { ascending: true }).order('name', { ascending: true }).range(1000, 1999),
       supabase.from('award_predictions').select('*').eq('user_id', u.user.id),
     ]);
+    const ps = [...(ps1 ?? []), ...(ps2 ?? [])];
 
     const catList = (cats as AwardCategory[]) ?? [];
     setCategories(catList);
