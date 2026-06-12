@@ -206,18 +206,26 @@ export default function AwardsPage() {
             {description && <p className="mb-4 text-base text-chalk">{description}</p>}
 
             {isTott ? (
-              /* ---- 4-3-3 formation picker ---- */
-              <div className="rounded-2xl border-2 border-white/10 overflow-hidden"
-                style={{ background: 'linear-gradient(to top, #0d2410 0%, #153318 50%, #0d2410 100%)' }}>
-                {/* Pitch centre line */}
-                <div className="mx-auto my-0 h-px w-3/4 bg-white/10" />
-                <div className="px-4 py-6 space-y-4">
-                  {TOTT_ROWS.map(({ pos, slugs }) => {
-                    const rowCats = slugs
-                      .map((slug) => cats.find((c) => c.slug === slug))
-                      .filter(Boolean) as AwardCategory[];
-                    return (
-                      <div key={pos} className="flex items-start justify-center gap-2 sm:gap-4">
+              /* ---- 4-3-3 formation picker — full-width cards grouped by position ---- */
+              <div className="space-y-6">
+                {TOTT_ROWS.map(({ pos, slugs }) => {
+                  const rowCats = slugs
+                    .map((slug) => cats.find((c) => c.slug === slug))
+                    .filter(Boolean) as AwardCategory[];
+                  const colClass = slugs.length === 1
+                    ? 'grid-cols-1 max-w-sm'
+                    : slugs.length === 3
+                      ? 'grid-cols-1 sm:grid-cols-3'
+                      : 'grid-cols-2 sm:grid-cols-4';
+                  return (
+                    <div key={pos}>
+                      <div className="mb-3 flex items-center gap-3">
+                        <span className={`rounded-full border px-3 py-0.5 font-mono text-sm font-bold uppercase tracking-widest ${POS_COLOURS[pos]}`}>
+                          {pos === 'GK' ? 'Goalkeeper' : pos === 'DEF' ? 'Defenders' : pos === 'MID' ? 'Midfielders' : 'Forwards'}
+                        </span>
+                        <span className="h-px flex-1 bg-white/10" />
+                      </div>
+                      <div className={`grid gap-3 ${colClass}`}>
                         {rowCats.map((cat) => (
                           <TottSlot
                             key={cat.id}
@@ -231,9 +239,9 @@ export default function AwardsPage() {
                           />
                         ))}
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -539,20 +547,14 @@ function TottSlot({
   onSaved: (p: AwardPrediction) => void;
 }) {
   const locked = category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
-  const [pick, setPick] = useState(pred?.pick_1 ?? '');
+  const [pick1, setPick1] = useState(pred?.pick_1 ?? '');
+  const [pick2, setPick2] = useState(pred?.pick_2 ?? '');
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  const playerName = useMemo(() => {
-    for (const g of playerGroups) {
-      const o = g.options.find((o) => o.value === pick);
-      if (o) return o.label;
-    }
-    return null;
-  }, [pick, playerGroups]);
-
-  async function save(v: string) {
+  async function save() {
+    if (!pick1 && !pick2) return;
     setState('saving');
-    const row = { user_id: userId, category_id: category.id, pick_1: v || null, pick_2: null };
+    const row = { user_id: userId, category_id: category.id, pick_1: pick1 || null, pick_2: pick2 || null };
     const { error } = await supabase
       .from('award_predictions')
       .upsert(row, { onConflict: 'user_id,category_id' });
@@ -566,29 +568,56 @@ function TottSlot({
   const colour = POS_COLOURS[pos] ?? 'bg-white/10 text-chalk border-white/10';
 
   return (
-    <div className="flex flex-col items-center gap-1.5 w-[4.5rem] sm:w-24">
-      <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest ${colour}`}>
-        {pos}
-      </span>
-      <div className={`w-full rounded-xl border-2 bg-pitch-900/80 p-2 text-center transition ${settled ? 'border-lime/40' : state === 'saved' ? 'border-lime/60' : 'border-white/10'}`}>
-        {locked ? (
-          <p className="font-display text-[10px] sm:text-xs uppercase text-chalk leading-tight min-h-[2rem] flex items-center justify-center">
-            {playerName ?? <span className="text-chalk/30">TBD</span>}
-          </p>
-        ) : (
-          <SearchableSelect
-            value={pick}
-            onChange={(v) => { setPick(v); save(v); }}
-            disabled={locked}
-            placeholder="Pick"
-            groups={playerGroups}
-            compact
-          />
-        )}
+    <div className="flex flex-col rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-4 shadow-card focus-within:border-white/25 transition-colors">
+      <div className="mb-3 flex items-center justify-between">
+        <span className={`rounded-full border px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-widest ${colour}`}>
+          {pos}
+        </span>
         {settled && (
-          <span className="mt-1 block font-mono text-[9px] text-lime">+{pred!.points}pt</span>
+          <span className="rounded-full bg-lime/20 px-2.5 py-0.5 font-display text-sm uppercase text-lime">
+            +{pred!.points}pts
+          </span>
+        )}
+        {locked && !settled && (
+          <span className="font-mono text-xs uppercase tracking-widest text-chalk/40">Locked</span>
         )}
       </div>
+
+      <div className="space-y-2">
+        <div>
+          <p className="mb-1 font-mono text-xs uppercase tracking-widest text-chalk/60">1st · {category.pts_pick_1}pts</p>
+          <SearchableSelect
+            value={pick1}
+            onChange={setPick1}
+            disabled={locked}
+            placeholder="— pick a player —"
+            groups={playerGroups}
+          />
+        </div>
+        <div>
+          <p className="mb-1 font-mono text-xs uppercase tracking-widest text-chalk/60">2nd · {category.pts_pick_2}pts</p>
+          <SearchableSelect
+            value={pick2}
+            onChange={setPick2}
+            disabled={locked}
+            placeholder="— pick a player —"
+            groups={playerGroups}
+          />
+        </div>
+      </div>
+
+      {!locked && (
+        <div className="mt-3 flex items-center gap-3">
+          <button
+            onClick={save}
+            disabled={(!pick1 && !pick2) || state === 'saving'}
+            className="rounded-full bg-lime/15 px-4 py-1.5 font-body font-bold text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+          >
+            {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred?.pick_1 ? 'Update' : 'Save pick'}
+          </button>
+          {state === 'error' && <span className="font-mono text-sm text-flame">Couldn&apos;t save</span>}
+        </div>
+      )}
     </div>
   );
 }

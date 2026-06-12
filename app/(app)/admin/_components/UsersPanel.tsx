@@ -38,7 +38,7 @@ export default function UsersPanel({ users }: { users: UserRow[] }) {
   return (
     <div>
       <h2 className="font-display text-2xl uppercase text-chalk">Users</h2>
-      <p className="mt-1 font-mono text-xs text-chalk/40">{list.length} registered</p>
+      <p className="mt-1 font-mono text-smtext-chalk/40">{list.length} registered</p>
 
       <div className="mt-4 space-y-1.5">
         {list.map((u) => (
@@ -46,11 +46,11 @@ export default function UsersPanel({ users }: { users: UserRow[] }) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-display text-sm uppercase text-chalk truncate">{u.display_name}</p>
-                <p className="font-mono text-xs text-chalk/40 truncate">{u.email}</p>
+                <p className="font-mono text-smtext-chalk/40 truncate">{u.email}</p>
                 <div className="mt-1 flex items-center gap-3">
-                  <span className="font-mono text-xs text-lime">{u.total_points}pts</span>
-                  <span className="font-mono text-xs text-chalk/40">{u.league_count} league{u.league_count !== 1 ? 's' : ''}</span>
-                  <span className="font-mono text-xs text-chalk/25">
+                  <span className="font-mono text-smtext-lime">{u.total_points}pts</span>
+                  <span className="font-mono text-smtext-chalk/40">{u.league_count} league{u.league_count !== 1 ? 's' : ''}</span>
+                  <span className="font-mono text-smtext-chalk/25">
                     {new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })}
                   </span>
                 </div>
@@ -62,13 +62,13 @@ export default function UsersPanel({ users }: { users: UserRow[] }) {
                     <button
                       onClick={() => deleteUser(u.id)}
                       disabled={deleting === u.id}
-                      className="rounded-lg bg-flame/20 px-3 py-1 font-mono text-xs text-flame transition hover:bg-flame/30 disabled:opacity-40"
+                      className="rounded-lg bg-flame/20 px-3 py-1 font-mono text-smtext-flame transition hover:bg-flame/30 disabled:opacity-40"
                     >
                       {deleting === u.id ? 'Deleting…' : 'Confirm delete'}
                     </button>
                     <button
                       onClick={() => setConfirm(null)}
-                      className="font-mono text-xs text-chalk/40 hover:text-chalk transition"
+                      className="font-mono text-smtext-chalk/40 hover:text-chalk transition"
                     >
                       Cancel
                     </button>
@@ -76,7 +76,7 @@ export default function UsersPanel({ users }: { users: UserRow[] }) {
                 ) : (
                   <button
                     onClick={() => setConfirm(u.id)}
-                    className="rounded-lg border border-flame/20 px-2.5 py-1 font-mono text-xs text-flame/60 transition hover:border-flame/50 hover:text-flame"
+                    className="rounded-lg border border-flame/20 px-2.5 py-1 font-mono text-smtext-flame/60 transition hover:border-flame/50 hover:text-flame"
                   >
                     Delete
                   </button>
@@ -87,7 +87,7 @@ export default function UsersPanel({ users }: { users: UserRow[] }) {
         ))}
       </div>
 
-      {error && <p className="mt-3 font-mono text-xs text-flame">{error}</p>}
+      {error && <p className="mt-3 font-mono text-smtext-flame">{error}</p>}
     </div>
   );
 }

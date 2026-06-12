@@ -89,7 +89,7 @@ export default function SearchableSelect({
         disabled={disabled}
         onClick={() => !disabled && setOpen((v) => !v)}
         className={`w-full rounded-xl border text-left font-mono transition
-          ${compact ? 'px-2 py-1.5 text-[11px]' : 'px-3 py-2.5 text-base'}
+          ${compact ? 'px-2.5 py-2 text-sm' : 'px-3 py-2.5 text-base'}
           ${open ? 'border-lime/70' : 'border-white/15'}
           bg-pitch-800 text-chalk
           ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-white/30'}`}

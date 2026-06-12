@@ -196,17 +196,17 @@ function CategoryCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="font-display text-base uppercase tracking-wide text-chalk">{category.label}</p>
-              <p className="font-mono text-xs uppercase tracking-widest text-chalk/40">
+              <p className="font-mono text-sm uppercase tracking-widest text-chalk/40">
             {category.pts_pick_1}pts · {category.pts_pick_2}pts
           </p>
         </div>
         <div className="shrink-0 text-right">
           {resolvedResult ? (
-            <span className="rounded-full bg-lime/20 px-2.5 py-1 font-mono text-xs text-lime">
+            <span className="rounded-full bg-lime/20 px-2.5 py-1 font-mono text-sm text-lime">
               {resolvedResult}
             </span>
           ) : (
-            <span className="rounded-full bg-pitch-700 px-2.5 py-1 font-mono text-xs text-chalk/40">
+            <span className="rounded-full bg-pitch-700 px-2.5 py-1 font-mono text-sm text-chalk/40">
               Not set
             </span>
           )}
@@ -227,7 +227,7 @@ function CategoryCard({
         <button
           onClick={() => setResult(pick || null)}
           disabled={!pick || resultState === 'saving'}
-          className="rounded-xl bg-lime px-4 py-2.5 font-display text-xs uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
+          className="rounded-xl bg-lime px-4 py-2.5 font-display text-sm uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
         >
           {resultState === 'saving' ? 'Setting…' : resultState === 'saved' ? 'Set ✓' : 'Set result'}
         </button>
@@ -235,48 +235,48 @@ function CategoryCard({
           <button
             onClick={() => setResult(null)}
             disabled={resultState === 'saving'}
-            className="rounded-xl border border-flame/30 px-4 py-2.5 font-display text-xs uppercase tracking-wide text-flame transition hover:bg-flame/10 disabled:opacity-40"
+            className="rounded-xl border border-flame/30 px-4 py-2.5 font-display text-sm uppercase tracking-wide text-flame transition hover:bg-flame/10 disabled:opacity-40"
           >
             Clear
           </button>
         )}
-        {resultState === 'error' && <span className="font-mono text-xs text-flame">Error</span>}
+        {resultState === 'error' && <span className="font-mono text-sm text-flame">Error</span>}
       </div>
 
       {/* Points */}
       <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/5 pt-3">
-        <span className="font-mono text-xs uppercase tracking-widest text-chalk/40">Points</span>
+        <span className="font-mono text-sm uppercase tracking-widest text-chalk/40">Points</span>
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-xs text-chalk/40">Pick 1</span>
+          <span className="font-mono text-sm text-chalk/40">Pick 1</span>
           <input
             type="number" min={0} value={pts1}
             onChange={(e) => { setPts1(e.target.value); setPtsState('idle'); }}
-            className="w-14 rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 text-center font-mono text-xs text-chalk outline-none focus:border-lime/60"
+            className="w-14 rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 text-center font-mono text-sm text-chalk outline-none focus:border-lime/60"
           />
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-xs text-chalk/40">Pick 2</span>
+          <span className="font-mono text-sm text-chalk/40">Pick 2</span>
           <input
             type="number" min={0} value={pts2}
             onChange={(e) => { setPts2(e.target.value); setPtsState('idle'); }}
-            className="w-14 rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 text-center font-mono text-xs text-chalk outline-none focus:border-lime/60"
+            className="w-14 rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 text-center font-mono text-sm text-chalk outline-none focus:border-lime/60"
           />
         </div>
         <button
           onClick={savePoints}
           disabled={ptsState === 'saving' || ptsUnchanged}
-          className="rounded-lg bg-lime/15 px-3 py-1 font-mono text-xs uppercase tracking-widest text-lime transition hover:bg-lime/25 disabled:opacity-40"
+          className="rounded-lg bg-lime/15 px-3 py-1 font-mono text-sm uppercase tracking-widest text-lime transition hover:bg-lime/25 disabled:opacity-40"
         >
           {ptsState === 'saving' ? 'Saving…' : ptsState === 'saved' ? 'Saved ✓' : ptsState === 'error' ? 'Error' : 'Save pts'}
         </button>
         {ptsState !== 'idle' && currentResult && (
-          <span className="font-mono text-xs text-chalk/40">rescores existing picks</span>
+          <span className="font-mono text-sm text-chalk/40">rescores existing picks</span>
         )}
       </div>
 
       {/* Deadline */}
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/5 pt-3">
-        <span className={`font-mono text-xs uppercase tracking-widest ${locked ? 'text-flame' : 'text-chalk/40'}`}>
+        <span className={`font-mono text-sm uppercase tracking-widest ${locked ? 'text-flame' : 'text-chalk/40'}`}>
           {locked ? 'Locked' : category.deadline ? 'Locks ' + new Date(category.deadline).toLocaleString() : 'No deadline'}
         </span>
         <div className="flex flex-1 flex-wrap items-center gap-2">
@@ -284,12 +284,12 @@ function CategoryCard({
             type="datetime-local"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-xs text-chalk outline-none focus:border-lime/60"
+            className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-sm text-chalk outline-none focus:border-lime/60"
           />
           <button
             onClick={() => saveDeadline(deadline || null)}
             disabled={deadlineState === 'saving'}
-            className="rounded-lg bg-pitch-700 px-3 py-1 font-mono text-xs uppercase tracking-widest text-chalk/70 transition hover:bg-pitch-600 disabled:opacity-40"
+            className="rounded-lg bg-pitch-700 px-3 py-1 font-mono text-sm uppercase tracking-widest text-chalk/70 transition hover:bg-pitch-600 disabled:opacity-40"
           >
             {deadlineState === 'saving' ? 'Saving…' : deadlineState === 'saved' ? 'Saved ✓' : 'Set deadline'}
           </button>
@@ -297,7 +297,7 @@ function CategoryCard({
             <button
               onClick={() => { const now = new Date().toISOString(); setDeadline(now.slice(0, 16)); saveDeadline(now); }}
               disabled={deadlineState === 'saving'}
-              className="rounded-lg bg-flame/15 px-3 py-1 font-mono text-xs uppercase tracking-widest text-flame transition hover:bg-flame/25 disabled:opacity-40"
+              className="rounded-lg bg-flame/15 px-3 py-1 font-mono text-sm uppercase tracking-widest text-flame transition hover:bg-flame/25 disabled:opacity-40"
             >
               Lock now
             </button>
@@ -306,12 +306,12 @@ function CategoryCard({
             <button
               onClick={() => { setDeadline(''); saveDeadline(null); }}
               disabled={deadlineState === 'saving'}
-              className="rounded-lg bg-pitch-700 px-3 py-1 font-mono text-xs uppercase tracking-widest text-chalk/50 transition hover:bg-pitch-600 disabled:opacity-40"
+              className="rounded-lg bg-pitch-700 px-3 py-1 font-mono text-sm uppercase tracking-widest text-chalk/50 transition hover:bg-pitch-600 disabled:opacity-40"
             >
               Unlock
             </button>
           )}
-          {deadlineState === 'error' && <span className="font-mono text-xs text-flame">Error</span>}
+          {deadlineState === 'error' && <span className="font-mono text-sm text-flame">Error</span>}
         </div>
       </div>
     </div>
@@ -331,7 +331,7 @@ function ResultPick({
   teams: Team[];
   playersByTeam: PlayerGroup[];
 }) {
-  const base = 'w-full rounded-xl border border-white/15 bg-pitch-800 px-3 py-2.5 font-mono text-xs text-chalk outline-none focus:border-lime/70';
+  const base = 'w-full rounded-xl border border-white/15 bg-pitch-800 px-3 py-2.5 font-mono text-sm text-chalk outline-none focus:border-lime/70';
 
   if (kind === 'team') {
     return (
