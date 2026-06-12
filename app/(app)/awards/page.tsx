@@ -268,8 +268,12 @@ function CategoryRow({
   tally?: Record<string, number>;
 }) {
   const locked = !isOpinion && category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
+  const isSinglePick = isOpinion || category.meta?.single === true;
+  const pickCount = category.meta?.picks ?? 2;
   const [pick1, setPick1] = useState(pred?.pick_1 ?? '');
   const [pick2, setPick2] = useState(pred?.pick_2 ?? '');
+  const [pick3, setPick3] = useState(pred?.pick_3 ?? '');
+  const [pick4, setPick4] = useState(pred?.pick_4 ?? '');
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const filteredTeamGroups = useMemo((): SelectGroup[] => {
@@ -298,14 +302,20 @@ function CategoryRow({
   }
 
   async function save() {
-    if (isOpinion ? !pick1 : (!pick1 && !pick2)) return;
+    if (isSinglePick ? !pick1 : (!pick1 && !pick2)) return;
     setState('saving');
-    const row = {
+    const row: {
+      user_id: string; category_id: number;
+      pick_1: string | null; pick_2: string | null;
+      pick_3?: string | null; pick_4?: string | null;
+    } = {
       user_id: userId,
       category_id: category.id,
       pick_1: pick1 || null,
-      pick_2: isOpinion ? null : (pick2 || null),
+      pick_2: isSinglePick ? null : (pick2 || null),
     };
+    if (pickCount >= 3) row.pick_3 = pick3 || null;
+    if (pickCount >= 4) row.pick_4 = pick4 || null;
     const { error } = await supabase
       .from('award_predictions')
       .upsert(row, { onConflict: 'user_id,category_id' });
@@ -393,6 +403,15 @@ function CategoryRow({
   }
 
   // ---- Regular Award / Prediction card ----
+  const pts3 = category.meta?.pts_pick_3;
+  const pts4 = category.meta?.pts_pick_4;
+
+  const ptsLabel = isSinglePick
+    ? `${category.pts_pick_1}pts`
+    : pickCount >= 4
+      ? `${category.pts_pick_1} / ${category.pts_pick_2} / ${pts3 ?? '?'} / ${pts4 ?? '?'} pts`
+      : `${category.pts_pick_1}pts · ${category.pts_pick_2}pts`;
+
   return (
     <div className="flex flex-col rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-10 shadow-card focus-within:border-gold/60 transition-colors">
       <div className="mb-4">
@@ -408,9 +427,7 @@ function CategoryRow({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <p className="font-mono text-sm uppercase tracking-widest text-chalk">
-            {category.pts_pick_1}pts · {category.pts_pick_2}pts
-          </p>
+          <p className="font-mono text-sm uppercase tracking-widest text-chalk">{ptsLabel}</p>
           {confLabel && (
             <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-sm uppercase tracking-widest text-chalk">
               {confLabel} only
@@ -419,9 +436,9 @@ function CategoryRow({
         </div>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2">
+      {isSinglePick ? (
         <PickInput
-          label="1st choice"
+          label="Your pick"
           value={pick1}
           onChange={setPick1}
           disabled={locked}
@@ -429,22 +446,25 @@ function CategoryRow({
           teamGroups={filteredTeamGroups}
           playerGroups={playerGroups}
         />
-        <PickInput
-          label="2nd choice"
-          value={pick2}
-          onChange={setPick2}
-          disabled={locked}
-          kind={category.pick_kind}
-          teamGroups={filteredTeamGroups}
-          playerGroups={playerGroups}
-        />
-      </div>
+      ) : pickCount >= 4 ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <PickInput label={`1st (${category.pts_pick_1}pts)`} value={pick1} onChange={setPick1} disabled={locked} kind={category.pick_kind} teamGroups={filteredTeamGroups} playerGroups={playerGroups} />
+          <PickInput label={`2nd (${category.pts_pick_2}pts)`} value={pick2} onChange={setPick2} disabled={locked} kind={category.pick_kind} teamGroups={filteredTeamGroups} playerGroups={playerGroups} />
+          <PickInput label={`3rd (${pts3 ?? '?'}pts)`} value={pick3} onChange={setPick3} disabled={locked} kind={category.pick_kind} teamGroups={filteredTeamGroups} playerGroups={playerGroups} />
+          <PickInput label={`4th (${pts4 ?? '?'}pts)`} value={pick4} onChange={setPick4} disabled={locked} kind={category.pick_kind} teamGroups={filteredTeamGroups} playerGroups={playerGroups} />
+        </div>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <PickInput label="1st choice" value={pick1} onChange={setPick1} disabled={locked} kind={category.pick_kind} teamGroups={filteredTeamGroups} playerGroups={playerGroups} />
+          <PickInput label="2nd choice" value={pick2} onChange={setPick2} disabled={locked} kind={category.pick_kind} teamGroups={filteredTeamGroups} playerGroups={playerGroups} />
+        </div>
+      )}
 
       {!locked && (
         <div className="mt-3 flex items-center gap-3">
           <button
             onClick={save}
-            disabled={(!pick1 && !pick2) || state === 'saving'}
+            disabled={(isSinglePick ? !pick1 : (!pick1 && !pick2)) || state === 'saving'}
             className="rounded-full bg-lime/15 px-4 py-1.5 font-body font-bold text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
           >
             {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save picks'}

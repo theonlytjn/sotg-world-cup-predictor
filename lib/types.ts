@@ -76,7 +76,13 @@ export interface AwardCategory {
   pts_pick_2: number;
   sort_order: number;
   results_visible: boolean;
-  meta: { confederation?: string } | null;
+  meta: {
+    confederation?: string;
+    single?: boolean;
+    picks?: number;
+    pts_pick_3?: number;
+    pts_pick_4?: number;
+  } | null;
 }
 
 export interface AwardPrediction {
@@ -85,6 +91,8 @@ export interface AwardPrediction {
   category_id: number;
   pick_1: string | null;
   pick_2: string | null;
+  pick_3?: string | null;
+  pick_4?: string | null;
   points: number | null;
 }
 

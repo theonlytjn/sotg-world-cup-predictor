@@ -17,6 +17,7 @@ import {
   Settings01Icon,
   Menu01Icon,
   Cancel01Icon,
+  Medal01Icon,
 } from '@hugeicons-pro/core-stroke-rounded';
 
 const ADMIN_EMAIL = 'tony@theonlytjn.com';
@@ -27,6 +28,7 @@ const tabs = [
   { href: '/tournament',  label: 'World Cup',  icon: FootballIcon },
   { href: '/fixtures',    label: 'Fixtures',   icon: Calendar1Icon },
   { href: '/leaderboard', label: 'Table',      icon: BarChartIcon },
+  { href: '/leagues',     label: 'Leagues',    icon: Medal01Icon },
   { href: '/rules',       label: 'Rules',      icon: BookOpenIcon },
   { href: '/me',          label: 'Me',         icon: UserIcon },
 ];
