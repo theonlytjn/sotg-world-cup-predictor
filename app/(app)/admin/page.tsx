@@ -98,16 +98,16 @@ export default async function AdminPage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="font-display text-4xl uppercase text-chalk">Admin</h1>
-          <p className="mt-1 font-mono text-xs text-chalk/40">{user.email}</p>
+          <p className="mt-1 font-mono text-base text-chalk">{user.email}</p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/admin/bracket"
-            className="rounded-full border border-white/15 px-3 py-1 font-mono text-xs uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime"
+            className="rounded-full border border-white/15 px-3 py-1 font-mono text-base uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime"
           >
             Bracket →
           </Link>
-          <span className="rounded-full bg-flame/20 px-3 py-1 font-mono text-xs uppercase tracking-widest text-flame">
+          <span className="rounded-full bg-flame/20 px-3 py-1 font-mono text-base uppercase tracking-widest text-flame">
             Admin
           </span>
         </div>

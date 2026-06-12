@@ -118,14 +118,14 @@ export default async function BracketPage() {
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
-        <Link href="/admin" className="font-mono text-xs uppercase tracking-widest text-chalk/40 hover:text-chalk transition">
+        <Link href="/admin" className="font-mono text-base uppercase tracking-widest text-chalk hover:text-chalk transition">
           ← Admin
         </Link>
       </div>
 
       <div className="mb-8">
         <h1 className="font-display text-4xl uppercase text-chalk">Bracket Preview</h1>
-        <p className="mt-1 font-mono text-xs text-chalk/40">
+        <p className="mt-1 font-mono text-base text-chalk">
           Projected Round of 32 · Admin only · Updates as results come in
         </p>
       </div>
@@ -147,16 +147,16 @@ export default async function BracketPage() {
                       key={r.team_id}
                       className={[
                         'flex items-center justify-between py-0.5',
-                        isAdvancing && groupDone ? 'text-chalk' : isAdvancing ? 'text-chalk/70' : 'text-chalk/30',
+                        isAdvancing && groupDone ? 'text-chalk' : isAdvancing ? 'text-chalk' : 'text-chalk',
                       ].join(' ')}
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="font-mono text-[10px] text-chalk/40 w-3">{r.position}</span>
-                        <span className="font-mono text-xs truncate">{r.tla ?? r.team_name}</span>
+                        <span className="font-mono text-[10px] text-chalk w-3">{r.position}</span>
+                        <span className="font-mono text-base truncate">{r.tla ?? r.team_name}</span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
-                        <span className="font-mono text-[10px] text-chalk/40">{r.played}g</span>
-                        <span className="font-mono text-xs font-bold">{r.points}pt</span>
+                        <span className="font-mono text-[10px] text-chalk">{r.played}g</span>
+                        <span className="font-mono text-base font-bold">{r.points}pt</span>
                       </div>
                     </div>
                   );
@@ -173,7 +173,7 @@ export default async function BracketPage() {
         <div className="space-y-6">
           {[...byDate.entries()].map(([date, matches]) => (
             <div key={date}>
-              <p className="mb-2 font-mono text-xs uppercase tracking-widest text-chalk/40">{date}</p>
+              <p className="mb-2 font-mono text-base uppercase tracking-widest text-chalk">{date}</p>
               <div className="space-y-2">
                 {matches.map((m, i) => {
                   const s1 = resolveSlot(m.slot1);
@@ -185,23 +185,23 @@ export default async function BracketPage() {
                       key={i}
                       className="flex items-center gap-3 rounded-xl border border-white/10 bg-pitch-900/60 px-4 py-3"
                     >
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-chalk/30 w-12 shrink-0">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-chalk w-12 shrink-0">
                         {m.slot1}
                       </span>
                       <span className={[
                         'flex-1 font-display text-sm uppercase',
-                        s1.confirmed ? 'text-chalk' : isBest3rd1 ? 'text-chalk/30 italic' : 'text-chalk/60',
+                        s1.confirmed ? 'text-chalk' : isBest3rd1 ? 'text-chalk italic' : 'text-chalk',
                       ].join(' ')}>
                         {s1.label}
                       </span>
-                      <span className="font-mono text-xs text-chalk/30 shrink-0">vs</span>
+                      <span className="font-mono text-base text-chalk shrink-0">vs</span>
                       <span className={[
                         'flex-1 text-right font-display text-sm uppercase',
-                        s2.confirmed ? 'text-chalk' : isBest3rd2 ? 'text-chalk/30 italic' : 'text-chalk/60',
+                        s2.confirmed ? 'text-chalk' : isBest3rd2 ? 'text-chalk italic' : 'text-chalk',
                       ].join(' ')}>
                         {s2.label}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-chalk/30 w-12 shrink-0 text-right">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-chalk w-12 shrink-0 text-right">
                         {m.slot2}
                       </span>
                     </div>
@@ -211,7 +211,7 @@ export default async function BracketPage() {
             </div>
           ))}
         </div>
-        <p className="mt-4 font-mono text-xs text-chalk/30">
+        <p className="mt-4 font-mono text-base text-chalk">
           Confirmed (bright) once the group finishes all 3 games · Best 3rd slots resolve after all groups complete
         </p>
       </section>

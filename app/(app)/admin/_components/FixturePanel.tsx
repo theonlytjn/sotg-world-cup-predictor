@@ -47,8 +47,8 @@ export default function FixturePanel({ fixtures }: { fixtures: Fixture[] }) {
             <button
               key={v}
               onClick={() => setFilter(v)}
-              className={`rounded-lg px-3 py-1 font-mono text-sm uppercase tracking-widest transition ${
-                filter === v ? 'bg-lime text-pitch-950' : 'text-chalk/50 hover:text-chalk'
+              className={`rounded-lg px-3 py-1 font-mono text-base uppercase tracking-widest transition ${
+                filter === v ? 'bg-lime text-pitch-950' : 'text-chalk hover:text-chalk'
               }`}
             >
               {v === 'pending' ? 'Pending' : 'All'}
@@ -56,12 +56,12 @@ export default function FixturePanel({ fixtures }: { fixtures: Fixture[] }) {
           ))}
         </div>
       </div>
-      <p className="mt-1 text-sm text-chalk/50">
+      <p className="mt-1 text-base text-chalk">
         Override sets status to FINISHED and re-scores all predictions for that game.
       </p>
 
       {filtered.length === 0 && (
-        <p className="mt-6 font-mono text-sm text-chalk/40">
+        <p className="mt-6 font-mono text-base text-chalk">
           {filter === 'pending' ? 'All fixtures are finished.' : 'No fixtures found.'}
         </p>
       )}
@@ -118,22 +118,22 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
     }`}>
       {/* Teams + score */}
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        <span className="truncate font-display text-sm uppercase text-chalk">
+        <span className="truncate font-display text-base uppercase text-chalk">
           {fixture.home_team?.name ?? 'TBD'}
         </span>
-        <span className="font-mono text-sm text-chalk/40">
+        <span className="font-mono text-base text-chalk">
           {finished || live
             ? `${fixture.home_score ?? '?'} – ${fixture.away_score ?? '?'}`
             : 'vs'}
         </span>
-        <span className="truncate font-display text-sm uppercase text-chalk">
+        <span className="truncate font-display text-base uppercase text-chalk">
           {fixture.away_team?.name ?? 'TBD'}
         </span>
       </div>
 
       {/* Status + kickoff */}
-      <span className={`font-mono text-sm uppercase tracking-widest ${
-        finished ? 'text-chalk/30' : live ? 'text-lime' : 'text-chalk/50'
+      <span className={`font-mono text-base uppercase tracking-widest ${
+        finished ? 'text-chalk' : live ? 'text-lime' : 'text-chalk'
       }`}>
         {finished ? 'FT' : live ? 'Live' : koLabel}
       </span>
@@ -146,23 +146,23 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
           max={30}
           value={home}
           onChange={(e) => setHome(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
-          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-sm text-chalk outline-none focus:border-lime/60"
+          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-base text-chalk outline-none focus:border-lime/60"
           placeholder="H"
         />
-        <span className="font-mono text-chalk/30">–</span>
+        <span className="font-mono text-chalk">–</span>
         <input
           type="number"
           min={0}
           max={30}
           value={away}
           onChange={(e) => setAway(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
-          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-sm text-chalk outline-none focus:border-lime/60"
+          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-base text-chalk outline-none focus:border-lime/60"
           placeholder="A"
         />
         <button
           onClick={override}
           disabled={home === '' || away === '' || state === 'saving'}
-          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
         >
           {state === 'saving' ? '…' : state === 'saved' ? '✓' : state === 'error' ? '!' : finished ? 'Override' : 'Set'}
         </button>
