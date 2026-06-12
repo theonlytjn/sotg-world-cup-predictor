@@ -462,6 +462,8 @@ export default function PredictPage() {
                     supabase={supabase}
                     onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
                     onEdit={(id, h, a) => setLocalEdits((prev) => ({ ...prev, [id]: { home: h, away: a } }))}
+                    exactPts={exactPts}
+                    resultPts={resultPts}
                   />
                 ))}
               </div>
@@ -511,6 +513,8 @@ export default function PredictPage() {
                     supabase={supabase}
                     onSaved={(p) => setPreds((prev) => ({ ...prev, [f.id]: p }))}
                     onEdit={(id, h, a) => setLocalEdits((prev) => ({ ...prev, [id]: { home: h, away: a } }))}
+                    exactPts={exactPts}
+                    resultPts={resultPts}
                   />
                 ))}
               </div>
@@ -530,7 +534,7 @@ export default function PredictPage() {
 }
 
 function FixtureRow({
-  fixture, pred, userId, supabase, onSaved, onEdit,
+  fixture, pred, userId, supabase, onSaved, onEdit, exactPts, resultPts,
 }: {
   fixture: Fixture;
   pred?: Pred;
@@ -538,6 +542,8 @@ function FixtureRow({
   supabase: ReturnType<typeof createClient>;
   onSaved: (p: Pred) => void;
   onEdit?: (fixtureId: number, home: string, away: string) => void;
+  exactPts?: number;
+  resultPts?: number;
 }) {
   const { locked, locksInMin } = getLockStatus(fixture.kickoff);
   const finished = fixture.status === 'FINISHED';
@@ -655,7 +661,7 @@ function FixtureRow({
               {fixture.home_score}–{fixture.away_score}
             </span>
           )}
-          {finished && <PointsBadge points={pred?.points ?? null} hasPick={!!pred} />}
+          {finished && <PointsBadge points={pred?.points ?? null} hasPick={!!pred} exactPts={exactPts} resultPts={resultPts} />}
           {state === 'error' && <span className="text-flame">Couldn&apos;t save</span>}
         </div>
       </div>
@@ -906,12 +912,12 @@ function CommunityPicks({
   );
 }
 
-function PointsBadge({ points, hasPick }: { points: number | null; hasPick: boolean }) {
+function PointsBadge({ points, hasPick, exactPts = 5, resultPts = 1 }: { points: number | null; hasPick: boolean; exactPts?: number; resultPts?: number }) {
   if (!hasPick) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk">No pick</span>;
   if (points === null) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk">Pending</span>;
   const tone =
-    points === 5 ? 'bg-lime text-pitch-950 font-bold'
-    : points === 1 ? 'bg-lime/20 text-lime'
+    points === exactPts ? 'bg-lime text-pitch-950 font-bold'
+    : points === resultPts ? 'bg-lime/20 text-lime'
     : 'bg-flame/20 text-flame';
   return <span className={`rounded-full px-2.5 py-0.5 font-display ${tone}`}>+{points}</span>;
 }
