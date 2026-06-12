@@ -550,8 +550,8 @@ function FixtureRow({
       {/* Mobile: full team names on top row, score inputs below */}
       <div className="mt-2 sm:hidden space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <TeamSide team={fixture.home_team} align="left" fullName />
-          <TeamSide team={fixture.away_team} align="right" fullName />
+          <TeamSide team={fixture.home_team} align="left" compact />
+          <TeamSide team={fixture.away_team} align="right" compact />
         </div>
         <div className="flex items-center justify-center gap-2">
           <ScoreBox value={home} setValue={handleHomeChange} disabled={locked} onCommit={save} />
@@ -609,18 +609,17 @@ function FixtureRow({
   );
 }
 
-function TeamSide({ team, align, fullName = false }: { team: Team | null; align: 'left' | 'right'; fullName?: boolean }) {
-  const name = fullName ? (team?.name || 'TBD') : (team?.tla || team?.name || 'TBD');
+function TeamSide({ team, align, compact = false }: { team: Team | null; align: 'left' | 'right'; compact?: boolean }) {
   return (
-    <div className={`flex min-w-0 items-center gap-2 ${align === 'right' ? 'flex-row-reverse text-right' : ''} ${fullName ? 'flex-1' : ''}`}>
+    <div className={`flex min-w-0 items-center gap-2 ${align === 'right' ? 'flex-row-reverse text-right' : ''} ${compact ? 'flex-1' : ''}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {team?.crest ? (
-        <img src={team.crest} alt="" className={`shrink-0 object-contain ${fullName ? 'h-6 w-6' : 'h-8 w-8'}`} />
+        <img src={team.crest} alt="" className={`shrink-0 object-contain ${compact ? 'h-6 w-6' : 'h-8 w-8'}`} />
       ) : (
-        <span className={`shrink-0 rounded-full bg-pitch-700 ${fullName ? 'h-6 w-6' : 'h-8 w-8'}`} />
+        <span className={`shrink-0 rounded-full bg-pitch-700 ${compact ? 'h-6 w-6' : 'h-8 w-8'}`} />
       )}
-      <span className={`font-display uppercase text-chalk ${fullName ? 'text-sm leading-snug' : 'truncate text-base'}`}>
-        {name}
+      <span className={`font-display uppercase leading-snug text-chalk ${compact ? 'text-sm' : 'text-base'}`}>
+        {team?.name || 'TBD'}
       </span>
     </div>
   );

@@ -280,7 +280,7 @@ export default function FixturesPage() {
                         <td className="px-1 py-2">
                           <div className="flex items-center gap-1.5">
                             {r.team?.crest && <img src={r.team.crest} alt="" className="h-4 w-4 shrink-0 object-contain" />}
-                            <span className="font-display text-base uppercase text-chalk truncate">{r.team?.tla ?? '—'}</span>
+                            <span className="font-display text-sm uppercase leading-snug text-chalk">{r.team?.name ?? '—'}</span>
                           </div>
                         </td>
                         {[r.played, r.won, r.drawn, r.lost].map((v, j) => (
@@ -452,7 +452,7 @@ function Side({ t, reverse }: { t: Team | null; reverse?: boolean }) {
         // eslint-disable-next-line @next/next/no-img-element
         ? <img src={t.crest} alt="" className="h-6 w-6 shrink-0 object-contain" />
         : <span className="h-6 w-6 shrink-0 rounded-full bg-pitch-700" />}
-      <span className="truncate font-display text-base font-bold uppercase text-chalk">{t?.tla ?? t?.name ?? 'TBD'}</span>
+      <span className="font-display text-base font-bold uppercase leading-snug text-chalk">{t?.name ?? 'TBD'}</span>
     </div>
   );
 }

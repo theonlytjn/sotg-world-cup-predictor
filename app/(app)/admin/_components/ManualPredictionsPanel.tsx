@@ -86,8 +86,8 @@ export default function ManualPredictionsPanel({
           <option value="">— choose a fixture —</option>
           {fixtures.map((f) => {
             const ko = new Date(f.kickoff).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-            const ht = f.home_team?.tla ?? f.home_team?.name ?? '?';
-            const at = f.away_team?.tla ?? f.away_team?.name ?? '?';
+            const ht = f.home_team?.name ?? '?';
+            const at = f.away_team?.name ?? '?';
             return (
               <option key={f.id} value={f.id}>
                 MD{f.matchday ?? '?'} · {ht} vs {at} ({ko})
@@ -105,7 +105,7 @@ export default function ManualPredictionsPanel({
             <>
               {selectedFixture && (
                 <p className="mb-4 font-display text-sm uppercase tracking-wide text-chalk/60">
-                  {selectedFixture.home_team?.tla} vs {selectedFixture.away_team?.tla} ·{' '}
+                  {selectedFixture.home_team?.name} vs {selectedFixture.away_team?.name} ·{' '}
                   {new Date(selectedFixture.kickoff).toLocaleString(undefined, {
                     weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
                   })}

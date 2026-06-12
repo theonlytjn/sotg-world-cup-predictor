@@ -119,7 +119,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
       {/* Teams + score */}
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <span className="truncate font-display text-sm uppercase text-chalk">
-          {fixture.home_team?.tla ?? fixture.home_team?.name ?? 'TBD'}
+          {fixture.home_team?.name ?? 'TBD'}
         </span>
         <span className="font-mono text-sm text-chalk/40">
           {finished || live
@@ -127,7 +127,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
             : 'vs'}
         </span>
         <span className="truncate font-display text-sm uppercase text-chalk">
-          {fixture.away_team?.tla ?? fixture.away_team?.name ?? 'TBD'}
+          {fixture.away_team?.name ?? 'TBD'}
         </span>
       </div>
 
