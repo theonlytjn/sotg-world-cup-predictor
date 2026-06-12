@@ -272,7 +272,7 @@ export default function LeaguePage() {
   return (
     <div>
       <div className="mb-1 flex items-center gap-2">
-        <Link href="/leagues" className="font-mono text-xs uppercase tracking-widest text-chalk/40 hover:text-chalk transition">
+        <Link href="/leagues" className="font-mono text-sm uppercase tracking-widest text-chalk hover:text-chalk transition">
           ← Leagues
         </Link>
       </div>
@@ -309,25 +309,25 @@ export default function LeaguePage() {
         <p className="mb-3 font-display text-sm uppercase tracking-widest text-chalk">Invite friends</p>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/10 bg-pitch-800 px-4 py-2.5">
-            <span className="font-mono text-sm tracking-[0.3em] text-chalk/60 select-all">
+            <span className="font-mono text-sm tracking-[0.3em] text-chalk select-all">
               {league.invite_code}
             </span>
             <span className="mx-1 h-4 w-px bg-white/10" />
-            <span className="truncate font-mono text-xs text-chalk/30 select-all">
+            <span className="truncate font-mono text-sm text-chalk select-all">
               {inviteUrl}
             </span>
           </div>
           <div className="flex gap-2">
             <button
               onClick={copyCode}
-              className="flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 font-mono text-xs uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime active:scale-95"
+              className="flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 font-mono text-sm uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime active:scale-95"
             >
               <HugeiconsIcon icon={ClipboardCopyIcon} size={14} color="currentColor" strokeWidth={1.5} />
               {copied ? 'Copied!' : 'Code'}
             </button>
             <button
               onClick={copyLink}
-              className="flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 font-mono text-xs uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime active:scale-95"
+              className="flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 font-mono text-sm uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime active:scale-95"
             >
               <HugeiconsIcon icon={ClipboardCopyIcon} size={14} color="currentColor" strokeWidth={1.5} />
               {copiedLink ? 'Copied!' : 'Share'}
@@ -437,7 +437,7 @@ export default function LeaguePage() {
             </p>
             <button
               onClick={() => { setH2hTarget(null); setH2hData(null); }}
-              className="font-mono text-sm text-chalk/40 hover:text-chalk transition"
+              className="font-mono text-sm text-chalk hover:text-chalk transition"
             >
               ✕ Close
             </button>
@@ -448,18 +448,18 @@ export default function LeaguePage() {
             <div className="text-left">
               <p className="font-display text-base uppercase tracking-wide text-lime">You</p>
               <p className="font-display text-3xl font-black text-chalk">{members.find(m => m.user_id === userId)?.total_points ?? 0}</p>
-              <p className="font-mono text-sm text-chalk/60">total pts</p>
+              <p className="font-mono text-base text-chalk">total pts</p>
             </div>
-            <span className="font-display text-xl text-chalk/30">vs</span>
+            <span className="font-display text-xl text-chalk">vs</span>
             <div className="text-right">
               <p className="font-display text-base uppercase tracking-wide text-chalk">{h2hTarget.display_name}</p>
               <p className="font-display text-3xl font-black text-chalk">{h2hTarget.total_points}</p>
-              <p className="font-mono text-sm text-chalk/60">total pts</p>
+              <p className="font-mono text-base text-chalk">total pts</p>
             </div>
           </div>
 
           {h2hLoading && (
-            <p className="py-4 text-center font-mono text-sm text-chalk/40">Loading matchup…</p>
+            <p className="py-4 text-center font-mono text-base text-chalk">Loading matchup…</p>
           )}
 
           {!h2hLoading && h2hData && (
@@ -468,44 +468,44 @@ export default function LeaguePage() {
               <div className="grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-pitch-800/60 p-4 mb-5">
                 <div className="text-center">
                   <p className="font-display text-3xl font-black text-lime">{h2hData.myWins}</p>
-                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/50">Your wins</p>
+                  <p className="font-mono text-sm uppercase tracking-widest text-chalk">Your wins</p>
                 </div>
                 <div className="text-center">
                   <p className="font-display text-3xl font-black text-chalk">{h2hData.ties}</p>
-                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/50">Tied</p>
+                  <p className="font-mono text-sm uppercase tracking-widest text-chalk">Tied</p>
                 </div>
                 <div className="text-center">
                   <p className="font-display text-3xl font-black text-flame">{h2hData.theirWins}</p>
-                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/50">Their wins</p>
+                  <p className="font-mono text-sm uppercase tracking-widest text-chalk">Their wins</p>
                 </div>
               </div>
-              <p className="mb-4 text-center font-mono text-xs uppercase tracking-widest text-chalk/40">
+              <p className="mb-4 text-center font-mono text-sm uppercase tracking-widest text-chalk">
                 {h2hData.shared} shared {h2hData.shared === 1 ? 'fixture' : 'fixtures'} · per-fixture points compared
               </p>
 
               {/* Recent fixtures */}
               {h2hData.fixtures.length > 0 && (
                 <div className="space-y-2">
-                  <p className="font-mono text-xs uppercase tracking-widest text-chalk/40 mb-2">Recent fixtures</p>
+                  <p className="font-mono text-sm uppercase tracking-widest text-chalk mb-2">Recent fixtures</p>
                   {h2hData.fixtures.map((f, i) => {
                     const youWon = f.myPoints > f.theirPoints;
                     const tied   = f.myPoints === f.theirPoints;
                     return (
                       <div key={i} className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl border border-white/8 bg-pitch-900/40 px-3 py-2.5">
                         <div className="text-left">
-                          <span className={`font-display text-sm uppercase ${youWon ? 'text-lime' : tied ? 'text-chalk' : 'text-chalk/50'}`}>
+                          <span className={`font-display text-sm uppercase ${youWon ? 'text-lime' : tied ? 'text-chalk' : 'text-chalk'}`}>
                             {f.myPick}
                           </span>
-                          <span className={`ml-1.5 font-mono text-xs ${youWon ? 'text-lime' : 'text-chalk/40'}`}>
+                          <span className={`ml-1.5 font-mono text-sm ${youWon ? 'text-lime' : 'text-chalk'}`}>
                             +{f.myPoints}
                           </span>
                         </div>
-                        <p className="truncate text-center font-mono text-xs text-chalk/40 px-1">{f.fixtureName}</p>
+                        <p className="truncate text-center font-mono text-sm text-chalk px-1">{f.fixtureName}</p>
                         <div className="text-right">
-                          <span className={`font-mono text-xs ${f.theirPoints > f.myPoints ? 'text-flame' : 'text-chalk/40'}`}>
+                          <span className={`font-mono text-sm ${f.theirPoints > f.myPoints ? 'text-flame' : 'text-chalk'}`}>
                             +{f.theirPoints}
                           </span>
-                          <span className={`ml-1.5 font-display text-sm uppercase ${f.theirPoints > f.myPoints ? 'text-flame' : tied ? 'text-chalk' : 'text-chalk/50'}`}>
+                          <span className={`ml-1.5 font-display text-sm uppercase ${f.theirPoints > f.myPoints ? 'text-flame' : tied ? 'text-chalk' : 'text-chalk'}`}>
                             {f.theirPick}
                           </span>
                         </div>
@@ -516,7 +516,7 @@ export default function LeaguePage() {
               )}
 
               {h2hData.shared === 0 && (
-                <p className="py-4 text-center font-mono text-sm text-chalk/40">
+                <p className="py-4 text-center font-mono text-base text-chalk">
                   No shared settled fixtures yet — check back once games are played.
                 </p>
               )}
@@ -530,7 +530,7 @@ export default function LeaguePage() {
         {canInteract && !isCreator && !leaveConfirm && (
           <button
             onClick={() => setLeaveConfirm(true)}
-            className="font-mono text-sm text-chalk/40 hover:text-flame transition"
+            className="font-mono text-sm text-chalk hover:text-flame transition"
           >
             Leave league
           </button>
@@ -547,14 +547,14 @@ export default function LeaguePage() {
             </button>
             <button
               onClick={() => setLeaveConfirm(false)}
-              className="font-mono text-sm text-chalk/40 hover:text-chalk transition"
+              className="font-mono text-sm text-chalk hover:text-chalk transition"
             >
               Cancel
             </button>
           </div>
         )}
         {canInteract && isCreator && (
-          <p className="font-mono text-xs text-chalk/25">
+          <p className="font-mono text-sm text-chalk">
             Creator — you can&apos;t leave, but members can
           </p>
         )}
