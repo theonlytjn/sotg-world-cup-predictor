@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
       assist: g.assist?.name ?? null,
     }));
 
-    const { data: rows, error } = await db
+    const baseUpdate = db
       .from('fixtures')
       .update({
         status: m.status,
@@ -102,8 +102,14 @@ export async function GET(req: NextRequest) {
         away_score: m.score?.fullTime?.away ?? null,
         goals: goals.length > 0 ? goals : null,
       })
-      .eq('external_id', m.id)
-      .select('id');
+      .eq('external_id', m.id);
+
+    // When football-data.org lags (still TIMED/SCHEDULED after KO), don't
+    // overwrite a score the admin has already manually confirmed as FINISHED.
+    const isActive = ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(m.status);
+    const { data: rows, error } = isActive
+      ? await baseUpdate.select('id')
+      : await baseUpdate.neq('status', 'FINISHED').select('id');
     if (error) continue;
     if (rows?.length) updated += rows.length;
   }
