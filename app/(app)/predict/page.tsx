@@ -625,6 +625,8 @@ function FixtureRow({
           {state === 'error' && <span className="text-flame">Couldn&apos;t save</span>}
         </div>
       </div>
+
+      {locked && <CommunityPicks fixtureId={fixture.id} supabase={supabase} />}
     </div>
   );
 }
@@ -684,6 +686,73 @@ function ScoreBox({ value, setValue, disabled, onCommit }: {
       className="h-12 w-12 rounded-xl border-2 border-white/15 bg-pitch-800 text-center font-display text-xl text-chalk outline-none transition focus:border-gold disabled:opacity-50"
       placeholder="–"
     />
+  );
+}
+
+function CommunityPicks({
+  fixtureId,
+  supabase,
+}: {
+  fixtureId: number;
+  supabase: ReturnType<typeof createClient>;
+}) {
+  const [picks, setPicks] = useState<{ label: string; count: number; pct: number }[] | null>(null);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from('match_predictions')
+      .select('home_pred, away_pred')
+      .eq('fixture_id', fixtureId)
+      .then(({ data }) => {
+        if (!data?.length) { setPicks([]); return; }
+        const counts: Record<string, number> = {};
+        for (const p of data) {
+          const key = `${p.home_pred}–${p.away_pred}`;
+          counts[key] = (counts[key] ?? 0) + 1;
+        }
+        const tot = data.length;
+        setTotal(tot);
+        setPicks(
+          Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([label, count]) => ({ label, count, pct: Math.round((count / tot) * 100) }))
+        );
+      });
+  }, [fixtureId, supabase]);
+
+  if (picks === null) return (
+    <div className="mt-4 border-t border-white/10 pt-3">
+      <p className="font-mono text-sm text-chalk">Loading community picks…</p>
+    </div>
+  );
+  if (picks.length === 0) return null;
+
+  return (
+    <div className="mt-4 border-t border-white/10 pt-3">
+      <p className="mb-2.5 font-mono text-sm uppercase tracking-widest text-chalk">
+        Community picks <span className="text-chalk">· {total} prediction{total !== 1 ? 's' : ''}</span>
+      </p>
+      <div className="space-y-2">
+        {picks.map(({ label, pct }, i) => (
+          <div key={label} className="flex items-center gap-3">
+            <span className={`w-10 shrink-0 font-display text-base uppercase ${i === 0 ? 'text-lime' : 'text-chalk'}`}>
+              {label}
+            </span>
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+              <div
+                className={`h-full rounded-full transition-all ${i === 0 ? 'bg-lime' : 'bg-white/30'}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className={`w-9 shrink-0 text-right font-mono text-sm ${i === 0 ? 'text-lime' : 'text-chalk'}`}>
+              {pct}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
