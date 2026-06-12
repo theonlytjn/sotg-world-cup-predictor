@@ -397,36 +397,45 @@ function FixtureRow({ f }: { f: Fixture }) {
   const awayGoals = (f.goals ?? []).filter((g) => g.team_id === f.away_team_id);
 
   return (
-    <div className={`rounded-2xl border px-4 py-3 transition-colors ${live ? 'border-lime/25 bg-pitch-900/80' : finished ? 'border-white/6 bg-pitch-900/40' : 'border-white/10 bg-pitch-900/60'}`}>
-      <div className="flex items-center gap-3">
-        <span className="w-8 shrink-0 font-display text-base uppercase tracking-widest text-chalk">{f.group_label ?? '—'}</span>
-        <Side t={f.home_team} />
-        <div className="w-20 shrink-0 text-center">
-          {finished || live
-            ? <span className="font-display font-black text-2xl text-chalk">{f.home_score ?? 0}–{f.away_score ?? 0}</span>
-            : <span className="font-mono text-base text-chalk">{koTime}</span>}
-        </div>
-        <Side t={f.away_team} reverse />
-        <span className="w-10 shrink-0 text-right font-display text-sm uppercase tracking-widest">
-          {live ? (
-            <span className="flex items-center justify-end gap-1 text-flame">
-              <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />Live
+    <div className={`rounded-2xl border px-3 py-3 transition-colors ${live ? 'border-lime/25 bg-pitch-900/80' : finished ? 'border-white/6 bg-pitch-900/40' : 'border-white/10 bg-pitch-900/60'}`}>
+      <div className="flex items-center gap-2">
+        {/* Group label */}
+        <span className="w-5 shrink-0 font-display text-xs uppercase tracking-widest text-chalk">{f.group_label ?? '—'}</span>
+
+        {/* Home team */}
+        <Side t={f.home_team} align="left" />
+
+        {/* Centre: status above score */}
+        <div className="w-16 shrink-0 flex flex-col items-center gap-0.5">
+          <span className={`font-display text-[0.6rem] uppercase tracking-widest ${live ? 'text-flame' : 'text-chalk'}`}>
+            {live ? (
+              <span className="flex items-center gap-1">
+                <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />
+                Live
+              </span>
+            ) : finished ? 'FT' : koTime}
+          </span>
+          {(finished || live) && (
+            <span className="font-display font-black text-2xl text-chalk leading-none">
+              {f.home_score ?? 0}–{f.away_score ?? 0}
             </span>
-          ) : finished ? <span className="text-chalk">FT</span> : ''}
-        </span>
+          )}
+        </div>
+
+        {/* Away team */}
+        <Side t={f.away_team} align="right" />
       </div>
 
       {(homeGoals.length > 0 || awayGoals.length > 0) && (
-        <div className="mt-2.5 flex gap-3 border-t border-white/6 pt-2.5">
-          <span className="w-8 shrink-0" />
+        <div className="mt-2 flex gap-2 border-t border-white/6 pt-2">
+          <span className="w-5 shrink-0" />
           <div className="flex-1 space-y-0.5">
             {homeGoals.map((g, i) => <GoalLine key={i} g={g} />)}
           </div>
-          <div className="w-20 shrink-0" />
+          <div className="w-16 shrink-0" />
           <div className="flex-1 space-y-0.5 text-right">
             {awayGoals.map((g, i) => <GoalLine key={i} g={g} reverse />)}
           </div>
-          <span className="w-10 shrink-0" />
         </div>
       )}
     </div>
@@ -445,14 +454,16 @@ function GoalLine({ g, reverse }: { g: GoalEvent; reverse?: boolean }) {
   );
 }
 
-function Side({ t, reverse }: { t: Team | null; reverse?: boolean }) {
+function Side({ t, align }: { t: Team | null; align: 'left' | 'right' }) {
   return (
-    <div className={`flex flex-1 items-center gap-2 ${reverse ? 'flex-row-reverse text-right' : ''}`}>
+    <div className={`flex flex-1 flex-col gap-1 ${align === 'right' ? 'items-end' : 'items-start'}`}>
       {t?.crest
         // eslint-disable-next-line @next/next/no-img-element
-        ? <img src={t.crest} alt="" className="h-6 w-6 shrink-0 object-contain" />
-        : <span className="h-6 w-6 shrink-0 rounded-full bg-pitch-700" />}
-      <span className="font-display text-base font-bold uppercase leading-snug text-chalk">{t?.name ?? 'TBD'}</span>
+        ? <img src={t.crest} alt="" className="h-7 w-7 object-contain" />
+        : <span className="h-7 w-7 rounded-full bg-pitch-700" />}
+      <span className={`font-display text-[0.55rem] uppercase leading-tight text-chalk ${align === 'right' ? 'text-right' : ''}`}>
+        {t?.name ?? 'TBD'}
+      </span>
     </div>
   );
 }
