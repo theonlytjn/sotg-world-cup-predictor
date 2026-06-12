@@ -286,7 +286,7 @@ export default function LeaguePage() {
             <p className="font-display text-base uppercase tracking-[0.28em] text-lime">Private League</p>
           </div>
           <h1 className="font-display text-4xl uppercase text-chalk">{league.name}</h1>
-          <p className="mt-1 font-mono text-sm text-chalk/40">
+          <p className="mt-1 font-mono text-sm text-chalk">
             {members.length} {members.length === 1 ? 'member' : 'members'}
           </p>
         </div>
@@ -334,7 +334,7 @@ export default function LeaguePage() {
             </button>
           </div>
         </div>
-        <p className="mt-2 font-mono text-xs text-chalk/30">
+        <p className="mt-2 font-mono text-sm text-chalk">
           Share the code or the link — anyone with a SOTG account can join
         </p>
       </div>
@@ -418,12 +418,12 @@ export default function LeaguePage() {
         })}
       </div>
 
-      <p className="mt-2 text-center font-mono text-xs text-chalk/35">
+      <p className="mt-2 text-center font-mono text-sm text-chalk">
         Tied on points<span className="text-gold">·</span> Correct Scores (CS) decides the order
       </p>
 
       {members.length > 1 && !h2hTarget && canInteract && (
-        <p className="mt-2 font-mono text-xs uppercase tracking-widest text-chalk/40 text-center">
+        <p className="mt-2 font-mono text-sm uppercase tracking-widest text-chalk text-center">
           Tap a rival to see head-to-head
         </p>
       )}
