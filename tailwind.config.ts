@@ -23,8 +23,8 @@ const config: Config = {
         },
         chalk: '#f4f6f2',
         lime: {
-          DEFAULT: '#c6ff3d',
-          dim: '#9fcc2f',
+          DEFAULT: '#ffd24a',
+          dim: '#c9991a',
         },
         flame: '#ff5c38',
         gold: '#ffd24a',
