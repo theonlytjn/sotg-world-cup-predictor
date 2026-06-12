@@ -2,24 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Colour tokens ─────────────────────────────────────────────────────────
+   All values as space-separated RGB channels so Tailwind's opacity modifiers
+   (e.g. bg-lime/10, text-chalk/40) continue to work with both themes. */
+
 :root {
-  --bg: #070b08;
+  /* dark theme (default) */
+  --c-pitch-950: 7 11 8;
+  --c-pitch-900: 11 17 13;
+  --c-pitch-800: 18 26 20;
+  --c-pitch-750: 22 31 23;
+  --c-pitch-700: 27 38 30;
+  --c-pitch-600: 39 54 43;
+  --c-chalk:     244 246 242;
+  --c-lime:      255 210 74;
+  --c-lime-dim:  201 153 26;
+  --c-gold:      255 210 74;
+  --c-flame:     255 92 56;
 }
+
+html.light {
+  /* light theme — warm cream palette */
+  --c-pitch-950: 247 245 239;
+  --c-pitch-900: 237 234 225;
+  --c-pitch-800: 224 220 210;
+  --c-pitch-750: 211 207 196;
+  --c-pitch-700: 196 192 181;
+  --c-pitch-600: 178 174 162;
+  --c-chalk:     26 31 27;
+  --c-lime:      154 110 0;
+  --c-lime-dim:  122 87 0;
+  --c-gold:      154 110 0;
+  --c-flame:     210 58 24;
+}
+
+/* ── Body ─────────────────────────────────────────────────────────────────── */
 
 html {
   -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background-color: var(--bg);
-  color: #f4f6f2;
+  background-color: rgb(var(--c-pitch-950));
+  color: rgb(var(--c-chalk));
   font-family: var(--font-body), sans-serif;
+  font-size: 1.125rem;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+
   background-image:
-    /* stadium-light amber glow from top */
-    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(255, 210, 74, 0.18) 0%, transparent 60%),
-    /* subtle warm accent bottom-right */
+    radial-gradient(ellipse 90% 55% at 50% -8%,  rgba(255, 210, 74, 0.18) 0%, transparent 60%),
     radial-gradient(ellipse 55% 40% at 90% 100%, rgba(255, 210, 74, 0.05) 0%, transparent 55%),
-    /* very fine horizontal pitch lines */
     repeating-linear-gradient(
       180deg,
       transparent 0px,
@@ -27,81 +60,92 @@ body {
       rgba(255, 255, 255, 0.018) 96px,
       rgba(255, 255, 255, 0.018) 97px
     );
-  min-height: 100dvh;
 }
 
-/* Boldonse — zero tracking, generous line-height so descenders never clip */
+html.light body {
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -8%,  rgba(154, 110, 0, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 40% at 90% 100%, rgba(154, 110, 0, 0.04) 0%, transparent 55%);
+}
+
+/* ── Boldonse display font ─────────────────────────────────────────────────── */
+
 .font-display {
   letter-spacing: 0;
   line-height: 2;
 }
 
-body {
-  font-size: 1.125rem; /* 18px base */
-  -webkit-font-smoothing: antialiased;
+/* ── Border colour inversion for light mode ───────────────────────────────── */
+/* border-white/* classes become border-black/* with equivalent visual weight */
+
+html.light .border-white\/5  { border-color: rgb(0 0 0 / 0.05); }
+html.light .border-white\/8  { border-color: rgb(0 0 0 / 0.06); }
+html.light .border-white\/10 { border-color: rgb(0 0 0 / 0.08); }
+html.light .border-white\/12 { border-color: rgb(0 0 0 / 0.09); }
+html.light .border-white\/15 { border-color: rgb(0 0 0 / 0.11); }
+html.light .border-white\/20 { border-color: rgb(0 0 0 / 0.14); }
+html.light .border-white\/25 { border-color: rgb(0 0 0 / 0.16); }
+
+/* Dividers that use bg-white/X */
+html.light .bg-white\/5  { background-color: rgb(0 0 0 / 0.04); }
+html.light .bg-white\/8  { background-color: rgb(0 0 0 / 0.05); }
+html.light .bg-white\/10 { background-color: rgb(0 0 0 / 0.07); }
+
+/* Card shadow lightened for light backgrounds */
+html.light .shadow-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 12px 40px -12px rgba(0,0,0,0.10);
 }
 
-/* ── Legibility overrides ──────────────────────────────────────────────────
-   Tailwind's opacity modifiers generate very low-contrast grey on our dark
-   pitch background. Override each level upward so secondary/tertiary text
-   is comfortably readable without changing every component file. */
-.text-chalk\/12 { color: rgb(244 246 242 / 0.30); }
-.text-chalk\/25 { color: rgb(244 246 242 / 0.48); }
-.text-chalk\/30 { color: rgb(244 246 242 / 0.55); }
-.text-chalk\/35 { color: rgb(244 246 242 / 0.62); }
-.text-chalk\/40 { color: rgb(244 246 242 / 0.68); }
-.text-chalk\/50 { color: rgb(244 246 242 / 0.76); }
-.text-chalk\/55 { color: rgb(244 246 242 / 0.80); }
-.text-chalk\/60 { color: rgb(244 246 242 / 0.85); }
+/* ── Gradient fade utility (replaces inline style for leaderboard teaser) ─── */
+.fade-to-bg {
+  background: linear-gradient(to bottom, transparent, rgb(var(--c-pitch-950)));
+}
 
-/* hide scrollbar while keeping scroll behaviour — used by Nav on mobile */
+/* ── Scrollbar hide ────────────────────────────────────────────────────────── */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* number inputs without spinners — cleaner score boxes */
+/* ── Number inputs without spinners ─────────────────────────────────────── */
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-input[type='number'] {
-  -moz-appearance: textfield;
-}
+input[type='number'] { -moz-appearance: textfield; }
+
+/* ── Animations ─────────────────────────────────────────────────────────── */
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .rise { animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
 @keyframes pulse-live {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50%       { opacity: 0.35; }
 }
 .live-dot { animation: pulse-live 1.4s ease-in-out infinite; }
 
-/* homepage marquee */
 @keyframes marquee-scroll { to { transform: translateX(-50%); } }
 .marquee-track { animation: marquee-scroll 32s linear infinite; }
 .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
 
-/* prediction ticket flip/pop */
 @keyframes flip {
-  0% { transform: rotateX(90deg); opacity: 0; }
-  100% { transform: rotateX(0); opacity: 1; }
+  0%   { transform: rotateX(90deg); opacity: 0; }
+  100% { transform: rotateX(0);     opacity: 1; }
 }
 .flip-anim { animation: flip 0.5s ease; }
 
 @keyframes pop {
-  0% { transform: scale(0.6); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0%   { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
 }
 .pop-anim { animation: pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); }
 
-/* live ping dot */
 @keyframes live-ping {
-  0% { box-shadow: 0 0 0 0 rgba(255, 92, 56, 0.55); }
-  70% { box-shadow: 0 0 0 8px rgba(255, 92, 56, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 92, 56, 0); }
+  0%   { box-shadow: 0 0 0 0   rgba(255, 92, 56, 0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(255, 92, 56, 0); }
+  100% { box-shadow: 0 0 0 0   rgba(255, 92, 56, 0); }
 }
 .live-ping { animation: live-ping 1.6s infinite; }

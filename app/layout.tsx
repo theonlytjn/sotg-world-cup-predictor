@@ -31,6 +31,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
+      <head>
+        {/* Prevent flash of wrong theme — reads localStorage before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('sotg-theme')==='light')document.documentElement.classList.add('light')}catch(e){}` }} />
+      </head>
       <body>
         <PageLoader />
         <AosInit />

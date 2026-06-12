@@ -40,7 +40,7 @@ export default async function RulesPage() {
   return (
     <div>
       <h1 className="font-display text-4xl uppercase text-chalk">Rules &amp; Points</h1>
-      <p className="mt-1 text-base text-chalk/55">
+      <p className="mt-1 text-base text-chalk">
         Every point source in the predictor — live from the database.
       </p>
 
@@ -54,18 +54,18 @@ export default async function RulesPage() {
           {matchRules.map((r) => (
             <div key={r.key} className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
               <p className="font-display text-lg uppercase text-chalk">{r.label}</p>
-              <p className="mt-1 flex-1 text-base text-chalk/50">{r.description}</p>
+              <p className="mt-1 flex-1 text-base text-chalk">{r.description}</p>
               <p className="mt-4 font-mono text-4xl font-semibold text-lime">
                 {r.points}
-                <span className="ml-1.5 text-base text-lime/60">pts</span>
+                <span className="ml-1.5 text-base text-lime">pts</span>
               </p>
             </div>
           ))}
           {/* Wrong prediction — always 0 */}
           <div className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
             <p className="font-display text-lg uppercase text-chalk">Wrong</p>
-            <p className="mt-1 flex-1 text-base text-chalk/50">Score and result both wrong — no points.</p>
-            <p className="mt-4 font-mono text-4xl font-semibold text-chalk/25">
+            <p className="mt-1 flex-1 text-base text-chalk">Score and result both wrong — no points.</p>
+            <p className="mt-4 font-mono text-4xl font-semibold text-chalk">
               0<span className="ml-1.5 text-base">pts</span>
             </p>
           </div>
@@ -88,22 +88,22 @@ export default async function RulesPage() {
               {cats.map((cat) => (
                 <div key={cat.slug} className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
                   <p className="font-display text-lg uppercase leading-tight text-chalk">{cat.label}</p>
-                  <p className="mt-1 flex-1 text-base text-chalk/50">
+                  <p className="mt-1 flex-1 text-base text-chalk">
                     {PICK_KIND_LABEL[cat.pick_kind] ?? 'Make a prediction'}
                   </p>
                   <div className="mt-4 flex items-end gap-4">
                     <div>
-                      <p className="font-mono text-sm uppercase tracking-widest text-chalk/30">1st choice</p>
+                      <p className="font-mono text-sm uppercase tracking-widest text-chalk">1st choice</p>
                       <p className="font-mono text-3xl font-semibold text-lime">
                         {cat.pts_pick_1}
-                        <span className="ml-1 text-base text-lime/60">pts</span>
+                        <span className="ml-1 text-base text-lime">pts</span>
                       </p>
                     </div>
                     <div className="mb-1">
-                      <p className="font-mono text-sm uppercase tracking-widest text-chalk/30">2nd</p>
-                      <p className="font-mono text-xl font-semibold text-chalk/50">
+                      <p className="font-mono text-sm uppercase tracking-widest text-chalk">2nd</p>
+                      <p className="font-mono text-xl font-semibold text-chalk">
                         {cat.pts_pick_2}
-                        <span className="ml-1 text-base text-chalk/30">pts</span>
+                        <span className="ml-1 text-base text-chalk">pts</span>
                       </p>
                     </div>
                   </div>
@@ -121,7 +121,7 @@ export default async function RulesPage() {
           <span className="h-px flex-1 bg-white/10" />
         </div>
         <div className="rounded-2xl border border-gold/20 bg-pitch-900/60 p-5">
-          <p className="text-base text-chalk/55">
+          <p className="text-base text-chalk">
             Five open-ended opinion votes — no points, no deadline. Vote on anything from the Breakthrough Star to the Worst Team. Results are tallied and revealed when the tournament ends.
           </p>
         </div>
@@ -142,7 +142,7 @@ export default async function RulesPage() {
           ].map(({ title, body }) => (
             <div key={title} className="rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
               <p className="font-display text-lg uppercase text-chalk">{title}</p>
-              <p className="mt-2 text-base text-chalk/55">{body}</p>
+              <p className="mt-2 text-base text-chalk">{body}</p>
             </div>
           ))}
         </div>

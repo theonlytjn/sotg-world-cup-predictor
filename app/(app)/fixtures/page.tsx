@@ -154,7 +154,7 @@ export default function FixturesPage() {
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [standings]);
 
-  if (loading) return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading…</p>;
+  if (loading) return <p className="py-20 text-center font-mono text-base text-chalk">Loading…</p>;
 
   return (
     <div>
@@ -166,14 +166,14 @@ export default function FixturesPage() {
         {byGroup.length > 0 && (
           <button
             onClick={() => setShowStandings((v) => !v)}
-            className="font-mono text-base uppercase tracking-widest text-chalk/40 hover:text-lime transition"
+            className="font-mono text-base uppercase tracking-widest text-chalk hover:text-lime transition"
           >
             {showStandings ? 'Hide tables' : 'Show tables'}
           </button>
         )}
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">Fixtures</h1>
-      <p className="mt-1 text-chalk/75">Scores update automatically as results come in.</p>
+      <p className="mt-1 text-chalk">Scores update automatically as results come in.</p>
 
       {/* Group standings (toggleable) */}
       {showStandings && byGroup.length > 0 && (
@@ -188,14 +188,14 @@ export default function FixturesPage() {
                   <thead>
                     <tr className="border-b border-white/6">
                       {['#','Team','P','W','D','L','GD','Pts'].map((h) => (
-                        <th key={h} className={`py-1.5 font-mono text-[9px] uppercase tracking-widest text-chalk/30 ${h === 'Team' ? 'px-1 text-left' : h === '#' ? 'pl-3 text-left' : h === 'Pts' ? 'pr-3 text-center' : 'px-1 text-center'}`}>{h}</th>
+                        <th key={h} className={`py-1.5 font-mono text-[9px] uppercase tracking-widest text-chalk ${h === 'Team' ? 'px-1 text-left' : h === '#' ? 'pl-3 text-left' : h === 'Pts' ? 'pr-3 text-center' : 'px-1 text-center'}`}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((r, i) => (
                       <tr key={r.position} className={`border-t border-white/5 ${i < 2 ? 'bg-lime/[0.03]' : ''}`}>
-                        <td className="pl-3 py-2 font-mono text-base text-chalk/40">{r.position}</td>
+                        <td className="pl-3 py-2 font-mono text-base text-chalk">{r.position}</td>
                         <td className="px-1 py-2">
                           <div className="flex items-center gap-1.5">
                             {r.team?.crest && <img src={r.team.crest} alt="" className="h-4 w-4 shrink-0 object-contain" />}
@@ -203,9 +203,9 @@ export default function FixturesPage() {
                           </div>
                         </td>
                         {[r.played, r.won, r.drawn, r.lost].map((v, j) => (
-                          <td key={j} className="px-1 py-2 text-center font-mono text-base text-chalk/60">{v}</td>
+                          <td key={j} className="px-1 py-2 text-center font-mono text-base text-chalk">{v}</td>
                         ))}
-                        <td className="px-1 py-2 text-center font-mono text-base text-chalk/60">{r.goal_diff > 0 ? `+${r.goal_diff}` : r.goal_diff}</td>
+                        <td className="px-1 py-2 text-center font-mono text-base text-chalk">{r.goal_diff > 0 ? `+${r.goal_diff}` : r.goal_diff}</td>
                         <td className="pr-3 py-2 text-center font-display text-base text-chalk">{r.points}</td>
                       </tr>
                     ))}
@@ -214,7 +214,7 @@ export default function FixturesPage() {
               </div>
             ))}
           </div>
-          <p className="mt-2 font-mono text-sm uppercase tracking-widest text-chalk/25">
+          <p className="mt-2 font-mono text-sm uppercase tracking-widest text-chalk">
             Top 2 from each group advance
           </p>
         </section>
@@ -233,7 +233,7 @@ export default function FixturesPage() {
             <button
               key={mg.matchday}
               onClick={() => setActiveTab(mg.matchday)}
-              className={['flex flex-1 flex-col items-center pb-4 pt-3 relative transition-colors', active ? 'text-lime' : 'text-chalk/50 hover:text-chalk'].join(' ')}
+              className={['flex flex-1 flex-col items-center pb-4 pt-3 relative transition-colors', active ? 'text-lime' : 'text-chalk hover:text-chalk'].join(' ')}
             >
               <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
               <span className="font-display text-3xl">{mg.matchday}</span>
@@ -242,8 +242,8 @@ export default function FixturesPage() {
                   <span className="flex items-center gap-1 text-flame">
                     <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />{liveCount} live
                   </span>
-                ) : allDone ? <span className="text-chalk/25">Done</span>
-                  : <span className="text-chalk/35">{upcoming} left</span>}
+                ) : allDone ? <span className="text-chalk">Done</span>
+                  : <span className="text-chalk">{upcoming} left</span>}
               </span>
               {active && <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-lime" />}
             </button>
@@ -258,19 +258,19 @@ export default function FixturesPage() {
             <button
               onClick={() => activeDayIdx > 0 && setActiveDay(activeGroup.dateGroups[activeDayIdx - 1].dateKey)}
               disabled={activeDayIdx <= 0}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk/50 transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
             >←</button>
             <div className="flex-1 text-center">
               <p className="font-display text-base uppercase tracking-widest text-chalk">{activeDayGroup?.label ?? '—'}</p>
-              <p className="font-mono text-base text-chalk/35">
+              <p className="font-mono text-base text-chalk">
                 {activeDayGroup?.fixtures.length ?? 0} matches
-                {totalDays > 1 && <span className="ml-2 text-chalk/25">Day {activeDayIdx + 1} of {totalDays}</span>}
+                {totalDays > 1 && <span className="ml-2 text-chalk">Day {activeDayIdx + 1} of {totalDays}</span>}
               </p>
             </div>
             <button
               onClick={() => activeDayIdx < totalDays - 1 && setActiveDay(activeGroup.dateGroups[activeDayIdx + 1].dateKey)}
               disabled={activeDayIdx >= totalDays - 1}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk/50 transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
             >→</button>
           </div>
           {totalDays > 1 && (
@@ -302,12 +302,12 @@ function FixtureRow({ f }: { f: Fixture }) {
   return (
     <div className={`rounded-2xl border px-4 py-3 transition-colors ${live ? 'border-lime/25 bg-pitch-900/80' : finished ? 'border-white/6 bg-pitch-900/40' : 'border-white/10 bg-pitch-900/60'}`}>
       <div className="flex items-center gap-3">
-        <span className="w-8 shrink-0 font-display text-base uppercase tracking-widest text-chalk/40">{f.group_label ?? '—'}</span>
+        <span className="w-8 shrink-0 font-display text-base uppercase tracking-widest text-chalk">{f.group_label ?? '—'}</span>
         <Side t={f.home_team} />
         <div className="w-20 shrink-0 text-center">
           {finished || live
             ? <span className="font-display font-black text-2xl text-chalk">{f.home_score ?? 0}–{f.away_score ?? 0}</span>
-            : <span className="font-mono text-base text-chalk/40">{koTime}</span>}
+            : <span className="font-mono text-base text-chalk">{koTime}</span>}
         </div>
         <Side t={f.away_team} reverse />
         <span className="w-10 shrink-0 text-right font-display text-sm uppercase tracking-widest">
@@ -315,7 +315,7 @@ function FixtureRow({ f }: { f: Fixture }) {
             <span className="flex items-center justify-end gap-1 text-flame">
               <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />Live
             </span>
-          ) : finished ? <span className="text-chalk/30">FT</span> : ''}
+          ) : finished ? <span className="text-chalk">FT</span> : ''}
         </span>
       </div>
 
@@ -340,10 +340,10 @@ function GoalLine({ g, reverse }: { g: GoalEvent; reverse?: boolean }) {
   const min = g.minute != null ? (g.injury_time ? `${g.minute}+${g.injury_time}'` : `${g.minute}'`) : '';
   const tag = g.type === 'OWN_GOAL' ? '(og)' : g.type === 'PENALTY' ? '(p)' : '';
   return (
-    <p className={`font-mono text-base text-chalk/55 ${reverse ? 'text-right' : ''}`}>
+    <p className={`font-mono text-base text-chalk ${reverse ? 'text-right' : ''}`}>
       {reverse
-        ? <>{tag && <span className="text-chalk/30 mr-1">{tag}</span>}{g.scorer ?? '—'}{min && <span className="text-chalk/30 ml-1">{min}</span>}</>
-        : <>{min && <span className="text-chalk/30 mr-1">{min}</span>}{g.scorer ?? '—'}{tag && <span className="text-chalk/30 ml-1">{tag}</span>}</>}
+        ? <>{tag && <span className="text-chalk mr-1">{tag}</span>}{g.scorer ?? '—'}{min && <span className="text-chalk ml-1">{min}</span>}</>
+        : <>{min && <span className="text-chalk mr-1">{min}</span>}{g.scorer ?? '—'}{tag && <span className="text-chalk ml-1">{tag}</span>}</>}
     </p>
   );
 }

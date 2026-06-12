@@ -156,12 +156,12 @@ export default function PredictPage() {
   }
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading fixtures…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk">Loading fixtures…</p>;
   }
 
   if (fixtures.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-6 text-chalk/70">
+      <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-6 text-chalk">
         <p className="font-display text-xl uppercase text-chalk">No fixtures yet</p>
         <p className="mt-2 text-base">
           Run <code className="rounded bg-pitch-700 px-1.5 py-0.5 font-mono text-lime">npm run seed</code>{' '}
@@ -181,7 +181,7 @@ export default function PredictPage() {
         <p className="font-display text-base tracking-[0.28em] uppercase text-lime">Your picks</p>
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">Predict</h1>
-      <p className="mt-1 text-base text-chalk/55">
+      <p className="mt-1 text-base text-chalk">
         Call the scoreline for every group game. Locks at kickoff — no edits after.
       </p>
 
@@ -197,7 +197,7 @@ export default function PredictPage() {
               onClick={() => setActiveTab(mg.matchday)}
               className={[
                 'flex flex-1 flex-col items-center pb-4 pt-3 transition-colors relative',
-                active ? 'text-lime' : 'text-chalk/50 hover:text-chalk',
+                active ? 'text-lime' : 'text-chalk hover:text-chalk',
               ].join(' ')}
             >
               <span className="font-display text-sm uppercase tracking-[0.2em]">Matchday</span>
@@ -209,9 +209,9 @@ export default function PredictPage() {
                     {mg.liveCount} live
                   </span>
                 ) : done ? (
-                  <span className="text-chalk/25">Done</span>
+                  <span className="text-chalk">Done</span>
                 ) : (
-                  <span className="text-chalk/35">{upcoming} left</span>
+                  <span className="text-chalk">{upcoming} left</span>
                 )}
               </span>
               {active && (
@@ -229,7 +229,7 @@ export default function PredictPage() {
             <button
               onClick={prevDay}
               disabled={activeDayIdx <= 0}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk/50 transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
               aria-label="Previous day"
             >
               ←
@@ -238,10 +238,10 @@ export default function PredictPage() {
               <p className="font-display text-base uppercase tracking-widest text-chalk">
                 {activeDayGroup?.label ?? '—'}
               </p>
-              <p className="font-mono text-base text-chalk/35">
+              <p className="font-mono text-base text-chalk">
                 {activeDayGroup?.fixtures.length ?? 0} matches
                 {totalDays > 1 && (
-                  <span className="ml-2 text-chalk/25">
+                  <span className="ml-2 text-chalk">
                     Day {activeDayIdx + 1} of {totalDays}
                   </span>
                 )}
@@ -250,7 +250,7 @@ export default function PredictPage() {
             <button
               onClick={nextDay}
               disabled={activeDayIdx >= totalDays - 1}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk/50 transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-chalk transition hover:border-white/30 hover:text-chalk disabled:opacity-20"
               aria-label="Next day"
             >
               →
@@ -345,15 +345,15 @@ function FixtureRow({
     }`}>
       {/* Top bar: group + status/time */}
       <div className="mb-3 flex items-center justify-between">
-        <span className="font-display text-sm uppercase tracking-[0.22em] text-chalk/40">
+        <span className="font-display text-sm uppercase tracking-[0.22em] text-chalk">
           {fixture.group_label ? `Group ${fixture.group_label}` : ''}
         </span>
-        <span className="flex items-center gap-1.5 font-display text-sm uppercase tracking-widest text-chalk/40">
+        <span className="flex items-center gap-1.5 font-display text-sm uppercase tracking-widest text-chalk">
           {live && <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-flame" />}
           {live ? (
             <span className="text-flame">Live</span>
           ) : finished ? (
-            <span className="text-chalk/30">Full time</span>
+            <span className="text-chalk">Full time</span>
           ) : (
             koTime
           )}
@@ -365,7 +365,7 @@ function FixtureRow({
         <TeamSide team={fixture.home_team} align="left" />
         <div className="flex items-center gap-2">
           <ScoreBox value={home} setValue={setHome} disabled={locked} onCommit={save} />
-          <span className="font-display text-lg text-chalk/25">–</span>
+          <span className="font-display text-lg text-chalk">–</span>
           <ScoreBox value={away} setValue={setAway} disabled={locked} onCommit={save} />
         </div>
         <TeamSide team={fixture.away_team} align="right" />
@@ -383,7 +383,7 @@ function FixtureRow({
               {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save pick'}
             </button>
           ) : (
-            <span className="flex items-center gap-1.5 font-display text-base uppercase tracking-widest text-chalk/30">
+            <span className="flex items-center gap-1.5 font-display text-base uppercase tracking-widest text-chalk">
               <HugeiconsIcon icon={LockIcon} size={12} color="currentColor" strokeWidth={2} />
               Locked
             </span>
@@ -398,7 +398,7 @@ function FixtureRow({
 
         <div className="flex items-center gap-2 font-mono text-base">
           {finished && (
-            <span className="text-chalk/40">
+            <span className="text-chalk">
               {fixture.home_score}–{fixture.away_score}
             </span>
           )}
@@ -446,8 +446,8 @@ function ScoreBox({ value, setValue, disabled, onCommit }: {
 }
 
 function PointsBadge({ points, hasPick }: { points: number | null; hasPick: boolean }) {
-  if (!hasPick) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk/30">No pick</span>;
-  if (points === null) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk/40">Pending</span>;
+  if (!hasPick) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk">No pick</span>;
+  if (points === null) return <span className="rounded-full bg-pitch-700/80 px-2.5 py-0.5 text-chalk">Pending</span>;
   const tone =
     points === 5 ? 'bg-lime text-pitch-950 font-bold'
     : points === 1 ? 'bg-lime/20 text-lime'

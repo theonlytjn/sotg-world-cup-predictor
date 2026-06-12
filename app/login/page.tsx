@@ -75,7 +75,7 @@ export default function LoginPage() {
   }
 
   const inputClass =
-    'w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3.5 text-chalk text-base outline-none placeholder:text-chalk/30 focus:border-lime/60';
+    'w-full rounded-xl border border-white/15 bg-pitch-900 px-4 py-3.5 text-chalk text-base outline-none placeholder:text-chalk focus:border-lime/60';
 
   if (mode === 'sent') {
     return (
@@ -83,12 +83,12 @@ export default function LoginPage() {
         <Back />
         <h1 className="mt-6 font-display text-5xl uppercase leading-none text-chalk">Check your email</h1>
         <div className="mt-8 rounded-2xl border border-lime/30 bg-lime/5 p-6">
-          <p className="text-base text-chalk/70">
+          <p className="text-base text-chalk">
             We sent a magic link to <span className="text-chalk">{email}</span>. Tap it on this
             device to sign in.
           </p>
         </div>
-        <button onClick={() => reset('signin')} className="mt-4 text-center text-base text-chalk/40 underline-offset-2 hover:underline">
+        <button onClick={() => reset('signin')} className="mt-4 text-center text-base text-chalk underline-offset-2 hover:underline">
           Back to sign in
         </button>
       </main>
@@ -110,17 +110,17 @@ export default function LoginPage() {
 
         <div className="space-y-4">
           <div>
-            <label className="font-mono text-base uppercase tracking-widest text-chalk/50">Email</label>
+            <label className="font-mono text-base uppercase tracking-widest text-chalk">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com" className={`mt-2 ${inputClass}`} />
           </div>
           <div>
-            <label className="font-mono text-base uppercase tracking-widest text-chalk/50">Password</label>
+            <label className="font-mono text-base uppercase tracking-widest text-chalk">Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters" className={`mt-2 ${inputClass}`} />
           </div>
           <div>
-            <label className="font-mono text-base uppercase tracking-widest text-chalk/50">Confirm password</label>
+            <label className="font-mono text-base uppercase tracking-widest text-chalk">Confirm password</label>
             <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && email && password && signUp()}
               placeholder="Same again" className={`mt-2 ${inputClass}`} />
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <p className="mt-6 text-center text-base text-chalk/40">
+        <p className="mt-6 text-center text-base text-chalk">
           Already have an account?{' '}
           <button onClick={() => reset('signin')} className="text-lime underline-offset-2 hover:underline">
             Sign in
@@ -159,12 +159,12 @@ export default function LoginPage() {
 
       <div className="space-y-4">
         <div>
-          <label className="font-mono text-base uppercase tracking-widest text-chalk/50">Email</label>
+          <label className="font-mono text-base uppercase tracking-widest text-chalk">Email</label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
             placeholder="you@email.com" className={`mt-2 ${inputClass}`} />
         </div>
         <div>
-          <label className="font-mono text-base uppercase tracking-widest text-chalk/50">Password</label>
+          <label className="font-mono text-base uppercase tracking-widest text-chalk">Password</label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && email && password && signInWithPassword()}
             placeholder="Your password" className={`mt-2 ${inputClass}`} />
@@ -180,19 +180,19 @@ export default function LoginPage() {
 
       <div className="my-5 flex items-center gap-3">
         <div className="h-px flex-1 bg-white/10" />
-        <span className="font-mono text-base uppercase tracking-widest text-chalk/30">or</span>
+        <span className="font-mono text-base uppercase tracking-widest text-chalk">or</span>
         <div className="h-px flex-1 bg-white/10" />
       </div>
 
       <button onClick={sendMagicLink} disabled={!email || loading}
-        className="w-full rounded-xl border border-white/15 py-3.5 font-display text-base uppercase tracking-wide text-chalk/70 transition hover:border-lime/40 hover:text-chalk disabled:opacity-40">
+        className="w-full rounded-xl border border-white/15 py-3.5 font-display text-base uppercase tracking-wide text-chalk transition hover:border-lime/40 hover:text-chalk disabled:opacity-40">
         {loading ? 'Sending…' : 'Send magic link'}
       </button>
-      <p className="mt-2 text-center text-base text-chalk/35">
+      <p className="mt-2 text-center text-base text-chalk">
         We&apos;ll email you a one-tap sign-in link — no password needed.
       </p>
 
-      <p className="mt-8 text-center text-base text-chalk/40">
+      <p className="mt-8 text-center text-base text-chalk">
         New here?{' '}
         <button onClick={() => reset('signup')} className="text-lime underline-offset-2 hover:underline">
           Create an account
@@ -225,7 +225,7 @@ function Divider() {
   return (
     <div className="my-6 flex items-center gap-3">
       <div className="h-px flex-1 bg-white/10" />
-      <span className="font-mono text-base uppercase tracking-widest text-chalk/30">or</span>
+      <span className="font-mono text-base uppercase tracking-widest text-chalk">or</span>
       <div className="h-px flex-1 bg-white/10" />
     </div>
   );

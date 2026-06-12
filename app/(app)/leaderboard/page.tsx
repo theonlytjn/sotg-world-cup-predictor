@@ -187,7 +187,7 @@ export default function LeaderboardPage() {
   }, [rows, liveBonus, isLive]);
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk">Loading…</p>;
   }
 
   return (
@@ -207,21 +207,21 @@ export default function LeaderboardPage() {
           </span>
         )}
         {lastUpdated && !isLive && (
-          <span className="ml-auto font-mono text-sm text-chalk/25">
+          <span className="ml-auto font-mono text-sm text-chalk">
             Refreshes every 30s
           </span>
         )}
       </div>
       <h1 className="font-display text-4xl uppercase text-chalk">The Table</h1>
       {isLive && (
-        <p className="mt-1 text-base text-chalk/55">
+        <p className="mt-1 text-base text-chalk">
           Live projected scores shown in orange — updates every 30 seconds.
         </p>
       )}
 
       {/* Table */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
-        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-b border-white/8 bg-pitch-800 px-4 py-3 font-display text-sm font-bold uppercase tracking-widest text-chalk/40">
+        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-b border-white/8 bg-pitch-800 px-4 py-3 font-display text-sm font-bold uppercase tracking-widest text-chalk">
           <span>#</span>
           <span>Player</span>
           <span className="text-center">5pt</span>
@@ -231,7 +231,7 @@ export default function LeaderboardPage() {
         </div>
 
         {displayRows.length === 0 && (
-          <p className="px-4 py-10 text-center text-base text-chalk/40">
+          <p className="px-4 py-10 text-center text-base text-chalk">
             No players yet — be the first to make a pick.
           </p>
         )}
@@ -257,7 +257,7 @@ export default function LeaderboardPage() {
                     <HugeiconsIcon icon={CrownIcon} size={18} color="currentColor" strokeWidth={1.5} />
                   </span>
                 ) : (
-                  <span className="font-display text-lg font-black text-chalk/30">{i + 1}</span>
+                  <span className="font-display text-lg font-black text-chalk">{i + 1}</span>
                 )}
               </div>
 
@@ -274,9 +274,9 @@ export default function LeaderboardPage() {
                 )}
               </span>
 
-              <span className="text-center font-mono text-base text-chalk/60">{r.exact_scores}</span>
-              <span className="text-center font-mono text-base text-chalk/60">{r.correct_results}</span>
-              <span className="text-center font-mono text-base text-chalk/60">{r.award_points}</span>
+              <span className="text-center font-mono text-base text-chalk">{r.exact_scores}</span>
+              <span className="text-center font-mono text-base text-chalk">{r.correct_results}</span>
+              <span className="text-center font-mono text-base text-chalk">{r.award_points}</span>
 
               {/* Total + live bonus */}
               <div className="flex flex-col items-end">
@@ -289,7 +289,7 @@ export default function LeaderboardPage() {
                 {isLive && bonus !== 0 && (
                   <span className={[
                     'font-mono text-sm font-semibold',
-                    bonus > 0 ? 'text-flame' : 'text-chalk/30',
+                    bonus > 0 ? 'text-flame' : 'text-chalk',
                   ].join(' ')}>
                     {bonus > 0 ? `+${bonus}` : bonus} live
                   </span>
@@ -324,7 +324,7 @@ function StandingsChart({
   if (!matchdays.length || !players.length) {
     return (
       <div className="flex h-44 items-center justify-center">
-        <p className="font-mono text-base text-chalk/30">Chart available once the first matchday is settled</p>
+        <p className="font-mono text-base text-chalk">Chart available once the first matchday is settled</p>
       </div>
     );
   }

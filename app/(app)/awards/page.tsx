@@ -167,13 +167,13 @@ export default function AwardsPage() {
   }, [categories]);
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk">Loading…</p>;
   }
 
   return (
     <div>
       <h1 className="font-display text-4xl uppercase text-chalk">Awards picks</h1>
-      <p className="mt-1 text-base text-chalk/55">
+      <p className="mt-1 text-base text-chalk">
         Two picks per category — your first choice scores more. Locks at tournament start.
       </p>
 
@@ -190,7 +190,7 @@ export default function AwardsPage() {
               </h2>
               <span className="h-px flex-1 bg-white/10" />
             </div>
-            {description && <p className="mb-4 text-base text-chalk/55">{description}</p>}
+            {description && <p className="mb-4 text-base text-chalk">{description}</p>}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {cats.map((cat) => (
                 <CategoryRow
@@ -214,20 +214,20 @@ export default function AwardsPage() {
 
       {/* Points breakdown — opinion section excluded (0 pts) */}
       <div className="mt-10 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
-        <p className="font-display text-base uppercase tracking-wide text-chalk/50">Points breakdown</p>
+        <p className="font-display text-base uppercase tracking-wide text-chalk">Points breakdown</p>
         <div className="mt-3 space-y-3">
           {SECTIONS.filter((s) => s.key !== 'opinion').map(({ key, label }) => {
             const cats = bySection.get(key);
             if (!cats?.length) return null;
             return (
               <div key={key}>
-                <p className="mb-1.5 font-mono text-sm uppercase tracking-widest text-chalk/30">{label}</p>
+                <p className="mb-1.5 font-mono text-sm uppercase tracking-widest text-chalk">{label}</p>
                 <div className="grid gap-1">
                   {cats.map((cat) => (
-                    <div key={cat.id} className="flex items-center justify-between font-mono text-base text-chalk/60">
+                    <div key={cat.id} className="flex items-center justify-between font-mono text-base text-chalk">
                       <span>{cat.label}</span>
                       <span className="text-lime">
-                        {cat.pts_pick_1}<span className="text-chalk/30"> / </span>{cat.pts_pick_2}
+                        {cat.pts_pick_1}<span className="text-chalk"> / </span>{cat.pts_pick_2}
                       </span>
                     </div>
                   ))}
@@ -326,11 +326,11 @@ function CategoryRow({
         <div className="mb-4">
           <div className="mb-2 flex items-start justify-between gap-2">
             <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>
-            <span className="shrink-0 rounded-full border border-gold/30 px-3 py-1 font-display text-base uppercase text-gold/70">
+            <span className="shrink-0 rounded-full border border-gold/30 px-3 py-1 font-display text-base uppercase text-gold">
               Poll
             </span>
           </div>
-          <p className="font-mono text-sm uppercase tracking-widest text-chalk/40">
+          <p className="font-mono text-sm uppercase tracking-widest text-chalk">
             Opinion · No points
           </p>
         </div>
@@ -346,10 +346,10 @@ function CategoryRow({
                 return (
                   <div key={pick}>
                     <div className="mb-1 flex items-center justify-between">
-                      <span className={['text-base', isMyVote ? 'text-gold' : 'text-chalk/80'].join(' ')}>
+                      <span className={['text-base', isMyVote ? 'text-gold' : 'text-chalk'].join(' ')}>
                         {getPickLabel(pick)}{isMyVote ? ' ✓' : ''}
                       </span>
-                      <span className="font-mono text-base text-chalk/40">{count} · {pct}%</span>
+                      <span className="font-mono text-base text-chalk">{count} · {pct}%</span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
                       <div
@@ -401,15 +401,15 @@ function CategoryRow({
             </span>
           )}
           {locked && !settled && (
-            <span className="shrink-0 font-mono text-base uppercase tracking-widest text-chalk/40">Locked</span>
+            <span className="shrink-0 font-mono text-base uppercase tracking-widest text-chalk">Locked</span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <p className="font-mono text-sm uppercase tracking-widest text-chalk/40">
+          <p className="font-mono text-sm uppercase tracking-widest text-chalk">
             {category.pts_pick_1}pts · {category.pts_pick_2}pts
           </p>
           {confLabel && (
-            <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-sm uppercase tracking-widest text-chalk/40">
+            <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-sm uppercase tracking-widest text-chalk">
               {confLabel} only
             </span>
           )}
@@ -468,7 +468,7 @@ function PickInput({
 
   return (
     <div>
-      <p className="mb-1 font-mono text-sm uppercase tracking-widest text-chalk/40">{label}</p>
+      <p className="mb-1 font-mono text-sm uppercase tracking-widest text-chalk">{label}</p>
 
       {kind === 'team' && (
         <SearchableSelect

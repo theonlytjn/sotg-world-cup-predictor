@@ -87,16 +87,16 @@ export default function MePage() {
         />
       </div>
 
-      <p className="mt-3 font-mono text-base uppercase tracking-widest text-chalk/35">
+      <p className="mt-3 font-mono text-base uppercase tracking-widest text-chalk">
         {picks} picks made · {stats?.settled ?? 0} settled
       </p>
 
       {/* display name form */}
       <div className="mt-8 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
-        <label className="block font-display text-sm font-bold uppercase tracking-widest text-chalk/50 mb-2">
+        <label className="block font-display text-sm font-bold uppercase tracking-widest text-chalk mb-2">
           Display name
         </label>
-        <p className="mb-3 text-base text-chalk/40">Shown on the leaderboard.</p>
+        <p className="mb-3 text-base text-chalk">Shown on the leaderboard.</p>
         <input
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
@@ -111,7 +111,7 @@ export default function MePage() {
           >
             {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
           </button>
-          <p className="font-mono text-base text-chalk/30">{email}</p>
+          <p className="font-mono text-base text-chalk">{email}</p>
         </div>
       </div>
     </div>
@@ -128,11 +128,11 @@ function StatCard({
 }) {
   return (
     <div className={`rounded-2xl border p-4 ${accent ? 'border-lime/25 bg-gradient-to-br from-lime/10 to-pitch-900' : 'border-white/10 bg-pitch-900/60'}`}>
-      <span className={accent ? 'text-lime' : 'text-chalk/40'}>{icon}</span>
+      <span className={accent ? 'text-lime' : 'text-chalk'}>{icon}</span>
       <div className={`mt-2 font-display text-4xl font-black ${accent ? 'text-lime' : 'text-chalk'}`}>
         {value}
       </div>
-      <div className="mt-1 font-display text-sm font-bold uppercase tracking-widest text-chalk/40">{label}</div>
+      <div className="mt-1 font-display text-sm font-bold uppercase tracking-widest text-chalk">{label}</div>
     </div>
   );
 }

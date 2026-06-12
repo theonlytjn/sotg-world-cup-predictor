@@ -90,15 +90,15 @@ export default function PollPage() {
   );
 
   if (loading) {
-    return <p className="py-20 text-center font-mono text-base text-chalk/40">Loading…</p>;
+    return <p className="py-20 text-center font-mono text-base text-chalk">Loading…</p>;
   }
 
   if (!anyOpen) {
     return (
       <div className="flex flex-col items-center py-24 text-center">
-        <span className="text-chalk/40"><HugeiconsIcon icon={LockIcon} size={48} color="currentColor" strokeWidth={1.5} /></span>
+        <span className="text-chalk"><HugeiconsIcon icon={LockIcon} size={48} color="currentColor" strokeWidth={1.5} /></span>
         <h1 className="mt-4 font-display text-4xl uppercase text-chalk">Opinion Poll</h1>
-        <p className="mt-3 max-w-sm text-chalk/55">
+        <p className="mt-3 max-w-sm text-chalk">
           The poll opens after the final whistle. Come back once the trophy has been lifted.
         </p>
       </div>
@@ -117,7 +117,7 @@ export default function PollPage() {
   return (
     <div>
       <h1 className="font-display text-4xl uppercase text-chalk">Opinion Poll</h1>
-      <p className="mt-1 text-base text-chalk/55">
+      <p className="mt-1 text-base text-chalk">
         The final whistle has blown — now tell us how it really went.
       </p>
 
@@ -227,7 +227,7 @@ function QuestionCard({
       <h2 className="font-display text-xl uppercase tracking-wide text-chalk">{question.label}</h2>
 
       {!open ? (
-        <p className="mt-2 font-mono text-base uppercase tracking-widest text-chalk/40">Not open yet</p>
+        <p className="mt-2 font-mono text-base uppercase tracking-widest text-chalk">Not open yet</p>
       ) : (
         <>
           {/* Picker */}
@@ -254,7 +254,7 @@ function QuestionCard({
           {/* Results reveal */}
           {tally.length > 0 && (
             <div className="mt-5 border-t border-white/5 pt-4">
-              <p className="mb-3 font-mono text-sm uppercase tracking-widest text-chalk/40">
+              <p className="mb-3 font-mono text-sm uppercase tracking-widest text-chalk">
                 {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
               </p>
               <div className="space-y-3">
@@ -267,9 +267,9 @@ function QuestionCard({
                       <div className="flex items-baseline justify-between gap-2">
                         <span className={`font-display text-base uppercase tracking-wide ${isMe ? 'text-lime' : 'text-chalk'}`}>
                           {label}
-                          {isMe && <span className="ml-1.5 font-mono text-sm text-lime/70">you</span>}
+                          {isMe && <span className="ml-1.5 font-mono text-sm text-lime">you</span>}
                         </span>
-                        <span className="shrink-0 font-mono text-base text-chalk/40">{pct}%</span>
+                        <span className="shrink-0 font-mono text-base text-chalk">{pct}%</span>
                       </div>
                       <div className="mt-1 h-1.5 w-full rounded-full bg-pitch-700">
                         <div
@@ -277,7 +277,7 @@ function QuestionCard({
                           style={{ width: `${barPct}%` }}
                         />
                       </div>
-                      <p className="mt-0.5 font-mono text-sm text-chalk/35">
+                      <p className="mt-0.5 font-mono text-sm text-chalk">
                         {voters.join(', ')}
                       </p>
                     </div>

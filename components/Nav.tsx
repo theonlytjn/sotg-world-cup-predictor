@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { HugeiconsIcon } from '@hugeicons/react';
+import ThemeToggle from '@/components/ThemeToggle';
 import {
   DartIcon,
   AwardIcon,
@@ -77,7 +78,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                   href={t.href}
                   className={[
                     'flex items-center gap-2 px-3 py-2 font-display text-base uppercase transition',
-                    active ? 'text-lime' : 'text-chalk/55 hover:text-chalk',
+                    active ? 'text-lime' : 'text-chalk hover:text-lime',
                   ].join(' ')}
                 >
                   <HugeiconsIcon icon={t.icon} size={18} color="currentColor" strokeWidth={1.8} />
@@ -92,16 +93,17 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                   'flex items-center gap-2 px-3 py-2 font-display text-base uppercase transition',
                   pathname === '/admin' || pathname.startsWith('/admin/')
                     ? 'text-flame'
-                    : 'text-flame/50 hover:text-flame',
+                    : 'text-flame hover:text-flame',
                 ].join(' ')}
               >
                 <HugeiconsIcon icon={Settings01Icon} size={18} color="currentColor" strokeWidth={1.8} />
                 Admin
               </Link>
             )}
+            <ThemeToggle />
             <button
               onClick={signOut}
-              className="ml-2 flex h-11 w-11 items-center justify-center rounded-full text-chalk/40 transition hover:text-flame"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-chalk transition hover:text-flame"
               title="Sign out"
               aria-label="Sign out"
             >
@@ -112,7 +114,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
           {/* Mobile hamburger toggle */}
           <button
             onClick={() => setMenuOpen((o) => !o)}
-            className="sm:hidden flex h-11 w-11 items-center justify-center rounded-full text-chalk/70 transition hover:text-chalk active:bg-pitch-800"
+            className="sm:hidden flex h-11 w-11 items-center justify-center rounded-full text-chalk transition hover:text-chalk active:bg-pitch-800"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           >
             <HugeiconsIcon
@@ -138,7 +140,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                   onClick={closeMenu}
                   className={[
                     'flex w-full items-center gap-4 rounded-2xl px-5 py-4 mb-2 bg-pitch-900 font-display text-base uppercase tracking-wide transition hover:bg-pitch-800',
-                    active ? 'text-lime' : 'text-chalk/75 hover:text-chalk',
+                    active ? 'text-lime' : 'text-chalk hover:text-lime',
                   ].join(' ')}
                 >
                   <HugeiconsIcon icon={t.icon} size={24} color="currentColor" strokeWidth={1.7} />
@@ -155,7 +157,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                   'flex w-full items-center gap-4 rounded-2xl px-5 py-4 mb-2 font-display text-base uppercase tracking-wide transition',
                   pathname === '/admin' || pathname.startsWith('/admin/')
                     ? 'text-flame'
-                    : 'text-flame/50 hover:text-flame',
+                    : 'text-flame hover:text-flame',
                 ].join(' ')}
               >
                 <HugeiconsIcon icon={Settings01Icon} size={24} color="currentColor" strokeWidth={1.7} />
@@ -165,9 +167,11 @@ export default function Nav({ userEmail }: { userEmail: string }) {
 
             <div className="my-4 h-px bg-white/8" />
 
+            <ThemeToggle mobile />
+
             <button
               onClick={signOut}
-              className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 bg-pitch-900 font-display text-base uppercase tracking-wide text-chalk/50 hover:text-flame hover:bg-pitch-800 transition"
+              className="mt-2 flex w-full items-center gap-4 rounded-2xl px-5 py-4 bg-pitch-900 font-display text-base uppercase tracking-wide text-chalk hover:text-flame hover:bg-pitch-800 transition"
             >
               <HugeiconsIcon icon={Logout01Icon} size={24} color="currentColor" strokeWidth={1.7} />
               Sign out

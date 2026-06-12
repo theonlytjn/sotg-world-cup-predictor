@@ -89,11 +89,11 @@ export default function TicketCarousel() {
         <div className="flex items-center justify-between">
           <span
             ref={(el) => { flipRef.current[2] = el; }}
-            className="font-display text-sm font-semibold uppercase tracking-[0.22em] text-chalk/55"
+            className="font-display text-sm font-semibold uppercase tracking-[0.22em] text-chalk"
           >
             {f.grp}
           </span>
-          <span className="rounded-full border border-[#272727] px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-chalk/40">
+          <span className="rounded-full border border-[#272727] px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-chalk">
             FT
           </span>
         </div>
@@ -119,7 +119,7 @@ export default function TicketCarousel() {
             <span ref={(el) => { flipRef.current[0] = el; }} className="inline-block min-w-[0.7em] text-center">
               {f.hs}
             </span>
-            <span className="text-[0.55em] text-chalk/25">–</span>
+            <span className="text-[0.55em] text-chalk">–</span>
             <span ref={(el) => { flipRef.current[1] = el; }} className="inline-block min-w-[0.7em] text-center">
               {f.as}
             </span>
@@ -166,10 +166,10 @@ export default function TicketCarousel() {
         style={{ background: BG_STUB, border: `1px solid ${BORDER}`, borderTop: 'none' }}
       >
         <div className="min-w-0">
-          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-chalk/35">
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-chalk">
             Your prediction · {OUTCOME_LABEL[f.kind]}
           </p>
-          <p className="mt-0.5 font-display text-base font-semibold uppercase tracking-wide text-chalk/70 truncate">
+          <p className="mt-0.5 font-display text-base font-semibold uppercase tracking-wide text-chalk truncate">
             {f.ht} {f.phs} – {f.pas} {f.at}
           </p>
         </div>

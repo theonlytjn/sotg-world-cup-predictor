@@ -30,8 +30,8 @@ type Scorer = {
 
 function gdColor(goal_diff: number) {
   if (goal_diff > 0) return 'text-lime';
-  if (goal_diff < 0) return 'text-flame/80';
-  return 'text-chalk/55';
+  if (goal_diff < 0) return 'text-flame';
+  return 'text-chalk';
 }
 
 export default async function TournamentPage() {
@@ -71,7 +71,7 @@ export default async function TournamentPage() {
       <h1 className="font-display text-4xl uppercase text-chalk">
         World Cup <span className="text-lime">&apos;26</span>
       </h1>
-      <p className="mt-1 text-base text-chalk/55">
+      <p className="mt-1 text-base text-chalk">
         Live group standings, top scorers, and assists — updated every 5 minutes.
       </p>
 
@@ -84,7 +84,7 @@ export default async function TournamentPage() {
 
         {!hasStandings ? (
           <div className="flex h-44 items-center justify-center rounded-2xl border border-white/10 bg-pitch-900/60">
-            <p className="font-mono text-base text-chalk/40">
+            <p className="font-mono text-base text-chalk">
               Standings appear once the tournament begins.
             </p>
           </div>
@@ -99,13 +99,13 @@ export default async function TournamentPage() {
                     <p className="font-display text-base uppercase tracking-widest text-lime">
                       Group {label}
                     </p>
-                    <p className="font-mono text-base uppercase tracking-widest text-chalk/40">
+                    <p className="font-mono text-base uppercase tracking-widest text-chalk">
                       {rows[0]?.played ?? 0} of 3 played
                     </p>
                   </div>
 
                   {/* Column headers */}
-                  <div className="grid grid-cols-[1.5rem_1fr_2rem_2rem_2rem_2rem_2.5rem] gap-x-1 border-b border-white/5 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-chalk/40">
+                  <div className="grid grid-cols-[1.5rem_1fr_2rem_2rem_2rem_2rem_2.5rem] gap-x-1 border-b border-white/5 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-chalk">
                     <span />
                     <span>Team</span>
                     <span className="text-center">P</span>
@@ -138,9 +138,9 @@ export default async function TournamentPage() {
                           </span>
                         </div>
 
-                        <span className="text-center font-mono text-base text-chalk/55">{row.played}</span>
-                        <span className="text-center font-mono text-base text-chalk/55">{row.won}</span>
-                        <span className="text-center font-mono text-base text-chalk/55">{row.drawn}</span>
+                        <span className="text-center font-mono text-base text-chalk">{row.played}</span>
+                        <span className="text-center font-mono text-base text-chalk">{row.won}</span>
+                        <span className="text-center font-mono text-base text-chalk">{row.drawn}</span>
                         <span className={['text-center font-mono text-base', gdColor(row.goal_diff)].join(' ')}>
                           {row.goal_diff > 0 ? `+${row.goal_diff}` : row.goal_diff}
                         </span>
@@ -153,7 +153,7 @@ export default async function TournamentPage() {
 
                   <div className="flex items-center gap-1.5 border-t border-white/5 px-3 py-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-lime/50" />
-                    <span className="font-mono text-sm uppercase tracking-widest text-chalk/35">Qualify</span>
+                    <span className="font-mono text-sm uppercase tracking-widest text-chalk">Qualify</span>
                   </div>
                 </div>
               );
@@ -177,7 +177,7 @@ export default async function TournamentPage() {
             </div>
             {topScorers.length === 0 ? (
               <div className="flex h-28 items-center justify-center">
-                <p className="font-mono text-base text-chalk/40">No goals scored yet</p>
+                <p className="font-mono text-base text-chalk">No goals scored yet</p>
               </div>
             ) : (
               topScorers.map((s, i) => (
@@ -185,19 +185,19 @@ export default async function TournamentPage() {
                   key={s.player_external_id}
                   className="flex items-center gap-3 border-t border-white/5 px-5 py-3.5"
                 >
-                  <span className="w-6 shrink-0 font-display font-black text-base text-chalk/40">{i + 1}</span>
+                  <span className="w-6 shrink-0 font-display font-black text-base text-chalk">{i + 1}</span>
                   {s.team_crest && (
                     <img src={s.team_crest} alt="" className="h-5 w-5 shrink-0 object-contain" />
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-base uppercase text-chalk">{s.player_name}</p>
                     {s.team_tla && (
-                      <p className="font-mono text-base text-chalk/45">{s.team_tla}</p>
+                      <p className="font-mono text-base text-chalk">{s.team_tla}</p>
                     )}
                   </div>
                   <div className="flex items-baseline gap-1 shrink-0">
                     <span className="font-display font-black text-2xl text-lime">{s.goals}</span>
-                    <span className="font-mono text-base text-chalk/40">{s.goals === 1 ? 'goal' : 'goals'}</span>
+                    <span className="font-mono text-base text-chalk">{s.goals === 1 ? 'goal' : 'goals'}</span>
                   </div>
                 </div>
               ))
@@ -211,7 +211,7 @@ export default async function TournamentPage() {
             </div>
             {topAssisters.length === 0 ? (
               <div className="flex h-28 items-center justify-center">
-                <p className="font-mono text-base text-chalk/40">
+                <p className="font-mono text-base text-chalk">
                   Assist data will appear as it becomes available
                 </p>
               </div>
@@ -221,19 +221,19 @@ export default async function TournamentPage() {
                   key={a.player_external_id}
                   className="flex items-center gap-3 border-t border-white/5 px-5 py-3.5"
                 >
-                  <span className="w-6 shrink-0 font-display font-black text-base text-chalk/40">{i + 1}</span>
+                  <span className="w-6 shrink-0 font-display font-black text-base text-chalk">{i + 1}</span>
                   {a.team_crest && (
                     <img src={a.team_crest} alt="" className="h-5 w-5 shrink-0 object-contain" />
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-base uppercase text-chalk">{a.player_name}</p>
                     {a.team_tla && (
-                      <p className="font-mono text-base text-chalk/45">{a.team_tla}</p>
+                      <p className="font-mono text-base text-chalk">{a.team_tla}</p>
                     )}
                   </div>
                   <div className="flex items-baseline gap-1 shrink-0">
                     <span className="font-display font-black text-2xl text-lime">{a.assists}</span>
-                    <span className="font-mono text-base text-chalk/40">{a.assists === 1 ? 'assist' : 'assists'}</span>
+                    <span className="font-mono text-base text-chalk">{a.assists === 1 ? 'assist' : 'assists'}</span>
                   </div>
                 </div>
               ))

@@ -58,7 +58,7 @@ export default async function Home() {
             <span className="text-lime">Own the table.</span>
           </h1>
 
-          <p className="mt-5 text-chalk/62 max-w-[30ch]" style={{ fontSize: 'clamp(16px, 1.5vw, 19px)' }}>
+          <p className="mt-5 text-chalk max-w-[30ch]" style={{ fontSize: 'clamp(16px, 1.5vw, 19px)' }}>
             Call the score on all 72 group games, bank the points, and settle who
             actually knows their football. The SOTG table doesn&apos;t lie.
           </p>
@@ -73,7 +73,7 @@ export default async function Home() {
             </Link>
             <Link
               href="/leaderboard"
-              className="inline-flex items-center font-display font-bold uppercase tracking-wide text-base rounded-full border border-[#272727] text-chalk px-6 py-3.5 transition hover:border-lime/60"
+              className="inline-flex items-center font-display font-bold uppercase tracking-wide text-base rounded-full border border-pitch-700 text-chalk px-6 py-3.5 transition hover:border-lime/60"
             >
               See the table
             </Link>
@@ -95,12 +95,12 @@ export default async function Home() {
 
       {/* ── FLAG MARQUEE ─────────────────────────────────── */}
       <div
-        className="marquee-wrap border-t border-b border-[#272727] bg-white/1 overflow-hidden py-3.5"
+        className="marquee-wrap border-t border-b border-pitch-700 bg-white/1 overflow-hidden py-3.5"
         style={{ maskImage: 'linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)' }}
       >
         <div className="marquee-track flex gap-8 w-max">
           {[...NATIONS, ...NATIONS].map(([flag, tla], i) => (
-            <span key={i} className="inline-flex items-center gap-2.5 font-display font-semibold text-base tracking-[0.12em] uppercase text-chalk/60 whitespace-nowrap">
+            <span key={i} className="inline-flex items-center gap-2.5 font-display font-semibold text-base tracking-[0.12em] uppercase text-chalk whitespace-nowrap">
               <span className="text-xl">{flag}</span>
               {tla}
             </span>
@@ -138,15 +138,15 @@ export default async function Home() {
               delay: '200',
             },
           ].map(({ n, title, body, icon, delay }) => (
-            <div key={n} data-aos="fade-up" data-aos-delay={delay} className="bg-pitch-900 border border-[#272727] rounded-[22px] p-7 sm:p-8">
+            <div key={n} data-aos="fade-up" data-aos-delay={delay} className="bg-pitch-900 border border-pitch-700 rounded-[22px] p-7 sm:p-8">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-20 h-20 rounded-[20px] bg-lime/12 flex items-center justify-center text-lime">
                   {icon}
                 </div>
-                <span className="font-display font-black text-[52px] leading-none text-chalk/10">{n}</span>
+                <span className="font-display font-black text-[52px] leading-none text-chalk">{n}</span>
               </div>
               <h3 className="font-display text-xl uppercase text-chalk mb-2.5">{title}</h3>
-              <p className="text-chalk/60 text-[15px] leading-relaxed">{body}</p>
+              <p className="text-chalk text-[15px] leading-relaxed">{body}</p>
             </div>
           ))}
         </div>
@@ -161,37 +161,37 @@ export default async function Home() {
         <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div data-aos="fade-up" data-aos-delay="0" className="rounded-[22px] p-8 sm:p-10 border border-lime/30 bg-gradient-to-br from-lime/14 to-pitch-900">
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
-              {exactPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
+              {exactPts}<span className="text-[18px] text-chalk font-semibold ml-1"> pts</span>
             </div>
             <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">
               {rulesMap['match_exact']?.label ?? 'Exact score'}
             </h3>
-            <p className="text-chalk/60 text-base">
+            <p className="text-chalk text-base">
               {rulesMap['match_exact']?.description ?? 'Nail the scoreline in 90 minutes — both teams correct.'}
             </p>
           </div>
-          <div data-aos="fade-up" data-aos-delay="100" className="rounded-[22px] p-8 sm:p-10 border border-[#272727] bg-pitch-900">
+          <div data-aos="fade-up" data-aos-delay="100" className="rounded-[22px] p-8 sm:p-10 border border-pitch-700 bg-pitch-900">
             <div className="font-display font-black text-lime" style={{ fontSize: 64, lineHeight: 1 }}>
-              {resultPts}<span className="text-[18px] text-chalk/60 font-semibold ml-1"> {resultPts === 1 ? 'pt' : 'pts'}</span>
+              {resultPts}<span className="text-[18px] text-chalk font-semibold ml-1"> {resultPts === 1 ? 'pt' : 'pts'}</span>
             </div>
             <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">
               {rulesMap['match_result']?.label ?? 'Correct result'}
             </h3>
-            <p className="text-chalk/60 text-base">
+            <p className="text-chalk text-base">
               {rulesMap['match_result']?.description ?? "Right winner or a draw, but the scoreline's off."}
             </p>
           </div>
-          <div data-aos="fade-up" data-aos-delay="200" className="rounded-[22px] p-8 sm:p-10 border border-[#272727] bg-pitch-900">
+          <div data-aos="fade-up" data-aos-delay="200" className="rounded-[22px] p-8 sm:p-10 border border-pitch-700 bg-pitch-900">
             <div className="font-display font-black text-flame" style={{ fontSize: 64, lineHeight: 1 }}>
-              0<span className="text-[18px] text-chalk/60 font-semibold ml-1"> pts</span>
+              0<span className="text-[18px] text-chalk font-semibold ml-1"> pts</span>
             </div>
             <h3 className="font-display text-xl uppercase text-chalk mt-3.5 mb-1.5">Miss</h3>
-            <p className="text-chalk/60 text-base">Wrong result. There&apos;s always the next matchday.</p>
+            <p className="text-chalk text-base">Wrong result. There&apos;s always the next matchday.</p>
           </div>
         </div>
-        <p className="mt-6 text-base text-chalk/40">
+        <p className="mt-6 text-base text-chalk">
           Point values are set by the admin and may change. See the{' '}
-          <Link href="/rules" className="text-lime/70 hover:text-lime transition">full rules page</Link>{' '}
+          <Link href="/rules" className="text-lime hover:text-lime transition">full rules page</Link>{' '}
           for all categories.
         </p>
       </section>
@@ -204,39 +204,38 @@ export default async function Home() {
         </h2>
         <div className="mt-9">
           {/* Full-width table — top 3 with fade below */}
-          <div className="relative overflow-hidden rounded-[26px] border border-[#272727] bg-pitch-900">
+          <div className="relative overflow-hidden rounded-[26px] border border-pitch-700 bg-pitch-900">
             {/* Column header row */}
-            <div className="grid grid-cols-[48px_1fr_auto] items-center gap-3 px-7 py-2.5 bg-pitch-800/80 border-b border-[#272727]">
-              <span className="font-mono text-[9px] uppercase tracking-widest text-chalk/40">#</span>
-              <span className="font-mono text-[9px] uppercase tracking-widest text-chalk/40">Player</span>
-              <span className="font-mono text-[9px] uppercase tracking-widest text-chalk/40">Pts</span>
+            <div className="grid grid-cols-[48px_1fr_auto] items-center gap-3 px-7 py-2.5 bg-pitch-800/80 border-b border-pitch-700">
+              <span className="font-mono text-[9px] uppercase tracking-widest text-chalk">#</span>
+              <span className="font-mono text-[9px] uppercase tracking-widest text-chalk">Player</span>
+              <span className="font-mono text-[9px] uppercase tracking-widest text-chalk">Pts</span>
             </div>
             {leaders && leaders.length > 0 ? (
               leaders.slice(0, 3).map((p, i) => (
                 <div
                   key={p.user_id}
-                  className={`grid grid-cols-[48px_1fr_auto] items-center gap-3 px-7 py-5 ${i > 0 ? 'border-t border-[#272727]' : ''}`}
+                  className={`grid grid-cols-[48px_1fr_auto] items-center gap-3 px-7 py-5 ${i > 0 ? 'border-t border-pitch-700' : ''}`}
                 >
-                  <span className={`font-display font-black text-[22px] leading-none ${RANK_COLOURS[i] ?? 'text-chalk/55'}`}>{i + 1}</span>
+                  <span className={`font-display font-black text-[22px] leading-none ${RANK_COLOURS[i] ?? 'text-chalk'}`}>{i + 1}</span>
                   <span className="font-display font-bold text-[17px] uppercase tracking-wide text-chalk">{p.display_name}</span>
                   <span className="font-display font-black text-2xl text-chalk">{p.total_points}</span>
                 </div>
               ))
             ) : (
               <div className="px-7 py-8">
-                <p className="text-chalk/55 text-base">No predictions yet — be the first!</p>
+                <p className="text-chalk text-base">No predictions yet — be the first!</p>
               </div>
             )}
             {/* Fade overlay hinting at more rows below */}
             <div
-              className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, transparent, #0b110d)' }}
+              className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none fade-to-bg"
             />
           </div>
 
           {/* Claim-it CTA */}
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-dashed border-lime/40 px-6 py-4">
-            <span className="text-base text-chalk/65">
+            <span className="text-base text-chalk">
               {loggedIn ? 'Your picks are being scored…' : 'Your name should be up there.'}
             </span>
             <Link
@@ -285,17 +284,17 @@ export default async function Home() {
       </div>
 
       {/* ── FOOTER ───────────────────────────────────────── */}
-      <footer className="text-center pb-14 pt-6 border-t border-[#272727]">
-        <p className="text-chalk/40 font-display font-semibold text-base tracking-[0.18em] uppercase">
+      <footer className="text-center pb-14 pt-6 border-t border-pitch-700">
+        <p className="text-chalk font-display font-semibold text-base tracking-[0.18em] uppercase">
           All rights reserved Students of the Game
         </p>
-        <p className="mt-1.5 text-chalk/30 font-display text-base tracking-[0.15em] uppercase">
+        <p className="mt-1.5 text-chalk font-display text-base tracking-[0.15em] uppercase">
           Crafted by{' '}
           <a
             href="https://www.theonlytjn.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-lime/65 hover:text-lime transition-colors"
+            className="text-lime hover:text-lime transition-colors"
           >
             TJN
           </a>
