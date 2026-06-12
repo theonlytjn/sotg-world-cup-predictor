@@ -34,8 +34,8 @@ const RANK_STYLES = [
   { text: 'text-[#e0a86b]', crown: 'text-[#e0a86b]' },
 ];
 
-// Single grid — table always has all 6 cols; container scrolls horizontally on small screens
-const GRID = 'grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem] gap-2';
+// Tighter on mobile so all 6 cols fit without scrolling
+const GRID = 'grid grid-cols-[1.25rem_1fr_2.25rem_2.25rem_2.25rem_2.75rem] gap-1 sm:grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem] sm:gap-2';
 
 function ColTip({ label, tip, className = 'justify-center' }: { label: string; tip: string; className?: string }) {
   return (
@@ -178,9 +178,8 @@ export default function LeaderboardPage() {
 
       {/* Table */}
       <div className="mt-6 overflow-hidden rounded-2xl border-2 border-white/20">
-        <div className="overflow-x-auto">
         {/* Header */}
-        <div className={`${GRID} items-center border-b border-white/20 bg-pitch-800 px-5 py-3.5 font-display text-xs font-bold uppercase tracking-widest text-chalk`} style={{ minWidth: '420px' }}>
+        <div className={`${GRID} items-center border-b border-white/20 bg-pitch-800 px-3 py-3 sm:px-5 sm:py-3.5 font-display text-[10px] sm:text-xs font-bold uppercase tracking-widest text-chalk`}>
           <span>#</span>
           <span>Player</span>
           <ColTip label="CS" tip="Correct Score — exact scoreline" />
@@ -190,7 +189,7 @@ export default function LeaderboardPage() {
         </div>
 
         {displayRows.length === 0 && (
-          <p className="px-5 py-10 text-center text-base text-chalk" style={{ minWidth: '420px' }}>
+          <p className="px-5 py-10 text-center text-base text-chalk">
             No players yet — be the first to make a pick.
           </p>
         )}
@@ -205,50 +204,49 @@ export default function LeaderboardPage() {
             <div
               key={r.user_id}
               className={[
-                `${GRID} items-center border-t border-white/15 px-5 py-4 transition-colors`,
+                `${GRID} items-center border-t border-white/15 px-3 py-2.5 sm:px-5 sm:py-4 transition-colors`,
                 isMe ? 'bg-lime/5' : i < 3 ? 'bg-pitch-900/40' : '',
               ].join(' ')}
-              style={{ minWidth: '420px' }}
             >
               {/* Rank */}
-              <div className="flex items-center">
+              <div className="flex items-center justify-center">
                 {i < 3 ? (
                   <span className={rankStyle.crown}>
-                    <HugeiconsIcon icon={CrownIcon} size={16} color="currentColor" strokeWidth={1.5} />
+                    <HugeiconsIcon icon={CrownIcon} size={12} color="currentColor" strokeWidth={1.5} />
                   </span>
                 ) : (
-                  <span className="font-display text-sm font-black text-chalk">{i + 1}</span>
+                  <span className="font-display text-[10px] sm:text-sm font-black text-chalk">{i + 1}</span>
                 )}
               </div>
 
               {/* Name */}
               <span className={[
-                'truncate font-display text-sm font-bold uppercase tracking-wide',
+                'truncate font-display text-[11px] sm:text-sm font-bold uppercase tracking-wide',
                 rankStyle ? rankStyle.text : 'text-chalk',
               ].join(' ')}>
                 {r.display_name}
                 {isMe && (
-                  <span className="ml-1.5 rounded-full bg-lime/20 px-1.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-lime">
+                  <span className="ml-1 hidden sm:inline rounded-full bg-lime/20 px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-widest text-lime">
                     you
                   </span>
                 )}
               </span>
 
-              <span className="text-center font-display font-black text-sm text-chalk">{r.exact_scores}</span>
-              <span className="text-center font-display font-black text-sm text-chalk">{r.correct_results}</span>
-              <span className="text-center font-display font-black text-sm text-chalk">{r.award_points}</span>
+              <span className="text-center font-display font-black text-[11px] sm:text-sm text-chalk">{r.exact_scores}</span>
+              <span className="text-center font-display font-black text-[11px] sm:text-sm text-chalk">{r.correct_results}</span>
+              <span className="text-center font-display font-black text-[11px] sm:text-sm text-chalk">{r.award_points}</span>
 
               {/* Total + live bonus */}
               <div className="flex flex-col items-end">
                 <span className={[
-                  'font-display font-black text-sm',
+                  'font-display font-black text-[11px] sm:text-sm',
                   rankStyle ? rankStyle.text : 'text-chalk',
                 ].join(' ')}>
                   {isLive ? liveTotal : r.total_points}
                 </span>
                 {isLive && bonus !== 0 && (
                   <span className={[
-                    'font-mono text-[10px] font-semibold',
+                    'font-mono text-[9px] font-semibold',
                     bonus > 0 ? 'text-flame' : 'text-chalk',
                   ].join(' ')}>
                     {bonus > 0 ? `+${bonus}` : bonus}
@@ -258,7 +256,6 @@ export default function LeaderboardPage() {
             </div>
           );
         })}
-        </div>
       </div>
     </div>
   );
