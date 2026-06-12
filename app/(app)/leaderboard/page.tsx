@@ -34,8 +34,19 @@ const RANK_STYLES = [
   { text: 'text-[#e0a86b]', crown: 'text-[#e0a86b]' },
 ];
 
-// Responsive grid: 5 cols on mobile (no awards), 6 cols on sm+
-const GRID = 'grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem_4rem] sm:grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] gap-1.5 sm:gap-2';
+// Single grid — table always has all 6 cols; container scrolls horizontally on small screens
+const GRID = 'grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem] gap-2';
+
+function ColTip({ label, tip, className = 'justify-center' }: { label: string; tip: string; className?: string }) {
+  return (
+    <span className={`relative flex items-center group cursor-default ${className}`}>
+      <span className="font-display text-xs font-bold uppercase tracking-widest">{label}</span>
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[180px] rounded-xl border border-white/20 bg-pitch-800 px-3 py-2 font-mono text-[11px] leading-snug text-chalk opacity-0 shadow-xl transition-opacity group-hover:opacity-100 z-20 text-center whitespace-nowrap">
+        {tip}
+      </span>
+    </span>
+  );
+}
 
 export default function LeaderboardPage() {
   const supabase = useMemo(() => createClient(), []);
@@ -167,18 +178,19 @@ export default function LeaderboardPage() {
 
       {/* Table */}
       <div className="mt-6 overflow-hidden rounded-2xl border-2 border-white/20">
+        <div className="overflow-x-auto">
         {/* Header */}
-        <div className={`${GRID} items-center border-b border-white/20 bg-pitch-800 px-3 py-3 sm:px-5 sm:py-3.5 font-display text-xs sm:text-sm font-bold uppercase tracking-widest text-chalk`}>
+        <div className={`${GRID} items-center border-b border-white/20 bg-pitch-800 px-5 py-3.5 font-display text-xs font-bold uppercase tracking-widest text-chalk`} style={{ minWidth: '420px' }}>
           <span>#</span>
           <span>Player</span>
-          <span className="text-center">5pt</span>
-          <span className="text-center">1pt</span>
-          <span className="hidden sm:block text-center">Awds</span>
-          <span className="text-right">Total</span>
+          <ColTip label="CS" tip="Correct Score — exact scoreline" />
+          <ColTip label="CR" tip="Correct Result — right outcome, wrong score" />
+          <ColTip label="Awds" tip="Award prediction points" />
+          <ColTip label="Total" tip="Total points" className="text-right justify-end" />
         </div>
 
         {displayRows.length === 0 && (
-          <p className="px-5 py-10 text-center text-base text-chalk">
+          <p className="px-5 py-10 text-center text-base text-chalk" style={{ minWidth: '420px' }}>
             No players yet — be the first to make a pick.
           </p>
         )}
@@ -193,9 +205,10 @@ export default function LeaderboardPage() {
             <div
               key={r.user_id}
               className={[
-                `${GRID} items-center border-t border-white/15 px-3 py-3 sm:px-5 sm:py-4 transition-colors`,
+                `${GRID} items-center border-t border-white/15 px-5 py-4 transition-colors`,
                 isMe ? 'bg-lime/5' : i < 3 ? 'bg-pitch-900/40' : '',
               ].join(' ')}
+              style={{ minWidth: '420px' }}
             >
               {/* Rank */}
               <div className="flex items-center">
@@ -204,13 +217,13 @@ export default function LeaderboardPage() {
                     <HugeiconsIcon icon={CrownIcon} size={16} color="currentColor" strokeWidth={1.5} />
                   </span>
                 ) : (
-                  <span className="font-display text-base font-black text-chalk">{i + 1}</span>
+                  <span className="font-display text-sm font-black text-chalk">{i + 1}</span>
                 )}
               </div>
 
               {/* Name */}
               <span className={[
-                'truncate font-display text-xs sm:text-sm font-bold uppercase tracking-wide',
+                'truncate font-display text-sm font-bold uppercase tracking-wide',
                 rankStyle ? rankStyle.text : 'text-chalk',
               ].join(' ')}>
                 {r.display_name}
@@ -221,21 +234,21 @@ export default function LeaderboardPage() {
                 )}
               </span>
 
-              <span className="text-center font-display font-black text-sm sm:text-base text-chalk">{r.exact_scores}</span>
-              <span className="text-center font-display font-black text-sm sm:text-base text-chalk">{r.correct_results}</span>
-              <span className="hidden sm:block text-center font-display font-black text-base text-chalk">{r.award_points}</span>
+              <span className="text-center font-display font-black text-sm text-chalk">{r.exact_scores}</span>
+              <span className="text-center font-display font-black text-sm text-chalk">{r.correct_results}</span>
+              <span className="text-center font-display font-black text-sm text-chalk">{r.award_points}</span>
 
               {/* Total + live bonus */}
               <div className="flex flex-col items-end">
                 <span className={[
-                  'font-display font-black text-xl sm:text-2xl',
+                  'font-display font-black text-sm',
                   rankStyle ? rankStyle.text : 'text-chalk',
                 ].join(' ')}>
                   {isLive ? liveTotal : r.total_points}
                 </span>
                 {isLive && bonus !== 0 && (
                   <span className={[
-                    'font-mono text-xs font-semibold',
+                    'font-mono text-[10px] font-semibold',
                     bonus > 0 ? 'text-flame' : 'text-chalk',
                   ].join(' ')}>
                     {bonus > 0 ? `+${bonus}` : bonus}
@@ -245,6 +258,7 @@ export default function LeaderboardPage() {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
