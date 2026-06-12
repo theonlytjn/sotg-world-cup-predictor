@@ -196,6 +196,47 @@ export default async function Home() {
         </p>
       </section>
 
+      {/* ── BANKER PICK ──────────────────────────────────── */}
+      <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
+        <div className="rounded-[26px] border border-gold/30 bg-gradient-to-br from-gold/8 to-pitch-900 p-8 sm:p-10 lg:p-12">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-3xl">⭐</span>
+                <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-gold">The Banker Pick</p>
+              </div>
+              <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(26px, 3.5vw, 40px)' }}>
+                One match. Double the points.
+              </h2>
+              <p className="mt-4 text-chalk max-w-[52ch]" style={{ fontSize: 'clamp(15px, 1.4vw, 17px)' }}>
+                Once per matchday you can star one of your predictions as your <span className="text-gold font-semibold">Banker</span>.
+                If it lands, your points for that game double — exact score becomes <span className="text-lime font-semibold">{exactPts * 2} pts</span>, correct result becomes <span className="text-lime font-semibold">{resultPts * 2} pts</span>.
+                Miss? The banker burns with it. Zero points, no backup.
+              </p>
+              <p className="mt-3 text-chalk" style={{ fontSize: 'clamp(14px, 1.2vw, 16px)' }}>
+                You can switch your banker right up until the whistle — but you only get one per matchday, so pick your most confident call.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 lg:min-w-[200px]">
+              <div className="rounded-2xl border border-gold/25 bg-pitch-900/70 p-5 text-center">
+                <p className="font-mono text-xs uppercase tracking-widest text-gold mb-1">Exact + Banker</p>
+                <p className="font-display font-black text-lime" style={{ fontSize: 48, lineHeight: 1 }}>
+                  {exactPts * 2}
+                  <span className="text-lg text-chalk ml-1"> pts</span>
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-pitch-900/70 p-5 text-center">
+                <p className="font-mono text-xs uppercase tracking-widest text-chalk mb-1">Result + Banker</p>
+                <p className="font-display font-black text-lime" style={{ fontSize: 48, lineHeight: 1 }}>
+                  {resultPts * 2}
+                  <span className="text-lg text-chalk ml-1"> pts</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── LEAGUES ──────────────────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">Private leagues</p>

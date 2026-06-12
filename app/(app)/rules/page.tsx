@@ -72,6 +72,83 @@ export default async function RulesPage() {
         </div>
       </section>
 
+      {/* ── Banker Pick ── */}
+      <section className="mt-8">
+        <div className="mb-3 flex items-center gap-3">
+          <h2 className="font-display text-2xl uppercase text-gold">Banker Pick</h2>
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <div className="rounded-2xl border border-gold/30 bg-gold/5 p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <span className="text-3xl leading-none">⭐</span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg uppercase text-chalk">Your one power move per matchday</p>
+              <p className="mt-2 text-base text-chalk">
+                Before any match in a matchday kicks off, you can mark one of your predictions as your
+                <span className="text-gold font-semibold"> Banker</span>. If that prediction scores points,
+                they&apos;re doubled. Simple as that.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-gold/20 bg-pitch-900/80 p-4">
+              <p className="font-mono text-sm uppercase tracking-widest text-gold">Exact score + Banker</p>
+              <p className="mt-2 font-mono text-3xl font-semibold text-lime">
+                {matchRules.find(r => r.key === 'match_exact')?.points
+                  ? `${(matchRules.find(r => r.key === 'match_exact')!.points * 2)}`
+                  : '6'}
+                <span className="ml-1.5 text-base text-lime">pts</span>
+              </p>
+              <p className="mt-1 text-sm text-chalk">
+                {matchRules.find(r => r.key === 'match_exact')?.points ?? 3} pts × 2 — you nailed it and doubled down
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-pitch-900/80 p-4">
+              <p className="font-mono text-sm uppercase tracking-widest text-chalk">Correct result + Banker</p>
+              <p className="mt-2 font-mono text-3xl font-semibold text-lime">
+                {matchRules.find(r => r.key === 'match_result')?.points
+                  ? `${(matchRules.find(r => r.key === 'match_result')!.points * 2)}`
+                  : '2'}
+                <span className="ml-1.5 text-base text-lime">pts</span>
+              </p>
+              <p className="mt-1 text-sm text-chalk">
+                {matchRules.find(r => r.key === 'match_result')?.points ?? 1} pt × 2 — right result, still doubled
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-pitch-900/80 p-4">
+              <p className="font-mono text-sm uppercase tracking-widest text-flame">Wrong prediction + Banker</p>
+              <p className="mt-2 font-mono text-3xl font-semibold text-chalk">
+                0<span className="ml-1.5 text-base">pts</span>
+              </p>
+              <p className="mt-1 text-sm text-chalk">
+                The banker burns with the pick. No bonus for a miss.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 text-lg leading-none">📌</span>
+              <p className="text-base text-chalk">
+                <span className="font-semibold text-chalk">One banker per matchday.</span>{' '}
+                You can set it on any prediction you&apos;ve already made, right up to the moment that match kicks off.
+                Switching it to another game automatically removes the old one.
+              </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 text-lg leading-none">☆</span>
+              <p className="text-base text-chalk">
+                <span className="font-semibold text-chalk">How to set it.</span>{' '}
+                On the Predict page, save your pick first, then tap the star (☆) that appears next to the save button.
+                The card gains a gold border to confirm it&apos;s your banker.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Award Sections ── */}
       {['main', 'specials', 'xtra'].map((section) => {
         const cats = awardsBySection.get(section);
