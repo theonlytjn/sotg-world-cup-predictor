@@ -3,6 +3,8 @@ import localFont from 'next/font/local';
 import './globals.css';
 import 'aos/dist/aos.css';
 import AosInit from '@/components/AosInit';
+import PageLoader from '@/components/PageLoader';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const display = localFont({
   src: '../public/fonts/Boldonse.woff2',
@@ -30,8 +32,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
+        <PageLoader />
         <AosInit />
         {children}
+        <ScrollToTop />
       </body>
     </html>
   );
