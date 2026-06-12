@@ -77,7 +77,7 @@ export default function MePage() {
   }
 
   return (
-    <div className="max-w-lg">
+    <div>
       <div className="flex items-center gap-3 mb-1">
         <span className="text-lime"><HugeiconsIcon icon={UserCircleIcon} size={18} color="currentColor" strokeWidth={1.5} /></span>
         <p className="font-display font-bold text-base tracking-[0.28em] uppercase text-lime">Profile</p>
@@ -85,7 +85,7 @@ export default function MePage() {
       <h1 className="font-display text-4xl uppercase text-chalk">You</h1>
 
       {/* stats grid — row 1 */}
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
         <StatCard
           icon={<HugeiconsIcon icon={AnalyticsIcon} size={18} color="currentColor" strokeWidth={1.5} />}
           label="Total pts"
@@ -105,7 +105,7 @@ export default function MePage() {
       </div>
 
       {/* stats grid — row 2 */}
-      <div className="mt-3 grid grid-cols-3 gap-3">
+      <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
         {/* Rank */}
         <div className="rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-6">
           <span className="text-chalk">

@@ -41,7 +41,7 @@ function RuleRow({ rule }: { rule: Rule }) {
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-pitch-900/60 px-4 py-3">
       <div className="flex-1 min-w-0">
         <p className="font-display text-base uppercase tracking-wide text-chalk">{rule.label}</p>
-        <p className="font-mono text-[11px] text-chalk/40">{rule.description}</p>
+        <p className="font-mono text-sm text-chalk/40">{rule.description}</p>
       </div>
       <div className="flex items-center gap-2">
         <input
@@ -51,11 +51,11 @@ function RuleRow({ rule }: { rule: Rule }) {
           onChange={(e) => { setPoints(e.target.value); setState('idle'); }}
           className="w-16 rounded-lg border border-white/15 bg-pitch-800 px-2 py-1.5 text-center font-mono text-sm text-chalk outline-none focus:border-lime/60"
         />
-        <span className="font-mono text-xs text-chalk/40">pts</span>
+        <span className="font-mono text-sm text-chalk/40">pts</span>
         <button
           onClick={save}
           disabled={state === 'saving' || parseInt(points, 10) === rule.points}
-          className="rounded-lg bg-lime/15 px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-lime transition hover:bg-lime/25 disabled:opacity-40"
+          className="rounded-lg bg-lime/15 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-lime transition hover:bg-lime/25 disabled:opacity-40"
         >
           {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : state === 'error' ? 'Error' : 'Save'}
         </button>

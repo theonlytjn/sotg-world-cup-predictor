@@ -47,7 +47,7 @@ export default function FixturePanel({ fixtures }: { fixtures: Fixture[] }) {
             <button
               key={v}
               onClick={() => setFilter(v)}
-              className={`rounded-lg px-3 py-1 font-mono text-xs uppercase tracking-widest transition ${
+              className={`rounded-lg px-3 py-1 font-mono text-sm uppercase tracking-widest transition ${
                 filter === v ? 'bg-lime text-pitch-950' : 'text-chalk/50 hover:text-chalk'
               }`}
             >
@@ -132,7 +132,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
       </div>
 
       {/* Status + kickoff */}
-      <span className={`font-mono text-[10px] uppercase tracking-widest ${
+      <span className={`font-mono text-sm uppercase tracking-widest ${
         finished ? 'text-chalk/30' : live ? 'text-lime' : 'text-chalk/50'
       }`}>
         {finished ? 'FT' : live ? 'Live' : koLabel}
@@ -162,7 +162,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
         <button
           onClick={override}
           disabled={home === '' || away === '' || state === 'saving'}
-          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-xs uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
         >
           {state === 'saving' ? '…' : state === 'saved' ? '✓' : state === 'error' ? '!' : finished ? 'Override' : 'Set'}
         </button>

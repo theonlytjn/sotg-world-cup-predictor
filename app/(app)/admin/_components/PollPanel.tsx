@@ -69,7 +69,7 @@ function QuestionRow({
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-pitch-900/60 px-4 py-3">
       <div className="flex-1 min-w-0">
         <p className="font-display text-base uppercase tracking-wide text-chalk">{question.label}</p>
-        <p className={`font-mono text-[11px] uppercase tracking-widest ${open ? 'text-lime' : 'text-chalk/40'}`}>
+        <p className={`font-mono text-sm uppercase tracking-widest ${open ? 'text-lime' : 'text-chalk/40'}`}>
           {open
             ? `Open since ${new Date(question.opens_at!).toLocaleString()}`
             : question.opens_at
@@ -83,18 +83,18 @@ function QuestionRow({
           type="datetime-local"
           value={datetime}
           onChange={(e) => setDatetime(e.target.value)}
-          className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-xs text-chalk outline-none focus:border-lime/60"
+          className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-sm text-chalk outline-none focus:border-lime/60"
         />
         <button
           onClick={() => onSetOpensAt(question.id, datetime ? new Date(datetime).toISOString() : null)}
-          className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-chalk/70 transition hover:bg-pitch-600"
+          className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-chalk/70 transition hover:bg-pitch-600"
         >
           Set
         </button>
         {!open && (
           <button
             onClick={() => onSetOpensAt(question.id, new Date().toISOString())}
-            className="rounded-lg bg-lime/15 px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-lime transition hover:bg-lime/25"
+            className="rounded-lg bg-lime/15 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-lime transition hover:bg-lime/25"
           >
             Open now
           </button>
@@ -102,7 +102,7 @@ function QuestionRow({
         {open && (
           <button
             onClick={() => onSetOpensAt(question.id, null)}
-            className="rounded-lg bg-flame/15 px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-flame transition hover:bg-flame/25"
+            className="rounded-lg bg-flame/15 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-flame transition hover:bg-flame/25"
           >
             Lock
           </button>

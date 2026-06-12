@@ -75,7 +75,7 @@ export default function ManualPredictionsPanel({
       </p>
 
       <div className="mt-4">
-        <label className="block font-mono text-xs uppercase tracking-widest text-chalk/50 mb-1.5">
+        <label className="block font-mono text-sm uppercase tracking-widest text-chalk/50 mb-1.5">
           Select fixture
         </label>
         <select
@@ -121,7 +121,7 @@ export default function ManualPredictionsPanel({
                       <div className="min-w-0 flex-1">
                         <span className="font-display text-sm uppercase text-chalk">{p.display_name}</span>
                         {hasExisting && (
-                          <span className="ml-2 font-mono text-[10px] text-lime/70">existing</span>
+                          <span className="ml-2 font-mono text-sm text-lime/70">existing</span>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -147,7 +147,7 @@ export default function ManualPredictionsPanel({
                         <button
                           onClick={() => save(p.id)}
                           disabled={d.home === '' || d.away === '' || st === 'saving'}
-                          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-xs uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+                          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
                         >
                           {st === 'saving' ? '…' : st === 'saved' ? '✓' : st === 'error' ? '!' : hasExisting ? 'Update' : 'Set'}
                         </button>
@@ -156,7 +156,7 @@ export default function ManualPredictionsPanel({
                   );
                 })}
               </div>
-              <p className="mt-4 font-mono text-xs text-chalk/30">
+              <p className="mt-4 font-mono text-sm text-chalk/30">
                 After setting all predictions, go to Fixture Scores above and set the final score — this will score everyone automatically.
               </p>
             </>
