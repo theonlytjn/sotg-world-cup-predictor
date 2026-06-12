@@ -2,14 +2,10 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
-import AwardPanel from './_components/AwardPanel';
-import FixturePanel from './_components/FixturePanel';
-import ManualPredictionsPanel from './_components/ManualPredictionsPanel';
-import PollPanel from './_components/PollPanel';
-import ScoringPanel from './_components/ScoringPanel';
-import UsersPanel from './_components/UsersPanel';
-import LeaguesAdminPanel from './_components/LeaguesAdminPanel';
+import AdminTabs from './_components/AdminTabs';
 import type { AwardCategory, PollQuestion } from '@/lib/types';
+import type FixturePanel from './_components/FixturePanel';
+import type ManualPredictionsPanel from './_components/ManualPredictionsPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,49 +109,19 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* Scoring — full width */}
-      <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-        <ScoringPanel rules={(scoringRules as { key: string; label: string; description: string; points: number }[]) ?? []} />
-      </div>
-
-      {/* 2-column grid for the heavier panels */}
-      <div className="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
-        <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-          <AwardPanel
-            categories={(categories as AwardCategory[]) ?? []}
-            resultsByCategory={resultsByCategory}
-            teams={(teams as { id: number; name: string; tla: string | null; confederation: string | null }[]) ?? []}
-            players={(players as { id: number; name: string; position: string | null; team_id: number | null }[]) ?? []}
-          />
-        </div>
-
-        <div className="flex flex-col gap-6">
-          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-            <PollPanel questions={(pollQuestions as PollQuestion[]) ?? []} />
-          </div>
-
-          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-            <FixturePanel
-              fixtures={(fixtures as unknown as Parameters<typeof FixturePanel>[0]['fixtures']) ?? []}
-            />
-          </div>
-
-          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-            <ManualPredictionsPanel
-              profiles={(profiles as unknown as { id: string; display_name: string; username: string | null }[]) ?? []}
-              fixtures={(fixtures as unknown as Parameters<typeof ManualPredictionsPanel>[0]['fixtures']) ?? []}
-            />
-          </div>
-
-          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-            <LeaguesAdminPanel leagues={leagueRows} users={userRows.map((u) => ({ id: u.id, display_name: u.display_name }))} />
-          </div>
-
-          <div className="rounded-2xl border-2 border-white/15 bg-pitch-900/40 p-10">
-            <UsersPanel users={userRows} />
-          </div>
-        </div>
-      </div>
+      <AdminTabs
+        categories={(categories as AwardCategory[]) ?? []}
+        resultsByCategory={resultsByCategory}
+        teams={(teams as { id: number; name: string; tla: string | null; confederation: string | null }[]) ?? []}
+        players={(players as { id: number; name: string; position: string | null; team_id: number | null }[]) ?? []}
+        fixtures={(fixtures as unknown as Parameters<typeof FixturePanel>[0]['fixtures']) ?? []}
+        manualFixtures={(fixtures as unknown as Parameters<typeof ManualPredictionsPanel>[0]['fixtures']) ?? []}
+        profiles={(profiles as unknown as Parameters<typeof ManualPredictionsPanel>[0]['profiles']) ?? []}
+        pollQuestions={(pollQuestions as PollQuestion[]) ?? []}
+        scoringRules={(scoringRules as { key: string; label: string; description: string; points: number }[]) ?? []}
+        leagueRows={leagueRows}
+        userRows={userRows}
+      />
     </div>
   );
 }
