@@ -196,6 +196,65 @@ export default async function Home() {
         </p>
       </section>
 
+      {/* ── LEAGUES ──────────────────────────────────────── */}
+      <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
+        <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">Private leagues</p>
+        <h2 className="font-display uppercase text-chalk" style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}>
+          Take the bragging rights private.
+        </h2>
+        <p className="mt-4 text-chalk max-w-[52ch]" style={{ fontSize: 'clamp(16px, 1.5vw, 19px)' }}>
+          The global table is one battle. Your league is personal. Create one, drop the code in the group chat, and run your own title race from matchday one to the final whistle.
+        </p>
+
+        <div className="mt-9 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            {
+              icon: '⚽',
+              title: 'Create your league',
+              body: 'Name it. Own it. Your league, your rules. Set it up in seconds and you\'re top of the table before a ball is kicked.',
+            },
+            {
+              icon: '🔗',
+              title: 'Share the code',
+              body: 'One invite code. Drop it in the group chat. Your mates join instantly — no sign-up drama, no faff.',
+            },
+            {
+              icon: '🏆',
+              title: 'Settle the debate',
+              body: 'Your own private table tracks every matchday. No hiding. The final standings decide who actually knows their football.',
+            },
+          ].map(({ icon, title, body }, i) => (
+            <div
+              key={title}
+              data-aos="fade-up"
+              data-aos-delay={String(i * 100)}
+              className="bg-pitch-900 border border-pitch-700 rounded-[22px] p-7 sm:p-8"
+            >
+              <div className="w-16 h-16 rounded-[18px] bg-lime/12 flex items-center justify-center text-3xl mb-6">
+                {icon}
+              </div>
+              <h3 className="font-display text-xl uppercase text-chalk mb-2.5">{title}</h3>
+              <p className="text-chalk text-[15px] leading-relaxed">{body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href={loggedIn ? '/leagues' : '/login'}
+            className="inline-flex items-center gap-2 font-display font-bold uppercase tracking-wide text-base rounded-full bg-lime text-pitch-950 px-6 py-3.5 transition hover:brightness-110 hover:-translate-y-0.5"
+          >
+            Create a League →
+          </Link>
+          <Link
+            href={loggedIn ? '/leagues' : '/login'}
+            className="inline-flex items-center font-display font-bold uppercase tracking-wide text-base rounded-full border border-pitch-700 text-chalk px-6 py-3.5 transition hover:border-lime/60"
+          >
+            Join with a Code
+          </Link>
+        </div>
+      </section>
+
       {/* ── LEADERBOARD TEASER ───────────────────────────── */}
       <section className="px-6 sm:px-10 lg:px-16 xl:px-24 py-16" data-aos="fade-up">
         <p className="font-display font-bold text-base tracking-[0.3em] uppercase text-lime mb-3.5">The race</p>
