@@ -129,7 +129,7 @@ export default function LoginPage() {
           {error && <p className="text-base text-flame">{error}</p>}
 
           <button onClick={signUp} disabled={!email || !password || !confirm || loading}
-            className="w-full rounded-xl bg-lime py-3.5 font-display text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40">
+            className="w-full rounded-xl bg-lime py-3.5 font-body font-bold text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40">
             {loading ? 'Creating…' : 'Create account'}
           </button>
         </div>
@@ -173,7 +173,7 @@ export default function LoginPage() {
         {error && <p className="text-base text-flame">{error}</p>}
 
         <button onClick={signInWithPassword} disabled={!email || !password || loading}
-          className="w-full rounded-xl bg-lime py-3.5 font-display text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40">
+          className="w-full rounded-xl bg-lime py-3.5 font-body font-bold text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40">
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </div>
@@ -185,7 +185,7 @@ export default function LoginPage() {
       </div>
 
       <button onClick={sendMagicLink} disabled={!email || loading}
-        className="w-full rounded-xl border border-white/15 py-3.5 font-display text-base uppercase tracking-wide text-chalk transition hover:border-lime/40 hover:text-chalk disabled:opacity-40">
+        className="w-full rounded-xl border border-white/15 py-3.5 font-body font-bold text-base uppercase tracking-wide text-chalk transition hover:border-lime/40 hover:text-chalk disabled:opacity-40">
         {loading ? 'Sending…' : 'Send magic link'}
       </button>
       <p className="mt-2 text-center text-base text-chalk">
@@ -207,7 +207,7 @@ function GoogleButton({ onClick, loading }: { onClick: () => void; loading: bool
     <button
       onClick={onClick}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-white py-3.5 font-display text-base uppercase tracking-wide text-[#1f1f1f] transition hover:bg-white/90 active:scale-[0.99] disabled:opacity-50"
+      className="w-full flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-white py-3.5 font-body font-bold text-base uppercase tracking-wide text-[#1f1f1f] transition hover:bg-white/90 active:scale-[0.99] disabled:opacity-50"
     >
       {/* Google 'G' logo */}
       <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">

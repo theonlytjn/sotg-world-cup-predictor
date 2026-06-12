@@ -107,7 +107,7 @@ export default function MePage() {
           <button
             onClick={saveName}
             disabled={saving || !displayName.trim()}
-            className="rounded-xl bg-lime px-5 py-2.5 font-display text-base font-bold uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
+            className="rounded-xl bg-lime px-5 py-2.5 font-body font-bold text-base uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
           >
             {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
           </button>

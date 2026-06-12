@@ -65,7 +65,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
           <Link href="/predict" className="shrink-0" onClick={closeMenu}>
             {!logoErr ? (
               <img
-                src={isDark ? '/logo-dark.svg' : '/logo.svg'}
+                src={isDark ? '/logo.svg' : '/logo-dark.svg'}
                 alt="SOTG '26"
                 className="h-10 sm:h-14 w-auto object-contain"
                 onError={() => setLogoErr(true)}

@@ -244,7 +244,7 @@ function QuestionCard({
             <button
               onClick={save}
               disabled={!pick || state === 'saving'}
-              className="rounded-xl bg-lime px-5 py-2.5 font-display text-base uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
+              className="rounded-xl bg-lime px-5 py-2.5 font-body font-bold text-base uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
             >
               {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : myPick ? 'Update' : 'Submit'}
             </button>

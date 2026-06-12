@@ -377,7 +377,7 @@ function CategoryRow({
               <button
                 onClick={save}
                 disabled={!pick1 || state === 'saving'}
-                className="rounded-full bg-gold/15 px-4 py-1.5 font-display text-base uppercase tracking-wide text-gold transition hover:bg-gold/25 disabled:opacity-30"
+                className="rounded-full bg-gold/15 px-4 py-1.5 font-body font-bold text-base uppercase tracking-wide text-gold transition hover:bg-gold/25 disabled:opacity-30"
               >
                 {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Voted ✓' : pred?.pick_1 ? 'Update vote' : 'Submit vote'}
               </button>
@@ -442,7 +442,7 @@ function CategoryRow({
           <button
             onClick={save}
             disabled={(!pick1 && !pick2) || state === 'saving'}
-            className="rounded-full bg-lime/15 px-4 py-1.5 font-display text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+            className="rounded-full bg-lime/15 px-4 py-1.5 font-body font-bold text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
           >
             {state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved ✓' : pred ? 'Update' : 'Save picks'}
           </button>

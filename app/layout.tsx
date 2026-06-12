@@ -19,7 +19,8 @@ const body = localFont({
 
 export const metadata: Metadata = {
   title: 'SOTG World Cup 2026 Predictor',
-  description: 'Predict every group game. Score the points. Top the table.',
+  description: 'The Students of the Game World Cup 2026 predictor. Pick the scoreline for every group game, earn points for accuracy, and battle your crew to top the table.',
+  icons: { icon: '/wc-logo-white.png' },
 };
 
 export const viewport: Viewport = {

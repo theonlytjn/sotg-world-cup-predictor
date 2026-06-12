@@ -112,7 +112,7 @@ export default function OnboardingPage() {
         <button
           onClick={save}
           disabled={!nickname.trim() || checking || saved}
-          className="mt-5 w-full rounded-xl bg-lime py-3 font-display text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
+          className="mt-5 w-full rounded-xl bg-lime py-3 font-body font-bold text-lg uppercase tracking-wide text-pitch-950 transition hover:brightness-110 disabled:opacity-40"
         >
           {checking ? 'Checking…' : saved ? 'Done ✓' : "Let's go"}
         </button>
