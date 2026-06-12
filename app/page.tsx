@@ -88,7 +88,7 @@ export default async function Home() {
             className="mx-auto h-24 w-auto object-contain"
           />
           <div className="w-full max-w-sm">
-            <TicketCarousel />
+            <TicketCarousel exactPts={exactPts} resultPts={resultPts} />
           </div>
         </div>
       </header>

@@ -12,28 +12,30 @@ type Fixture = {
   kind: 'exact' | 'result' | 'miss';
 };
 
-const fixtures: Fixture[] = [
-  {
-    grp: 'Group D · Matchday 1', hf: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', ht: 'ENG', af: '🇫🇷', at: 'FRA',
-    hs: 2, as: 1, phs: 2, pas: 1,
-    pts: '+5 pts', kind: 'exact',
-  },
-  {
-    grp: 'Group A · Matchday 2', hf: '🇧🇷', ht: 'BRA', af: '🇰🇷', at: 'KOR',
-    hs: 3, as: 1, phs: 2, pas: 0,
-    pts: '+1 pt', kind: 'result',
-  },
-  {
-    grp: 'Group C · Matchday 1', hf: '🇦🇷', ht: 'ARG', af: '🇲🇽', at: 'MEX',
-    hs: 1, as: 1, phs: 2, pas: 0,
-    pts: '0 pts', kind: 'miss',
-  },
-  {
-    grp: 'Group F · Matchday 3', hf: '🇪🇸', ht: 'ESP', af: '🇳🇱', at: 'NED',
-    hs: 2, as: 0, phs: 2, pas: 0,
-    pts: '+5 pts', kind: 'exact',
-  },
-];
+function makeFixtures(exactPts: number, resultPts: number): Fixture[] {
+  return [
+    {
+      grp: 'Group D · Matchday 1', hf: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', ht: 'ENG', af: '🇫🇷', at: 'FRA',
+      hs: 2, as: 1, phs: 2, pas: 1,
+      pts: `+${exactPts} pts`, kind: 'exact',
+    },
+    {
+      grp: 'Group A · Matchday 2', hf: '🇧🇷', ht: 'BRA', af: '🇰🇷', at: 'KOR',
+      hs: 3, as: 1, phs: 2, pas: 0,
+      pts: `+${resultPts} ${resultPts === 1 ? 'pt' : 'pts'}`, kind: 'result',
+    },
+    {
+      grp: 'Group C · Matchday 1', hf: '🇦🇷', ht: 'ARG', af: '🇲🇽', at: 'MEX',
+      hs: 1, as: 1, phs: 2, pas: 0,
+      pts: '0 pts', kind: 'miss',
+    },
+    {
+      grp: 'Group F · Matchday 3', hf: '🇪🇸', ht: 'ESP', af: '🇳🇱', at: 'NED',
+      hs: 2, as: 0, phs: 2, pas: 0,
+      pts: `+${exactPts} pts`, kind: 'exact',
+    },
+  ];
+}
 
 const BADGE_CLASS: Record<Fixture['kind'], string> = {
   exact:  'bg-lime text-pitch-950',
@@ -47,7 +49,8 @@ const OUTCOME_LABEL: Record<Fixture['kind'], string> = {
   miss:   'Wrong',
 };
 
-export default function TicketCarousel() {
+export default function TicketCarousel({ exactPts = 5, resultPts = 1 }: { exactPts?: number; resultPts?: number }) {
+  const fixtures = makeFixtures(exactPts, resultPts);
   const [idx, advance] = useReducer((i: number) => (i + 1) % fixtures.length, 0);
   const flipRef = useRef<(HTMLSpanElement | null)[]>([]);
   const ptsRef  = useRef<HTMLSpanElement>(null);

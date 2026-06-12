@@ -32,12 +32,14 @@ export const metadata: Metadata = {
     url: 'https://sotg.app',
     siteName: 'SOTG Predictor',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SOTG World Cup 2026 Predictor',
     description:
       'Pick the scoreline for every group game, earn points, and battle your crew to top the table.',
+    images: ['/og-image.png'],
   },
 };
 
