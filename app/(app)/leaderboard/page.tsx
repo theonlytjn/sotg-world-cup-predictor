@@ -274,7 +274,7 @@ export default function LeaderboardPage() {
               <span className="text-center font-display font-black text-[11px] sm:text-sm text-chalk">{r.award_points}</span>
 
               {/* Total + live bonus */}
-              <div className="flex flex-col items-end">
+              <div className="flex items-baseline justify-end gap-1">
                 <span className={[
                   'font-display font-black text-[11px] sm:text-sm',
                   rankStyle ? rankStyle.text : 'text-chalk',
@@ -282,10 +282,7 @@ export default function LeaderboardPage() {
                   {isLive ? liveTotal : r.total_points}
                 </span>
                 {isLive && bonus !== 0 && (
-                  <span className={[
-                    'font-display text-[10px] sm:text-xs font-black',
-                    bonus > 0 ? 'text-lime' : 'text-chalk',
-                  ].join(' ')}>
+                  <span className="font-display font-black text-[10px] sm:text-xs text-lime">
                     {bonus > 0 ? `+${bonus}` : bonus}
                   </span>
                 )}
