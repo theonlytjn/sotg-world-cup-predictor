@@ -47,7 +47,7 @@ export default function FixturePanel({ fixtures }: { fixtures: Fixture[] }) {
             <button
               key={v}
               onClick={() => setFilter(v)}
-              className={`rounded-lg px-3 py-1 font-mono text-sm uppercase tracking-widest transition ${
+              className={`rounded-lg px-3 py-1 font-mono text-xs uppercase tracking-widest transition ${
                 filter === v ? 'bg-lime text-pitch-950' : 'text-chalk/50 hover:text-chalk'
               }`}
             >
@@ -61,7 +61,7 @@ export default function FixturePanel({ fixtures }: { fixtures: Fixture[] }) {
       </p>
 
       {filtered.length === 0 && (
-        <p className="mt-6 font-mono text-sm text-chalk/40">
+        <p className="mt-6 font-mono text-xs text-chalk/40">
           {filter === 'pending' ? 'All fixtures are finished.' : 'No fixtures found.'}
         </p>
       )}
@@ -121,7 +121,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
         <span className="truncate font-display text-sm uppercase text-chalk">
           {fixture.home_team?.tla ?? fixture.home_team?.name ?? 'TBD'}
         </span>
-        <span className="font-mono text-sm text-chalk/40">
+        <span className="font-mono text-xs text-chalk/40">
           {finished || live
             ? `${fixture.home_score ?? '?'} – ${fixture.away_score ?? '?'}`
             : 'vs'}
@@ -132,7 +132,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
       </div>
 
       {/* Status + kickoff */}
-      <span className={`font-mono text-sm uppercase tracking-widest ${
+      <span className={`font-mono text-xs uppercase tracking-widest ${
         finished ? 'text-chalk/30' : live ? 'text-lime' : 'text-chalk/50'
       }`}>
         {finished ? 'FT' : live ? 'Live' : koLabel}
@@ -146,7 +146,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
           max={30}
           value={home}
           onChange={(e) => setHome(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
-          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-sm text-chalk outline-none focus:border-lime/60"
+          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-xs text-chalk outline-none focus:border-lime/60"
           placeholder="H"
         />
         <span className="font-mono text-chalk/30">–</span>
@@ -156,13 +156,13 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
           max={30}
           value={away}
           onChange={(e) => setAway(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
-          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-sm text-chalk outline-none focus:border-lime/60"
+          className="h-8 w-10 rounded-lg border border-white/15 bg-pitch-800 text-center font-mono text-xs text-chalk outline-none focus:border-lime/60"
           placeholder="A"
         />
         <button
           onClick={override}
           disabled={home === '' || away === '' || state === 'saving'}
-          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-sm uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
+          className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-xs uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
         >
           {state === 'saving' ? '…' : state === 'saved' ? '✓' : state === 'error' ? '!' : finished ? 'Override' : 'Set'}
         </button>

@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { HugeiconsIcon } from '@hugeicons/react';
-import ThemeToggle from '@/components/ThemeToggle';
 import {
   DartIcon,
   AwardIcon,
@@ -37,15 +36,6 @@ export default function Nav({ userEmail }: { userEmail: string }) {
   const router = useRouter();
   const [logoErr, setLogoErr] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    const check = () => setIsDark(!document.documentElement.classList.contains('light'));
-    check();
-    const obs = new MutationObserver(check);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
 
   async function signOut() {
     const supabase = createClient();
@@ -65,7 +55,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
           <Link href="/predict" className="shrink-0" onClick={closeMenu}>
             {!logoErr ? (
               <img
-                src={isDark ? '/logo.svg' : '/logo-dark.svg'}
+                src="/logo.svg"
                 alt="SOTG '26"
                 className="h-10 sm:h-14 w-auto object-contain"
                 onError={() => setLogoErr(true)}
@@ -109,7 +99,6 @@ export default function Nav({ userEmail }: { userEmail: string }) {
                 Admin
               </Link>
             )}
-            <ThemeToggle />
             <button
               onClick={signOut}
               className="flex h-9 w-9 items-center justify-center rounded-full text-chalk transition hover:text-flame"
@@ -175,8 +164,6 @@ export default function Nav({ userEmail }: { userEmail: string }) {
             )}
 
             <div className="my-4 h-px bg-white/8" />
-
-            <ThemeToggle mobile />
 
             <button
               onClick={signOut}

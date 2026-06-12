@@ -21,8 +21,11 @@ export default function MePage() {
   const [picks, setPicks] = useState(0);
   const [rank, setRank] = useState<number | null>(null);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [exactPts, setExactPts] = useState(3);
+  const [resultPts, setResultPts] = useState(1);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [resetState, setResetState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   useEffect(() => {
     (async () => {
@@ -30,7 +33,7 @@ export default function MePage() {
       if (!u.user) return;
       setEmail(u.user.email ?? '');
 
-      const [{ data: profile }, { data: allLb }, { count }] = await Promise.all([
+      const [{ data: profile }, { data: allLb }, { count }, { data: rules }] = await Promise.all([
         supabase.from('profiles').select('display_name').eq('id', u.user.id).single(),
         supabase
           .from('leaderboard')
@@ -41,9 +44,14 @@ export default function MePage() {
           .from('match_predictions')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', u.user.id),
+        supabase.from('scoring_rules').select('key, points'),
       ]);
 
       if (profile) setDisplayName(profile.display_name ?? '');
+
+      const rulesMap = Object.fromEntries((rules ?? []).map((r: { key: string; points: number }) => [r.key, r.points]));
+      setExactPts(rulesMap['match_exact'] ?? 3);
+      setResultPts(rulesMap['match_result'] ?? 1);
 
       const rows = (allLb ?? []) as Array<{
         user_id: string;
@@ -76,6 +84,16 @@ export default function MePage() {
     setTimeout(() => setSaved(false), 1500);
   }
 
+  async function sendReset() {
+    if (!email) return;
+    setResetState('sending');
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://sotg.app/auth/callback',
+    });
+    setResetState(error ? 'error' : 'sent');
+    if (!error) setTimeout(() => setResetState('idle'), 4000);
+  }
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-1">
@@ -94,12 +112,12 @@ export default function MePage() {
         />
         <StatCard
           icon={<HugeiconsIcon icon={DartIcon} size={18} color="currentColor" strokeWidth={1.5} />}
-          label="Exact (5pt)"
+          label={`Exact (${exactPts}pt)`}
           value={stats?.exact ?? 0}
         />
         <StatCard
           icon={<HugeiconsIcon icon={CheckmarkBadge01Icon} size={18} color="currentColor" strokeWidth={1.5} />}
-          label="Result (1pt)"
+          label={`Result (${resultPts}pt)`}
           value={stats?.results ?? 0}
         />
       </div>
@@ -166,6 +184,26 @@ export default function MePage() {
           </button>
           <p className="font-mono text-base text-chalk">{email}</p>
         </div>
+      </div>
+
+      {/* password reset */}
+      <div className="mt-4 rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-10">
+        <label className="block font-display text-sm font-bold uppercase tracking-widest text-chalk mb-2">
+          Password
+        </label>
+        <p className="mb-4 text-base text-chalk">
+          We'll send a reset link to <span className="text-lime">{email}</span>.
+        </p>
+        <button
+          onClick={sendReset}
+          disabled={resetState === 'sending' || resetState === 'sent'}
+          className="rounded-xl border-2 border-white/15 px-5 py-2.5 font-body font-bold text-base uppercase tracking-wide text-chalk transition hover:border-white/40 hover:text-lime disabled:opacity-50"
+        >
+          {resetState === 'sending' ? 'Sending…'
+            : resetState === 'sent' ? 'Link sent — check your email ✓'
+            : resetState === 'error' ? 'Error — try again'
+            : 'Send reset link'}
+        </button>
       </div>
     </div>
   );
