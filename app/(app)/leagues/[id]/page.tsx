@@ -53,8 +53,10 @@ export default function LeaguePage() {
   const supabase = useMemo(() => createClient(), []);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [league, setLeague] = useState<LeagueRow | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
+  const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -70,16 +72,23 @@ export default function LeaguePage() {
     if (!u.user) return;
     setUserId(u.user.id);
 
-    const { data: lg, error: le } = await supabase
-      .from('leagues')
-      .select('id, name, invite_code, created_by')
-      .eq('id', id)
-      .maybeSingle();
+    // Check admin status and fetch league in parallel
+    const [{ data: lg, error: le }, adminRes] = await Promise.all([
+      supabase
+        .from('leagues')
+        .select('id, name, invite_code, created_by')
+        .eq('id', id)
+        .maybeSingle(),
+      fetch('/api/admin/check').then((r) => r.json() as Promise<{ isAdmin: boolean }>),
+    ]);
+
+    const admin = adminRes.isAdmin ?? false;
+    setIsAdmin(admin);
 
     if (le || !lg) { setNotFound(true); setLoading(false); return; }
     setLeague(lg as LeagueRow);
 
-    // Check membership
+    // Check membership — admins can view any league without being a member
     const { data: myMembership } = await supabase
       .from('league_members')
       .select('user_id')
@@ -87,7 +96,8 @@ export default function LeaguePage() {
       .eq('user_id', u.user.id)
       .maybeSingle();
 
-    if (!myMembership) { setNotFound(true); setLoading(false); return; }
+    if (!myMembership && !admin) { setNotFound(true); setLoading(false); return; }
+    setIsMember(!!myMembership);
 
     // Get all members + their leaderboard data
     const { data: memberList } = await supabase
@@ -244,6 +254,7 @@ export default function LeaguePage() {
   }
 
   const isCreator = league.created_by === userId;
+  const canInteract = isMember; // H2H, leave etc only for actual members
   const inviteUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/leagues/join/${league.invite_code}`
     : `sotg.app/leagues/join/${league.invite_code}`;
@@ -269,11 +280,18 @@ export default function LeaguePage() {
             {members.length} {members.length === 1 ? 'member' : 'members'}
           </p>
         </div>
-        {isCreator && (
-          <span className="shrink-0 rounded-full bg-flame/20 px-3 py-1 font-mono text-xs uppercase tracking-widest text-flame">
-            Creator
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {isCreator && (
+            <span className="rounded-full bg-flame/20 px-3 py-1 font-mono text-xs uppercase tracking-widest text-flame">
+              Creator
+            </span>
+          )}
+          {isAdmin && !isMember && (
+            <span className="rounded-full bg-gold/20 px-3 py-1 font-mono text-xs uppercase tracking-widest text-gold">
+              Admin view
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Invite section */}
@@ -336,10 +354,10 @@ export default function LeaguePage() {
           return (
             <div
               key={m.user_id}
-              onClick={() => !isMe && loadH2H(m)}
+              onClick={() => !isMe && canInteract && loadH2H(m)}
               className={[
                 `${GRID} items-center border-t border-white/15 px-3 py-2.5 sm:px-5 sm:py-4`,
-                isMe ? 'bg-lime/5' : 'cursor-pointer hover:bg-white/5 transition-colors',
+                isMe ? 'bg-lime/5' : canInteract && !isMe ? 'cursor-pointer hover:bg-white/5 transition-colors' : '',
                 isH2hActive ? 'bg-lime/10' : i < 3 && !isMe ? 'bg-pitch-900/40' : '',
               ].join(' ')}
             >
@@ -379,7 +397,7 @@ export default function LeaguePage() {
         })}
       </div>
 
-      {members.length > 1 && !h2hTarget && (
+      {members.length > 1 && !h2hTarget && canInteract && (
         <p className="mt-3 font-mono text-xs uppercase tracking-widest text-chalk/40 text-center">
           Tap a rival to see head-to-head
         </p>
@@ -482,9 +500,9 @@ export default function LeaguePage() {
         </div>
       )}
 
-      {/* Leave / delete */}
+      {/* Leave / delete — only shown to actual members */}
       <div className="mt-6 flex items-center gap-4">
-        {!isCreator && !leaveConfirm && (
+        {canInteract && !isCreator && !leaveConfirm && (
           <button
             onClick={() => setLeaveConfirm(true)}
             className="font-mono text-sm text-chalk/40 hover:text-flame transition"
@@ -492,7 +510,7 @@ export default function LeaguePage() {
             Leave league
           </button>
         )}
-        {!isCreator && leaveConfirm && (
+        {canInteract && !isCreator && leaveConfirm && (
           <div className="flex items-center gap-3">
             <p className="font-mono text-sm text-chalk">Leave {league.name}?</p>
             <button
@@ -510,7 +528,7 @@ export default function LeaguePage() {
             </button>
           </div>
         )}
-        {isCreator && (
+        {canInteract && isCreator && (
           <p className="font-mono text-xs text-chalk/25">
             Creator — you can&apos;t leave, but members can
           </p>
