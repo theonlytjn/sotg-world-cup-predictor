@@ -63,6 +63,14 @@ export default function LeaderboardPage() {
   const [allMatchdays, setAllMatchdays]   = useState<number[]>([]);
   const [loading, setLoading]     = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [copied, setCopied]       = useState(false);
+
+  function copyInvite() {
+    navigator.clipboard.writeText('https://sotg.app').then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   const load = useCallback(async () => {
     const [
@@ -219,8 +227,26 @@ export default function LeaderboardPage() {
         </p>
       )}
 
+      {/* Invite banner */}
+      <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl border-2 border-white/10 bg-pitch-900/60 px-5 py-4">
+        <div>
+          <p className="font-display text-base uppercase tracking-wide text-chalk">
+            Challenge your crew
+          </p>
+          <p className="text-sm text-chalk mt-0.5">
+            Share <span className="text-lime">sotg.app</span> and get them picking before kickoff
+          </p>
+        </div>
+        <button
+          onClick={copyInvite}
+          className="shrink-0 rounded-xl bg-lime px-4 py-2.5 font-body font-bold text-base text-pitch-950 transition hover:brightness-110 active:scale-95"
+        >
+          {copied ? 'Copied!' : 'Copy link'}
+        </button>
+      </div>
+
       {/* Table */}
-      <div className="mt-6 overflow-hidden rounded-2xl border border-white/20">
+      <div className="mt-6 overflow-hidden rounded-2xl border-2 border-white/20">
         <div className="grid grid-cols-[2.5rem_1fr_3.5rem_3.5rem_3.5rem_5.5rem] items-center gap-2 border-b border-white/20 bg-pitch-800 px-5 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-chalk">
           <span>#</span>
           <span>Player</span>
@@ -306,7 +332,7 @@ export default function LeaderboardPage() {
           <h2 className="font-display text-2xl uppercase text-lime">Standings over time</h2>
           <span className="h-px flex-1 bg-white/10" />
         </div>
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
+        <div className="overflow-hidden rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-5">
           <StandingsChart players={chartPlayers} matchdays={allMatchdays} />
         </div>
       </section>

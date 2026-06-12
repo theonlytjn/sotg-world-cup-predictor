@@ -161,7 +161,7 @@ export default function PredictPage() {
 
   if (fixtures.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-6 text-chalk">
+      <div className="rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-10 text-chalk">
         <p className="font-display text-xl uppercase text-chalk">No fixtures yet</p>
         <p className="mt-2 text-base">
           Run <code className="rounded bg-pitch-700 px-1.5 py-0.5 font-mono text-lime">npm run seed</code>{' '}
@@ -336,11 +336,11 @@ function FixtureRow({
   const koTime = ko.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className={`rounded-2xl border p-5 sm:p-6 transition-colors ${
+    <div className={`rounded-2xl border-2 p-10 transition-colors focus-within:border-gold/60 ${
       live
         ? 'border-lime/25 bg-pitch-900/80'
         : finished
-        ? 'border-white/6 bg-pitch-900/30'
+        ? 'border-white/8 bg-pitch-900/30'
         : 'border-white/10 bg-pitch-900/60'
     }`}>
       {/* Top bar: group + status/time */}
@@ -439,7 +439,7 @@ function ScoreBox({ value, setValue, disabled, onCommit }: {
       disabled={disabled}
       onChange={(e) => setValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
       onBlur={onCommit}
-      className="h-12 w-12 rounded-xl border border-white/15 bg-pitch-800 text-center font-display text-xl text-chalk outline-none transition focus:border-lime/70 disabled:opacity-50"
+      className="h-12 w-12 rounded-xl border-2 border-white/15 bg-pitch-800 text-center font-display text-xl text-chalk outline-none transition focus:border-gold disabled:opacity-50"
       placeholder="–"
     />
   );

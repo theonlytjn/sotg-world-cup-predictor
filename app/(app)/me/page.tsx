@@ -92,7 +92,7 @@ export default function MePage() {
       </p>
 
       {/* display name form */}
-      <div className="mt-8 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
+      <div className="mt-8 rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-10 focus-within:border-gold/60 transition-colors">
         <label className="block font-display text-sm font-bold uppercase tracking-widest text-chalk mb-2">
           Display name
         </label>
@@ -101,7 +101,7 @@ export default function MePage() {
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           maxLength={24}
-          className="w-full rounded-xl border border-white/15 bg-pitch-800 px-4 py-3 font-body text-chalk outline-none transition focus:border-lime/60"
+          className="w-full rounded-xl border-2 border-white/15 bg-pitch-800 px-4 py-3 font-body text-chalk outline-none transition focus:border-gold"
         />
         <div className="mt-3 flex items-center justify-between">
           <button
@@ -127,7 +127,7 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className={`rounded-2xl border p-4 ${accent ? 'border-lime/25 bg-gradient-to-br from-lime/10 to-pitch-900' : 'border-white/10 bg-pitch-900/60'}`}>
+    <div className={`rounded-2xl border-2 p-6 ${accent ? 'border-gold/50 bg-gradient-to-br from-lime/10 to-pitch-900' : 'border-white/10 bg-pitch-900/60'}`}>
       <span className={accent ? 'text-lime' : 'text-chalk'}>{icon}</span>
       <div className={`mt-2 font-display text-4xl font-black ${accent ? 'text-lime' : 'text-chalk'}`}>
         {value}

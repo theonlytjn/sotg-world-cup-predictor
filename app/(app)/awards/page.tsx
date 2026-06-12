@@ -213,7 +213,7 @@ export default function AwardsPage() {
       })}
 
       {/* Points breakdown — opinion section excluded (0 pts) */}
-      <div className="mt-10 rounded-2xl border border-white/10 bg-pitch-900/60 p-5">
+      <div className="mt-10 rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-10">
         <p className="font-display text-base uppercase tracking-wide text-chalk">Points breakdown</p>
         <div className="mt-3 space-y-3">
           {SECTIONS.filter((s) => s.key !== 'opinion').map(({ key, label }) => {
@@ -322,7 +322,7 @@ function CategoryRow({
   if (isOpinion) {
     const totalVotes = tally ? Object.values(tally).reduce((a, b) => a + b, 0) : 0;
     return (
-      <div className="flex flex-col rounded-2xl border border-gold/25 bg-pitch-900/60 p-5 shadow-card">
+      <div className="flex flex-col rounded-2xl border-2 border-gold/60 bg-pitch-900/60 p-10 shadow-card">
         <div className="mb-4">
           <div className="mb-2 flex items-start justify-between gap-2">
             <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>
@@ -391,7 +391,7 @@ function CategoryRow({
 
   // ---- Regular Award / Prediction card ----
   return (
-    <div className="flex flex-col rounded-2xl border border-white/10 bg-pitch-900/60 p-5 shadow-card">
+    <div className="flex flex-col rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-10 shadow-card focus-within:border-gold/60 transition-colors">
       <div className="mb-4">
         <div className="mb-2 flex items-start justify-between gap-2">
           <p className="font-display text-xl uppercase text-chalk leading-tight">{category.label}</p>

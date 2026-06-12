@@ -19,8 +19,26 @@ const body = localFont({
 
 export const metadata: Metadata = {
   title: 'SOTG World Cup 2026 Predictor',
-  description: 'The Students of the Game World Cup 2026 predictor. Pick the scoreline for every group game, earn points for accuracy, and battle your crew to top the table.',
-  icons: { icon: '/wc-logo-white.png' },
+  description:
+    'The Students of the Game World Cup 2026 predictor. Pick the scoreline for every group game, earn points for accuracy, and battle your crew to top the table.',
+  icons: {
+    icon: '/wc-logo-white.png',
+    apple: '/wc-logo-white.png',
+  },
+  openGraph: {
+    title: 'SOTG World Cup 2026 Predictor',
+    description:
+      'Pick the scoreline for every group game, earn points, and battle your crew to top the table.',
+    url: 'https://sotg.app',
+    siteName: 'SOTG Predictor',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SOTG World Cup 2026 Predictor',
+    description:
+      'Pick the scoreline for every group game, earn points, and battle your crew to top the table.',
+  },
 };
 
 export const viewport: Viewport = {
