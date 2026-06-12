@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 type Mode = 'signin' | 'signup' | 'sent';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') ?? '/predict';
+
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,12 +19,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function reset(next: Mode) {
-    setError(null);
-    setPassword('');
-    setConfirm('');
-    setMode(next);
-  }
+  function reset(m: Mode) { setError(null); setPassword(''); setConfirm(''); setMode(m); }
 
   async function signInWithGoogle() {
     setError(null);
@@ -30,7 +28,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/predict`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
     setLoading(false);
@@ -44,7 +42,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) { setError(error.message); return; }
-    router.push('/predict');
+    router.push(next);
     router.refresh();
   }
 
@@ -54,7 +52,9 @@ export default function LoginPage() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/predict` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
     });
     setLoading(false);
     if (error) { setError(error.message); return; }
@@ -70,7 +70,11 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) { setError(error.message); return; }
-    router.push('/predict');
+    // New users go through onboarding, carrying the next destination forward
+    const onboardingUrl = next !== '/predict'
+      ? `/onboarding?next=${encodeURIComponent(next)}`
+      : '/onboarding';
+    router.push(onboardingUrl);
     router.refresh();
   }
 
@@ -101,7 +105,6 @@ export default function LoginPage() {
         <Back />
         <h1 className="mt-6 font-display text-5xl uppercase leading-none text-chalk">Create account</h1>
 
-        {/* Google sign-up */}
         <div className="mt-8">
           <GoogleButton onClick={signInWithGoogle} loading={loading} />
         </div>
@@ -144,13 +147,11 @@ export default function LoginPage() {
     );
   }
 
-  // mode === 'signin'
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-16">
       <Back />
       <h1 className="mt-6 font-display text-5xl uppercase leading-none text-chalk">Sign in</h1>
 
-      {/* Google OAuth — primary option */}
       <div className="mt-8">
         <GoogleButton onClick={signInWithGoogle} loading={loading} />
       </div>
@@ -202,6 +203,14 @@ export default function LoginPage() {
   );
 }
 
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="flex min-h-dvh items-center justify-center"><p className="font-mono text-base text-chalk">Loading…</p></main>}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
 function GoogleButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
   return (
     <button
@@ -209,7 +218,6 @@ function GoogleButton({ onClick, loading }: { onClick: () => void; loading: bool
       disabled={loading}
       className="w-full flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-white py-3.5 font-body font-bold text-base uppercase tracking-wide text-[#1f1f1f] transition hover:bg-white/90 active:scale-[0.99] disabled:opacity-50"
     >
-      {/* Google 'G' logo */}
       <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>

@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const destination = searchParams.get('next') ?? '/predict';
   const [userId, setUserId] = useState<string | null>(null);
   const [nickname, setNickname] = useState('');
   const [checking, setChecking] = useState(false);
@@ -108,7 +110,7 @@ export default function OnboardingPage() {
       return;
     }
 
-    router.replace('/predict');
+    router.replace(destination);
   }
 
   if (!ready) {
@@ -153,7 +155,7 @@ export default function OnboardingPage() {
           </button>
 
           <button
-            onClick={() => router.replace('/predict')}
+            onClick={() => router.replace(destination)}
             className="mt-3 w-full rounded-xl border border-white/15 py-3 font-body font-bold text-base uppercase tracking-wide text-chalk transition hover:border-white/40"
           >
             Skip — take me to predictions

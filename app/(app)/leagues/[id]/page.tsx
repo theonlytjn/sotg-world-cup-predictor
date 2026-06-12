@@ -217,9 +217,19 @@ export default function LeaguePage() {
     });
   }
 
-  function copyLink() {
+  async function copyLink() {
     if (!league) return;
     const url = `${window.location.origin}/leagues/join/${league.invite_code}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Join ${league.name} on SOTG`,
+          text: `Join my World Cup 2026 prediction league — ${league.name}`,
+          url,
+        });
+        return;
+      } catch {}
+    }
     navigator.clipboard.writeText(url).then(() => {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
@@ -320,7 +330,7 @@ export default function LeaguePage() {
               className="flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 font-mono text-xs uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime active:scale-95"
             >
               <HugeiconsIcon icon={ClipboardCopyIcon} size={14} color="currentColor" strokeWidth={1.5} />
-              {copiedLink ? 'Copied!' : 'Link'}
+              {copiedLink ? 'Copied!' : 'Share'}
             </button>
           </div>
         </div>
