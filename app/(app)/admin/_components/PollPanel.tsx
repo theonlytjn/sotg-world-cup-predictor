@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { PollQuestion } from '@/lib/types';
+import DateTimePicker from './DateTimePicker';
 
 export default function PollPanel({ questions }: { questions: PollQuestion[] }) {
   const allOpen = questions.every((q) => q.opens_at && new Date(q.opens_at) <= new Date());
@@ -60,49 +61,39 @@ function QuestionRow({
   question: PollQuestion;
   onSetOpensAt: (id: number | null, opens_at: string | null) => void;
 }) {
-  const open = question.opens_at != null && new Date(question.opens_at) <= new Date();
-  const [datetime, setDatetime] = useState(
-    question.opens_at ? new Date(question.opens_at).toISOString().slice(0, 16) : ''
-  );
+  const isOpen = question.opens_at != null && new Date(question.opens_at) <= new Date();
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-pitch-900/60 px-4 py-3">
       <div className="flex-1 min-w-0">
         <p className="font-display text-base uppercase tracking-wide text-chalk">{question.label}</p>
-        <p className={`font-mono text-base uppercase tracking-widest ${open ? 'text-lime' : 'text-chalk'}`}>
-          {open
-            ? `Open since ${new Date(question.opens_at!).toLocaleString()}`
+        <p className={`font-mono text-sm uppercase tracking-widest ${isOpen ? 'text-lime' : 'text-chalk/60'}`}>
+          {isOpen
+            ? `Open since ${new Date(question.opens_at!).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`
             : question.opens_at
-              ? `Scheduled ${new Date(question.opens_at).toLocaleString()}`
+              ? `Scheduled ${new Date(question.opens_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`
               : 'Locked'}
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <input
-          type="datetime-local"
-          value={datetime}
-          onChange={(e) => setDatetime(e.target.value)}
-          className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-base text-chalk outline-none focus:border-lime/60"
+        <DateTimePicker
+          value={question.opens_at ?? null}
+          onChange={(iso) => onSetOpensAt(question.id, iso)}
+          placeholder="Schedule open date"
         />
-        <button
-          onClick={() => onSetOpensAt(question.id, datetime ? new Date(datetime).toISOString() : null)}
-          className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-base uppercase tracking-widest text-chalk transition hover:bg-pitch-600"
-        >
-          Set
-        </button>
-        {!open && (
+        {!isOpen && (
           <button
             onClick={() => onSetOpensAt(question.id, new Date().toISOString())}
-            className="rounded-lg bg-lime/15 px-3 py-1.5 font-mono text-base uppercase tracking-widest text-lime transition hover:bg-lime/25"
+            className="rounded-lg bg-lime/15 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-lime transition hover:bg-lime/25"
           >
             Open now
           </button>
         )}
-        {open && (
+        {isOpen && (
           <button
             onClick={() => onSetOpensAt(question.id, null)}
-            className="rounded-lg bg-flame/15 px-3 py-1.5 font-mono text-base uppercase tracking-widest text-flame transition hover:bg-flame/25"
+            className="rounded-lg bg-flame/15 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-flame transition hover:bg-flame/25"
           >
             Lock
           </button>

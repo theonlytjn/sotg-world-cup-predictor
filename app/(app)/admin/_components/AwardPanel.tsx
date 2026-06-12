@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { AwardCategory } from '@/lib/types';
+import DateTimePicker from './DateTimePicker';
 
 type Team   = { id: number; name: string; tla: string | null; confederation: string | null };
 type Player = { id: number; name: string; position: string | null; team_id: number | null };
@@ -125,8 +126,8 @@ function CategoryCard({
   playersByTeam: PlayerGroup[];
 }) {
   const [pick, setPick]       = useState(currentResult ?? '');
-  const [deadline, setDeadline] = useState(
-    category.deadline ? new Date(category.deadline).toISOString().slice(0, 16) : ''
+  const [deadline, setDeadline] = useState<string>(
+    category.deadline ? new Date(category.deadline).toISOString() : ''
   );
   const [pts1, setPts1] = useState(String(category.pts_pick_1));
   const [pts2, setPts2] = useState(String(category.pts_pick_2));
@@ -278,43 +279,35 @@ function CategoryCard({
 
       {/* Deadline */}
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/5 pt-3">
-        <span className={`font-mono text-base uppercase tracking-widest ${locked ? 'text-flame' : 'text-chalk'}`}>
-          {locked ? 'Locked' : category.deadline ? 'Locks ' + new Date(category.deadline).toLocaleString() : 'No deadline'}
+        <span className={`shrink-0 font-mono text-sm uppercase tracking-widest ${locked ? 'text-flame' : 'text-chalk/60'}`}>
+          {locked ? '🔒 Locked' : 'Deadline'}
         </span>
-        <div className="flex flex-1 flex-wrap items-center gap-2">
-          <input
-            type="datetime-local"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-            className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-base text-chalk outline-none focus:border-lime/60"
-          />
+        <DateTimePicker
+          value={deadline || null}
+          onChange={(iso) => { setDeadline(iso ?? ''); saveDeadline(iso); }}
+          placeholder="No deadline set"
+        />
+        {!locked && (
           <button
-            onClick={() => saveDeadline(deadline || null)}
+            onClick={() => { const now = new Date().toISOString(); setDeadline(now.slice(0, 16)); saveDeadline(now); }}
             disabled={deadlineState === 'saving'}
-            className="rounded-lg bg-pitch-700 px-3 py-1 font-mono text-base uppercase tracking-widest text-chalk transition hover:bg-pitch-600 disabled:opacity-40"
+            className="rounded-lg bg-flame/15 px-3 py-1 font-mono text-sm uppercase tracking-widest text-flame transition hover:bg-flame/25 disabled:opacity-40"
           >
-            {deadlineState === 'saving' ? 'Saving…' : deadlineState === 'saved' ? 'Saved ✓' : 'Set deadline'}
+            Lock now
           </button>
-          {!locked && (
-            <button
-              onClick={() => { const now = new Date().toISOString(); setDeadline(now.slice(0, 16)); saveDeadline(now); }}
-              disabled={deadlineState === 'saving'}
-              className="rounded-lg bg-flame/15 px-3 py-1 font-mono text-base uppercase tracking-widest text-flame transition hover:bg-flame/25 disabled:opacity-40"
-            >
-              Lock now
-            </button>
-          )}
-          {locked && (
-            <button
-              onClick={() => { setDeadline(''); saveDeadline(null); }}
-              disabled={deadlineState === 'saving'}
-              className="rounded-lg bg-pitch-700 px-3 py-1 font-mono text-base uppercase tracking-widest text-chalk transition hover:bg-pitch-600 disabled:opacity-40"
-            >
-              Unlock
-            </button>
-          )}
-          {deadlineState === 'error' && <span className="font-mono text-base text-flame">Error</span>}
-        </div>
+        )}
+        {locked && (
+          <button
+            onClick={() => { setDeadline(''); saveDeadline(null); }}
+            disabled={deadlineState === 'saving'}
+            className="rounded-lg bg-pitch-700 px-3 py-1 font-mono text-sm uppercase tracking-widest text-chalk transition hover:bg-pitch-600 disabled:opacity-40"
+          >
+            Unlock
+          </button>
+        )}
+        {deadlineState === 'saving' && <span className="font-mono text-sm text-chalk/50">Saving…</span>}
+        {deadlineState === 'saved'  && <span className="font-mono text-sm text-lime">Saved ✓</span>}
+        {deadlineState === 'error'  && <span className="font-mono text-sm text-flame">Error</span>}
       </div>
     </div>
   );
@@ -385,7 +378,7 @@ function ResultPick({
 }
 
 function TottDeadlineControl({ categories }: { categories: AwardCategory[] }) {
-  const [datetime, setDatetime] = useState('');
+  const [pickedIso, setPickedIso] = useState<string | null>(null);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const allLocked = categories.every(
@@ -409,39 +402,33 @@ function TottDeadlineControl({ categories }: { categories: AwardCategory[] }) {
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-lime/20 bg-lime/5 px-4 py-3">
-      <span className="font-mono text-base uppercase tracking-widest text-lime">All 11 slots</span>
-      <input
-        type="datetime-local"
-        value={datetime}
-        onChange={(e) => setDatetime(e.target.value)}
-        className="rounded-lg border border-white/15 bg-pitch-800 px-2 py-1 font-mono text-base text-chalk outline-none focus:border-lime/60"
+      <span className="font-mono text-sm uppercase tracking-widest text-lime">All 11 slots</span>
+      <DateTimePicker
+        value={pickedIso}
+        onChange={(iso) => { setPickedIso(iso); if (iso) setAll(iso); }}
+        placeholder="Set deadline for all"
       />
-      <button
-        onClick={() => setAll(datetime ? new Date(datetime).toISOString() : null)}
-        disabled={state === 'saving' || !datetime}
-        className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-base uppercase tracking-widest text-chalk transition hover:bg-pitch-600 disabled:opacity-40"
-      >
-        {state === 'saving' ? '…' : state === 'saved' ? 'Saved ✓' : 'Set deadline'}
-      </button>
       {!allLocked && (
         <button
           onClick={() => setAll(new Date().toISOString())}
           disabled={state === 'saving'}
-          className="rounded-lg bg-flame/15 px-3 py-1.5 font-mono text-base uppercase tracking-widest text-flame transition hover:bg-flame/25 disabled:opacity-40"
+          className="rounded-lg bg-flame/15 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-flame transition hover:bg-flame/25 disabled:opacity-40"
         >
           Lock all now
         </button>
       )}
       {allLocked && (
         <button
-          onClick={() => setAll(null)}
+          onClick={() => { setPickedIso(null); setAll(null); }}
           disabled={state === 'saving'}
-          className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-base uppercase tracking-widest text-chalk transition hover:bg-pitch-600 disabled:opacity-40"
+          className="rounded-lg bg-pitch-700 px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-chalk transition hover:bg-pitch-600 disabled:opacity-40"
         >
           Unlock all
         </button>
       )}
-      {state === 'error' && <span className="font-mono text-base text-flame">Error</span>}
+      {state === 'saving' && <span className="font-mono text-sm text-chalk/50">Saving…</span>}
+      {state === 'saved'  && <span className="font-mono text-sm text-lime">Saved ✓</span>}
+      {state === 'error'  && <span className="font-mono text-sm text-flame">Error</span>}
     </div>
   );
 }
