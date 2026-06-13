@@ -252,17 +252,27 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 6) ESPN fallback — rescue stale fixtures (TIMED/SCHEDULED, kickoff > 2h ago)
-  //    football-data.org sometimes lags flipping match status; ESPN is usually faster.
+  // 6) ESPN fallback — rescue stale fixtures that football-data.org hasn't flipped to FINISHED:
+  //    Case A: TIMED/SCHEDULED and kickoff > 2h ago   (API never started tracking the live game)
+  //    Case B: IN_PLAY/PAUSED and kickoff > 2.5h ago  (API started but stalled before FINISHED)
+  //    The USA game hit Case B: football-data.org set IN_PLAY and never flipped to FINISHED.
   let espnFallback = 0;
-  const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-  const { data: stale } = await db
-    .from('fixtures')
-    .select('id, kickoff, home_team_id, away_team_id')
-    .not('status', 'in', '("FINISHED","IN_PLAY","PAUSED")')
-    .lt('kickoff', cutoff);
+  const cutoff2h   = new Date(Date.now() - 120 * 60 * 1000).toISOString();
+  const cutoff150m = new Date(Date.now() - 150 * 60 * 1000).toISOString();
 
-  if (stale && stale.length > 0) {
+  const [staleA, staleB] = await Promise.all([
+    db.from('fixtures')
+      .select('id, kickoff, home_team_id, away_team_id')
+      .not('status', 'in', '("FINISHED","IN_PLAY","PAUSED")')
+      .lt('kickoff', cutoff2h),
+    db.from('fixtures')
+      .select('id, kickoff, home_team_id, away_team_id')
+      .in('status', ['IN_PLAY', 'PAUSED'])
+      .lt('kickoff', cutoff150m),
+  ]);
+  const stale = [...(staleA.data ?? []), ...(staleB.data ?? [])];
+
+  if (stale.length > 0) {
     const { data: allTeams } = await db.from('teams').select('id, tla, name');
     const teamById = new Map<number, { tla: string; name: string }>();
     for (const t of allTeams ?? []) teamById.set(t.id, { tla: t.tla ?? '', name: t.name ?? '' });
