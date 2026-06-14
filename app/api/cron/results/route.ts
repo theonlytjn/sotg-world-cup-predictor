@@ -65,26 +65,33 @@ export async function GET(req: NextRequest) {
   const resultPts = rulesMap['match_result'] ?? CORRECT_RESULT_POINTS;
 
   // 1) fetch matches, standings, and top scorers from football-data.org Tier 1
-  const [matchesRes, standingsRes, scorersRes] = await Promise.all([
-    fetch('https://api.football-data.org/v4/competitions/WC/matches', {
-      headers: { 'X-Auth-Token': fdKey },
-      cache: 'no-store',
-    }),
-    fetch('https://api.football-data.org/v4/competitions/WC/standings', {
-      headers: { 'X-Auth-Token': fdKey },
-      cache: 'no-store',
-    }),
-    fetch('https://api.football-data.org/v4/competitions/WC/scorers?limit=50', {
-      headers: { 'X-Auth-Token': fdKey },
-      cache: 'no-store',
-    }),
-  ]);
-
-  if (!matchesRes.ok) {
-    return NextResponse.json({ error: `football-data matches ${matchesRes.status}` }, { status: 502 });
+  // Wrapped in try/catch so a network error falls through to the ESPN fallback
+  // rather than crashing the entire route and leaving stale fixtures unresolved.
+  let matchesRes: Response | null = null;
+  let standingsRes: Response | null = null;
+  let scorersRes: Response | null = null;
+  let fdError: string | null = null;
+  try {
+    [matchesRes, standingsRes, scorersRes] = await Promise.all([
+      fetch('https://api.football-data.org/v4/competitions/WC/matches', {
+        headers: { 'X-Auth-Token': fdKey },
+        cache: 'no-store',
+      }),
+      fetch('https://api.football-data.org/v4/competitions/WC/standings', {
+        headers: { 'X-Auth-Token': fdKey },
+        cache: 'no-store',
+      }),
+      fetch('https://api.football-data.org/v4/competitions/WC/scorers?limit=50', {
+        headers: { 'X-Auth-Token': fdKey },
+        cache: 'no-store',
+      }),
+    ]);
+  } catch (err) {
+    fdError = err instanceof Error ? err.message : String(err);
   }
 
-  const { matches } = (await matchesRes.json()) as { matches: FDMatch[] };
+  const matches: FDMatch[] =
+    matchesRes?.ok ? ((await matchesRes.json()) as { matches: FDMatch[] }).matches : [];
 
   // 2) update fixture scores, status, and goals
   let updated = 0;
@@ -159,7 +166,7 @@ export async function GET(req: NextRequest) {
 
   // 4) upsert group standings from Tier 1 API
   let standingsUpserted = 0;
-  if (standingsRes.ok) {
+  if (standingsRes?.ok) {
     const { standings } = (await standingsRes.json()) as { standings: FDStandingGroup[] };
 
     // Map football-data team external_id → internal team id
@@ -221,7 +228,7 @@ export async function GET(req: NextRequest) {
 
   // 5) upsert top scorers from dedicated /scorers endpoint (Tier 1 accessible)
   let scorersUpserted = 0;
-  if (scorersRes.ok) {
+  if (scorersRes?.ok) {
     type FDScorer = {
       player: { id: number; name: string };
       team: { id: number; tla: string; name: string; crest: string };
@@ -352,6 +359,7 @@ export async function GET(req: NextRequest) {
     standings_upserted: standingsUpserted,
     scorers_upserted: scorersUpserted,
     espn_fallback: espnFallback,
+    fd_error: fdError,
     ran_at: new Date().toISOString(),
   });
 }
