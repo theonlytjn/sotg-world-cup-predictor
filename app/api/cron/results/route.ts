@@ -255,12 +255,13 @@ export async function GET(req: NextRequest) {
   // 6) ESPN fallback — rescue stale fixtures that football-data.org hasn't flipped to FINISHED:
   //    Case A: TIMED/SCHEDULED and kickoff > 2h ago   (API never started tracking the live game)
   //    Case B: IN_PLAY/PAUSED and kickoff > 2.5h ago  (API started but stalled before FINISHED)
+  //    Case C: FINISHED but null scores > 2h ago       (API flipped status early, scores never arrived)
   //    The USA game hit Case B: football-data.org set IN_PLAY and never flipped to FINISHED.
   let espnFallback = 0;
   const cutoff2h   = new Date(Date.now() - 120 * 60 * 1000).toISOString();
   const cutoff150m = new Date(Date.now() - 150 * 60 * 1000).toISOString();
 
-  const [staleA, staleB] = await Promise.all([
+  const [staleA, staleB, staleC] = await Promise.all([
     db.from('fixtures')
       .select('id, kickoff, home_team_id, away_team_id')
       .not('status', 'in', '("FINISHED","IN_PLAY","PAUSED")')
@@ -269,8 +270,13 @@ export async function GET(req: NextRequest) {
       .select('id, kickoff, home_team_id, away_team_id')
       .in('status', ['IN_PLAY', 'PAUSED'])
       .lt('kickoff', cutoff150m),
+    db.from('fixtures')
+      .select('id, kickoff, home_team_id, away_team_id')
+      .eq('status', 'FINISHED')
+      .is('home_score', null)
+      .lt('kickoff', cutoff2h),
   ]);
-  const stale = [...(staleA.data ?? []), ...(staleB.data ?? [])];
+  const stale = [...(staleA.data ?? []), ...(staleB.data ?? []), ...(staleC.data ?? [])];
 
   if (stale.length > 0) {
     const { data: allTeams } = await db.from('teams').select('id, tla, name');
