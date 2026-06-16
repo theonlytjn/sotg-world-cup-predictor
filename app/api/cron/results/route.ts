@@ -142,13 +142,14 @@ export async function GET(req: NextRequest) {
 
     const { data: allPreds } = await db
       .from('match_predictions')
-      .select('id, fixture_id, home_pred, away_pred, is_banker')
+      .select('id, user_id, fixture_id, home_pred, away_pred, is_banker')
       .in('fixture_id', finishedIds);
 
     const updates = (allPreds ?? []).map((p) => {
       const fx = scoreMap.get(p.fixture_id)!;
       return {
         id: p.id,
+        user_id: p.user_id,
         fixture_id: p.fixture_id,
         home_pred: p.home_pred,
         away_pred: p.away_pred,
