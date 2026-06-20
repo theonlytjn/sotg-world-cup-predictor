@@ -857,11 +857,10 @@ function MatchdayRecap({
   const noPick  = finished.length - settledPreds.length;
   const allDone = matchdayGroup.finishedCount === matchdayGroup.totalCount;
 
-  const bestFixture = finished.find((f) => {
+  const nailedFixtures = finished.filter((f) => {
     const p = preds[f.id];
     return p && (p.is_banker ? p.points === exactPts * 2 : p.points === exactPts);
   });
-  const bestPred    = bestFixture ? preds[bestFixture.id] : null;
 
   const heading = stageLabel
     ? `${stageLabel} · ${allDone ? 'complete' : `${finished.length}/${matchdayGroup.totalCount} settled`}`
@@ -941,11 +940,14 @@ function MatchdayRecap({
         )}
       </div>
 
-      {bestFixture && bestPred && (
-        <p className="mt-2 font-display text-xs uppercase tracking-wide text-lime">
-          ⚡ Nailed {bestPred.home_pred}–{bestPred.away_pred} · {bestFixture.home_team?.name ?? 'TBD'} vs {bestFixture.away_team?.name ?? 'TBD'}
-        </p>
-      )}
+      {nailedFixtures.map((f) => {
+        const p = preds[f.id]!;
+        return (
+          <p key={f.id} className="mt-2 font-display text-xs uppercase tracking-wide text-lime">
+            ⚡ Nailed {p.home_pred}–{p.away_pred} · {f.home_team?.name ?? 'TBD'} vs {f.away_team?.name ?? 'TBD'}
+          </p>
+        );
+      })}
     </div>
   );
 }

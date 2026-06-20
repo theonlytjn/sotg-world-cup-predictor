@@ -142,8 +142,29 @@ create policy "predictions update own" on public.match_predictions
 --  totals regardless of the prediction read policy above. It only
 --  ever exposes sums + names, never individual unplayed picks.
 -- ============================================================
-drop view if exists public.leaderboard;
-create view public.leaderboard as
+create or replace view public.leaderboard as
+with rules as (
+  select
+    max(case when key = 'match_exact'  then points end) as exact_pts,
+    max(case when key = 'match_result' then points end) as result_pts
+  from public.scoring_rules
+),
+match_stats as (
+  select
+    mp.user_id,
+    sum(mp.points)                                                           as total,
+    count(*) filter (where mp.points in (r.exact_pts, r.exact_pts * 2))     as exact_scores,
+    count(*) filter (where mp.points in (r.result_pts, r.result_pts * 2))   as correct_results,
+    count(mp.id) filter (where mp.points is not null)                       as settled
+  from public.match_predictions mp
+  cross join rules r
+  group by mp.user_id
+),
+award_stats as (
+  select user_id, sum(points) as total
+  from public.award_predictions
+  group by user_id
+)
 select
   pr.id                                                                   as user_id,
   pr.display_name,
@@ -154,21 +175,8 @@ select
   coalesce(m.settled, 0)::int                                             as settled_predictions,
   coalesce(a.total, 0)::int                                               as award_points
 from public.profiles pr
-left join (
-  select
-    user_id,
-    sum(points)                                  as total,
-    count(*) filter (where points = 5)           as exact_scores,
-    count(*) filter (where points = 1)           as correct_results,
-    count(id) filter (where points is not null)  as settled
-  from public.match_predictions
-  group by user_id
-) m on m.user_id = pr.id
-left join (
-  select user_id, sum(points) as total
-  from public.award_predictions
-  group by user_id
-) a on a.user_id = pr.id;
+left join match_stats m on m.user_id = pr.id
+left join award_stats a on a.user_id = pr.id;
 
 grant select on public.leaderboard to anon, authenticated;
 
