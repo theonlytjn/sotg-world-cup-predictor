@@ -47,11 +47,11 @@ type DateGroup = { dateKey: string; label: string; fixtures: Fixture[] };
 type MatchdayGroup = { matchday: number; dateGroups: DateGroup[] };
 type StageGroup = { stage: string; fixtures: Fixture[] };
 
-const STAGE_ORDER = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'FINAL'];
+const STAGE_ORDER = ['GROUP_STAGE', 'LAST_32', 'LAST_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'FINAL'];
 const STAGE_LABELS: Record<string, string> = {
   GROUP_STAGE:    'Groups',
-  ROUND_OF_32:    'Rd 32',
-  ROUND_OF_16:    'Rd 16',
+  LAST_32:        'Rd 32',
+  LAST_16:        'Rd 16',
   QUARTER_FINALS: 'QF',
   SEMI_FINALS:    'SF',
   FINAL:          'Final',

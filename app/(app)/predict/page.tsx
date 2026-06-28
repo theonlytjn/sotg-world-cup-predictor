@@ -15,6 +15,8 @@ type Fixture = {
   status: string;
   home_score: number | null;
   away_score: number | null;
+  home_team_id: number | null;
+  away_team_id: number | null;
   home_team: Team | null;
   away_team: Team | null;
 };
@@ -23,11 +25,11 @@ type Pred = { fixture_id: number; home_pred: number; away_pred: number; points: 
 const LIVE = new Set(['IN_PLAY', 'PAUSED']);
 const LOCK_BEFORE_MS = 15 * 60_000;
 
-const STAGE_ORDER = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL'];
+const STAGE_ORDER = ['GROUP_STAGE', 'LAST_32', 'LAST_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL'];
 const STAGE_LABELS: Record<string, string> = {
   GROUP_STAGE:    'Groups',
-  ROUND_OF_32:    'Rd 32',
-  ROUND_OF_16:    'Rd 16',
+  LAST_32:        'Rd 32',
+  LAST_16:        'Rd 16',
   QUARTER_FINALS: 'QF',
   SEMI_FINALS:    'SF',
   THIRD_PLACE:    '3rd Place',
@@ -90,6 +92,7 @@ export default function PredictPage() {
       .from('fixtures')
       .select(
         `id, stage, matchday, group_label, kickoff, status, home_score, away_score,
+         home_team_id, away_team_id,
          home_team:teams!fixtures_home_team_id_fkey (id, name, tla, crest),
          away_team:teams!fixtures_away_team_id_fkey (id, name, tla, crest)`
       )
@@ -126,6 +129,7 @@ export default function PredictPage() {
         .from('fixtures')
         .select(
           `id, stage, matchday, group_label, kickoff, status, home_score, away_score,
+           home_team_id, away_team_id,
            home_team:teams!fixtures_home_team_id_fkey (id, name, tla, crest),
            away_team:teams!fixtures_away_team_id_fkey (id, name, tla, crest)`
         )

@@ -17,6 +17,9 @@ type FDGoal = {
 type FDMatch = {
   id: number;
   status: string;
+  stage: string;
+  homeTeam: { id: number | null } | null;
+  awayTeam: { id: number | null } | null;
   score: { fullTime: { home: number | null; away: number | null } };
   goals: FDGoal[] | null;
 };
@@ -123,6 +126,24 @@ export async function GET(req: NextRequest) {
       : await baseUpdate.neq('status', 'FINISHED').select('id');
     if (error) continue;
     if (rows?.length) updated += rows.length;
+  }
+
+  // 2b) fill in team IDs for knockout fixtures that were seeded before the bracket was set
+  // Build external_id → internal id map from the teams table
+  const { data: dbTeams } = await db.from('teams').select('id, external_id');
+  const idByExternal = new Map<number, number>();
+  for (const t of dbTeams ?? []) if (t.external_id != null) idByExternal.set(t.external_id, t.id);
+
+  for (const m of matches) {
+    const homeId = m.homeTeam?.id ? (idByExternal.get(m.homeTeam.id) ?? null) : null;
+    const awayId = m.awayTeam?.id ? (idByExternal.get(m.awayTeam.id) ?? null) : null;
+    if (!homeId || !awayId) continue;
+    // Only update rows that still have null team IDs — avoids unnecessary writes
+    await db
+      .from('fixtures')
+      .update({ home_team_id: homeId, away_team_id: awayId })
+      .eq('external_id', m.id)
+      .is('home_team_id', null);
   }
 
   // 3) rescore all finished predictions — batched: 3 DB calls total regardless of user count

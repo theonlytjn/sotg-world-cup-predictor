@@ -89,9 +89,11 @@ async function main() {
   const idByExternal = new Map<number, number>();
   for (const t of dbTeams ?? []) if (t.external_id != null) idByExternal.set(t.external_id, t.id);
 
-  // 3) fixtures
+  // 3) fixtures — include all matches, even those with TBD teams (null team IDs).
+  // This ensures re-running the seed after the group stage updates knockout fixtures
+  // with real team assignments once the bracket is set.
   const fixtureRows = matches
-    .filter((m) => idByExternal.has(m.homeTeam?.id) && idByExternal.has(m.awayTeam?.id))
+    .filter((m) => m.id != null)
     .map((m) => ({
       external_id: m.id,
       matchday: m.matchday,
@@ -101,8 +103,8 @@ async function main() {
       status: m.status,
       home_score: m.score?.fullTime?.home ?? null,
       away_score: m.score?.fullTime?.away ?? null,
-      home_team_id: idByExternal.get(m.homeTeam.id)!,
-      away_team_id: idByExternal.get(m.awayTeam.id)!,
+      home_team_id: idByExternal.get(m.homeTeam?.id) ?? null,
+      away_team_id: idByExternal.get(m.awayTeam?.id) ?? null,
     }));
 
   console.log(`Upserting ${fixtureRows.length} fixtures ...`);
