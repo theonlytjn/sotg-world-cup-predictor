@@ -458,6 +458,12 @@ create policy "scoring rules read all" on public.scoring_rules
 -- ============================================================
 alter table public.fixtures add column if not exists goals jsonb;
 
+-- score_locked: set true when an admin manually overrides a score (e.g. a
+-- knockout match decided on penalties, where the external API's full-time
+-- score isn't what we want to score against). While locked, /api/cron/results
+-- skips the fixture entirely — admin must explicitly revert to unlock it.
+alter table public.fixtures add column if not exists score_locked boolean not null default false;
+
 -- ============================================================
 --  GROUP STANDINGS  (populated by /api/cron/results each run)
 -- ============================================================
@@ -481,4 +487,27 @@ alter table public.group_standings enable row level security;
 
 drop policy if exists "group standings read" on public.group_standings;
 create policy "group standings read" on public.group_standings
+  for select using (true);
+
+-- ============================================================
+--  COMPETITION SCORERS  (populated by /api/cron/results each run)
+-- ============================================================
+create table if not exists public.competition_scorers (
+  player_external_id integer not null primary key,
+  player_name         text    not null,
+  team_external_id    integer,
+  team_tla            text,
+  team_name           text,
+  team_crest          text,
+  goals               integer not null default 0,
+  assists             integer not null default 0,
+  penalties           integer not null default 0,
+  played_matches      integer not null default 0,
+  updated_at          timestamptz not null default now()
+);
+
+alter table public.competition_scorers enable row level security;
+
+drop policy if exists "competition scorers read all" on public.competition_scorers;
+create policy "competition scorers read all" on public.competition_scorers
   for select using (true);

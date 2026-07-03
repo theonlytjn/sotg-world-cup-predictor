@@ -12,6 +12,7 @@ type Fixture = {
   status: string;
   home_score: number | null;
   away_score: number | null;
+  score_locked: boolean;
   home_team: Team | null;
   away_team: Team | null;
 };
@@ -61,7 +62,9 @@ export default function FixturePanel({ fixtures }: { fixtures: Fixture[] }) {
         </div>
       </div>
       <p className="mt-1 text-base text-chalk">
-        Override sets status to FINISHED and re-scores all predictions for that game.
+        Override sets status to FINISHED, locks the score, and re-scores all predictions for
+        that game. A locked score is never touched by the results cron — revert it to let the
+        API resume updating it.
       </p>
 
       {filtered.length === 0 && (
@@ -91,6 +94,8 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
   const [home, setHome] = useState(fixture.home_score != null ? String(fixture.home_score) : '');
   const [away, setAway] = useState(fixture.away_score != null ? String(fixture.away_score) : '');
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [locked, setLocked] = useState(fixture.score_locked);
+  const [revertState, setRevertState] = useState<'idle' | 'reverting' | 'error'>('idle');
 
   const finished = DONE.has(fixture.status);
   const live = LIVE.has(fixture.status);
@@ -107,9 +112,25 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
     });
     if (res.ok) {
       setState('saved');
+      setLocked(true);
       setTimeout(() => setState('idle'), 2000);
     } else {
       setState('error');
+    }
+  }
+
+  async function revert() {
+    setRevertState('reverting');
+    const res = await fetch('/api/admin/revert-fixture-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fixture_id: fixture.id }),
+    });
+    if (res.ok) {
+      setLocked(false);
+      setRevertState('idle');
+    } else {
+      setRevertState('error');
     }
   }
 
@@ -142,6 +163,15 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
         {finished ? 'FT' : live ? 'Live' : koLabel}
       </span>
 
+      {locked && (
+        <span
+          title="This score is manually locked — the results cron will not overwrite it."
+          className="rounded-lg bg-flame/15 px-2 py-1 font-mono text-sm uppercase tracking-widest text-flame"
+        >
+          Locked
+        </span>
+      )}
+
       {/* Score inputs + button */}
       <div className="flex items-center gap-1.5">
         <input
@@ -170,6 +200,16 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
         >
           {state === 'saving' ? '…' : state === 'saved' ? '✓' : state === 'error' ? '!' : finished ? 'Override' : 'Set'}
         </button>
+        {locked && (
+          <button
+            onClick={revert}
+            disabled={revertState === 'reverting'}
+            title="Unlock and pull the current score back from the API"
+            className="rounded-lg bg-white/5 px-3 py-1.5 font-display text-base uppercase tracking-wide text-chalk transition hover:bg-white/10 disabled:opacity-30"
+          >
+            {revertState === 'reverting' ? '…' : revertState === 'error' ? '!' : 'Revert to API'}
+          </button>
+        )}
       </div>
     </div>
   );

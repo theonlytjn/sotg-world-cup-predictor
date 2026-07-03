@@ -39,7 +39,7 @@ export default async function AdminPage() {
     db.from('players').select('id, name, position, team_id').order('name').range(0, 999),
     db.from('players').select('id, name, position, team_id').order('name').range(1000, 1999),
     db.from('fixtures').select(`
-      id, matchday, stage, group_label, kickoff, status, home_score, away_score,
+      id, matchday, stage, group_label, kickoff, status, home_score, away_score, score_locked,
       home_team:teams!fixtures_home_team_id_fkey (id, name, tla),
       away_team:teams!fixtures_away_team_id_fkey (id, name, tla)
     `).order('kickoff'),

@@ -116,7 +116,11 @@ export async function GET(req: NextRequest) {
         away_score: m.score?.fullTime?.away ?? null,
         goals: goals.length > 0 ? goals : null,
       })
-      .eq('external_id', m.id);
+      .eq('external_id', m.id)
+      // Never touch a fixture an admin has manually locked (e.g. a match
+      // decided on penalties, where the API's full-time score isn't what we
+      // score against) — it stays locked until explicitly reverted.
+      .eq('score_locked', false);
 
     // When football-data.org lags (still TIMED/SCHEDULED after KO), don't
     // overwrite a score the admin has already manually confirmed as FINISHED.
@@ -294,14 +298,17 @@ export async function GET(req: NextRequest) {
     db.from('fixtures')
       .select('id, kickoff, home_team_id, away_team_id')
       .not('status', 'in', '("FINISHED","IN_PLAY","PAUSED")')
+      .eq('score_locked', false)
       .lt('kickoff', cutoff2h),
     db.from('fixtures')
       .select('id, kickoff, home_team_id, away_team_id')
       .in('status', ['IN_PLAY', 'PAUSED'])
+      .eq('score_locked', false)
       .lt('kickoff', cutoff150m),
     db.from('fixtures')
       .select('id, kickoff, home_team_id, away_team_id')
       .eq('status', 'FINISHED')
+      .eq('score_locked', false)
       .is('home_score', null)
       .lt('kickoff', cutoff2h),
   ]);
@@ -368,6 +375,7 @@ export async function GET(req: NextRequest) {
           .from('fixtures')
           .update({ status: 'FINISHED', home_score: homeScore, away_score: awayScore })
           .eq('id', fx.id)
+          .eq('score_locked', false)
           .select('id');
         if (rows?.length) espnFallback++;
       }

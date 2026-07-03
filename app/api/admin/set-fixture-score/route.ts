@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
   const { error: fxErr } = await db
     .from('fixtures')
-    .update({ home_score, away_score, status: 'FINISHED' })
+    .update({ home_score, away_score, status: 'FINISHED', score_locked: true })
     .eq('id', fixture_id);
   if (fxErr) return NextResponse.json({ error: fxErr.message }, { status: 500 });
 

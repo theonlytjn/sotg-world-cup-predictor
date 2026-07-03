@@ -192,7 +192,7 @@ function CategoryCard({
     }
   }
 
-  const locked = category.deadline !== null && new Date(category.deadline).getTime() <= Date.now();
+  const locked = !!deadline && new Date(deadline).getTime() <= Date.now();
 
   return (
     <div className="rounded-2xl border border-white/10 bg-pitch-900/60 p-4">
