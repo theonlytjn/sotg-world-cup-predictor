@@ -10,7 +10,7 @@ type Fixture = {
   home_team: { name: string; tla: string | null } | null;
   away_team: { name: string; tla: string | null } | null;
 };
-type PredRow = { user_id: string; home_pred: number; away_pred: number };
+type PredRow = { user_id: string; home_pred: number; away_pred: number; is_banker: boolean };
 
 export default function ManualPredictionsPanel({
   profiles,
@@ -24,6 +24,8 @@ export default function ManualPredictionsPanel({
   const [draft, setDraft] = useState<Record<string, { home: string; away: string }>>({});
   const [states, setStates] = useState<Record<string, 'idle' | 'saving' | 'saved' | 'error'>>({});
   const [loading, setLoading] = useState(false);
+  const [bankers, setBankers] = useState<Record<string, boolean>>({});
+  const [bankerStates, setBankerStates] = useState<Record<string, 'idle' | 'saving' | 'error'>>({});
 
   useEffect(() => {
     if (!fixtureId) return;
@@ -41,6 +43,10 @@ export default function ManualPredictionsPanel({
         }
         setDraft(d);
         setStates({});
+        const b: Record<string, boolean> = {};
+        for (const p of profiles) b[p.id] = map[p.id]?.is_banker ?? false;
+        setBankers(b);
+        setBankerStates({});
       })
       .finally(() => setLoading(false));
   }, [fixtureId, profiles]);
@@ -64,14 +70,33 @@ export default function ManualPredictionsPanel({
     if (res.ok) setTimeout(() => setStates((s) => ({ ...s, [userId]: 'idle' })), 2000);
   }
 
+  async function toggleBanker(userId: string) {
+    if (!fixtureId) return;
+    const next = !bankers[userId];
+    setBankerStates((s) => ({ ...s, [userId]: 'saving' }));
+    const res = await fetch('/api/admin/set-banker', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fixture_id: fixtureId, user_id: userId, is_banker: next }),
+    });
+    if (res.ok) {
+      setBankers((b) => ({ ...b, [userId]: next }));
+      setBankerStates((s) => ({ ...s, [userId]: 'idle' }));
+    } else {
+      setBankerStates((s) => ({ ...s, [userId]: 'error' }));
+    }
+  }
+
   const selectedFixture = fixtures.find((f) => f.id === fixtureId);
 
   return (
     <div>
       <h2 className="font-display text-2xl uppercase text-chalk">Manual Predictions</h2>
       <p className="mt-1 text-base text-chalk">
-        Set predictions on behalf of any user for a past fixture (bypasses the kickoff lock). Use for
-        the opening match where predictions were submitted manually.
+        Set predictions — and toggle the banker — on behalf of any user for a fixture, including after
+        it has finished (bypasses the kickoff lock and re-scores automatically). Only one banker per
+        matchday/stage is allowed; setting one here unsets it on that user&apos;s other fixtures in the
+        same matchday/stage.
       </p>
 
       <div className="mt-4">
@@ -150,6 +175,16 @@ export default function ManualPredictionsPanel({
                           className="rounded-lg bg-lime/15 px-3 py-1.5 font-display text-base uppercase tracking-wide text-lime transition hover:bg-lime/25 disabled:opacity-30"
                         >
                           {st === 'saving' ? '…' : st === 'saved' ? '✓' : st === 'error' ? '!' : hasExisting ? 'Update' : 'Set'}
+                        </button>
+                        <button
+                          onClick={() => toggleBanker(p.id)}
+                          disabled={!hasExisting || bankerStates[p.id] === 'saving'}
+                          title={hasExisting ? 'Toggle banker (2x points) for this user on this fixture' : 'Set a prediction first'}
+                          className={`rounded-lg px-3 py-1.5 font-display text-base uppercase tracking-wide transition disabled:opacity-30 ${
+                            bankers[p.id] ? 'bg-flame/20 text-flame hover:bg-flame/30' : 'bg-white/5 text-chalk hover:bg-white/10'
+                          }`}
+                        >
+                          {bankerStates[p.id] === 'saving' ? '…' : bankerStates[p.id] === 'error' ? '!' : bankers[p.id] ? 'Banker ✓' : 'Banker'}
                         </button>
                       </div>
                     </div>

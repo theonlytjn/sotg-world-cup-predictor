@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const db = createAdminClient();
   const { data, error } = await db
     .from('match_predictions')
-    .select('user_id, home_pred, away_pred')
+    .select('user_id, home_pred, away_pred, is_banker')
     .eq('fixture_id', Number(fixtureId));
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
