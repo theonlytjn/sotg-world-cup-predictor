@@ -34,7 +34,7 @@ a { color: rgb(var(--lime)); }
 .small { font-size: 14px; }
 
 /* Layout */
-.wrap { max-width: 760px; margin: 0 auto; padding: 0 20px 120px; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px 120px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; max-width: 1100px; margin: 0 auto; }
 .topbar .logo { height: 34px; display: block; }
 .topbar nav { display: flex; gap: 6px; align-items: center; }
@@ -138,7 +138,7 @@ label.lbl { display: block; font-family: var(--display); font-size: 10px; letter
 /* Footer nav */
 .footer-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
   background: linear-gradient(to top, rgb(var(--pitch-950)) 60%, rgb(var(--pitch-950) / 0)); }
-.footer-nav .in { max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; gap: 10px; }
+.footer-nav .in { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; gap: 10px; }
 
 /* Review / ledger */
 .kv { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-top: 1px solid rgb(var(--chalk) / .07); }

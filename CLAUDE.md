@@ -60,6 +60,6 @@ small focused commit per slice. Update the `leaderboard` view to sum new point s
   stay at the root so Supabase auth redirect URLs and the results cron are unchanged.
 - `/pl` — Premier League season predictor. Static app in `public/pl` (no build step), config from
   `app/pl/config.js/route.ts`. Data in `pred_seasons` / `pred_entries` via `pred_*` RPCs
-  (`supabase-predictors-schema.sql`), keyed by competition + season. Yearly reset = admin page
+  (`supabase-predictors-schema.sql` + `supabase-predictors-002-close-time.sql`), keyed by competition + season. Seasons auto-close at `closes_at` (set on the admin page). Yearly reset = admin page
   (`/pl#admin`) → "Start new season"; update `public/pl/data.js` (teams/players/cup lists) too.
 - Future `/ucl` etc.: reuse the `pred_*` tables with a new `comp` value and its own question set.

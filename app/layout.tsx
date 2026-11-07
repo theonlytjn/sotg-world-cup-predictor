@@ -31,7 +31,13 @@ export const metadata: Metadata = {
     url: 'https://sotg.app',
     siteName: 'SOTG Predictor',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-sotg.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SOTG Predictors',
+    description: 'Season predictors, tournament games and bragging rights for the SOTG crew.',
+    images: ['/og-sotg.png'],
   },
 };
 

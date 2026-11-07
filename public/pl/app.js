@@ -43,6 +43,14 @@
     const a = new Uint8Array(24); crypto.getRandomValues(a);
     return Array.from(a, (b) => b.toString(16).padStart(2, '0')).join('');
   }
+  // Close-time helpers (UK time)
+  const fmtClose = (iso) => new Date(iso).toLocaleString('en-GB', { timeZone: 'Europe/London', weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).replace(':00', '').replace(' am', 'am').replace(' pm', 'pm');
+  function timeLeft(iso) {
+    const ms = new Date(iso).getTime() - Date.now();
+    if (ms <= 0) return 'closing now';
+    const d = Math.floor(ms / 864e5), hrs = Math.floor((ms % 864e5) / 36e5), m = Math.floor((ms % 36e5) / 6e4);
+    return d > 0 ? `${d}d ${hrs}h left` : hrs > 0 ? `${hrs}h ${m}m left` : `${m}m left`;
+  }
   const norm = (s) => String(s ?? '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
   let rpc = async function (fn, args = {}) {
@@ -185,7 +193,7 @@
       const mine = (n, t) => db.entries.find((e) => norm(e.name) === norm(n) && e.tok === t);
       const pinOk = () => { if (!a.p_pin) throw new Error('Preview: type any PIN'); };
       switch (fn) {
-        case 'pred_state': return { comp: COMP, season: '2026/27', title: 'Premier League 2026/27', is_current: true, locked: db.locked, results: db.results, count: db.entries.length, seasons: [{ season: '2026/27', title: 'Premier League 2026/27', is_current: true }] };
+        case 'pred_state': return { comp: COMP, season: '2026/27', title: 'Premier League 2026/27', is_current: true, closes_at: null, locked: db.locked, results: db.results, count: db.entries.length, seasons: [{ season: '2026/27', title: 'Premier League 2026/27', is_current: true }] };
         case 'pred_entries_list': { const see = db.locked || (a.p_name && mine(a.p_name, a.p_token)); return db.entries.map((e) => ({ id: e.id, name: e.name, created_at: e.created_at, updated_at: e.updated_at, answers: see ? e.answers : null })); }
         case 'pred_submit':
           if (db.locked) throw new Error('Predictions are closed');
@@ -195,6 +203,7 @@
         case 'pred_admin_set_lock': pinOk(); db.locked = a.p_locked; saveDb(db); return null;
         case 'pred_admin_set_results': pinOk(); db.results = a.p_results; saveDb(db); return null;
         case 'pred_admin_delete_entry': pinOk(); db.entries = db.entries.filter((e) => e.id !== a.p_id); saveDb(db); return null;
+        case 'pred_admin_set_close': pinOk(); return null;
         case 'pred_admin_new_season': pinOk(); throw new Error('Preview: new seasons need the real database');
         case 'pred_admin_rename_entry': pinOk(); db.entries.find((e) => e.id === a.p_id).name = a.p_name; saveDb(db); return null;
       }
@@ -351,6 +360,7 @@
       <span class="pill"><span class="dot"></span>${esc(STATE.title)} · open</span>
       <h1>Ten games in.<br/><span class="lime">Time to call it.</span></h1>
       <p>Champions, top seven, the drop, the cups, the awards and your Team of the Season. Lock it in now and we settle it in May.</p>
+      ${STATE.closes_at ? `<p class="lime" style="font-weight:800;margin-top:14px">⏱ Picks lock ${esc(fmtClose(STATE.closes_at))} · <span data-left>${esc(timeLeft(STATE.closes_at))}</span></p>` : ''}
     </section>
     <div class="card mt" id="start"></div>
     <p class="muted small center mt">${STATE.count} ${STATE.count === 1 ? 'person has' : 'people have'} already got their picks in · <a href="#ledger">see who</a></p></div>`);
@@ -379,6 +389,8 @@
       };
     }
     app.innerHTML = ''; app.appendChild(w);
+    const left = w.querySelector('[data-left]');
+    if (left) { const t = setInterval(() => { if (!document.body.contains(left)) return clearInterval(t); left.textContent = timeLeft(STATE.closes_at); }, 30000); }
   }
 
   async function viewPredict(stepIdx) {
@@ -478,7 +490,7 @@
       w.appendChild(pick);
     }
     if (!canSee) {
-      const c = h(`<div class="card"><p class="muted" style="margin-top:0">${STATE.locked ? 'Predictions are closed.' : 'No copying homework — you only see everyone’s picks once you’ve locked in your own.'} ${entries.length} in so far:</p><div></div>
+      const c = h(`<div class="card"><p class="muted" style="margin-top:0">${STATE.locked ? 'Predictions are closed.' : `No copying homework — you only see everyone’s picks once you’ve locked in your own.${STATE.closes_at ? ` Everything goes public when picks lock (${fmtClose(STATE.closes_at)}).` : ''}`} ${entries.length} in so far:</p><div></div>
         ${!STATE.locked && !me ? '<a class="btn btn-primary mt" href="#home">Make my predictions →</a>' : ''}</div>`);
       entries.forEach((e) => c.children[1].appendChild(h(`<span class="chip">${esc(e.name)}</span>`)));
       if (!entries.length) c.children[1].appendChild(h(`<p class="muted">Nobody yet. Be first.</p>`));
@@ -552,6 +564,17 @@
       <button class="btn btn-ghost btn-sm" data-csv>Download CSV</button><button class="btn btn-ghost btn-sm" data-out>Log out</button></div>
       <p class="muted small mt">Season over and results entered? Start the next one — this season stays viewable as an archive on the ledger.</p>
       <button class="btn btn-ghost btn-sm" data-new>Start new season</button></div>`);
+    const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
+    const closeCard = h(`<div class="card"><label class="lbl">Auto-close</label>
+      <p style="margin:0 0 12px">${settings.closes_at ? `Picks lock automatically <strong>${esc(fmtClose(settings.closes_at))}</strong> (UK time)` : 'No close time set — close it manually above.'}</p>
+      <div class="row"><input class="input" type="datetime-local" style="width:auto" value="${toLocalInput(settings.closes_at)}" />
+      <button class="btn btn-primary btn-sm" data-save>Save time</button>${settings.closes_at ? '<button class="btn btn-ghost btn-sm" data-clear>Remove</button>' : ''}</div></div>`);
+    closeCard.querySelector('[data-save]').onclick = async () => {
+      const v = closeCard.querySelector('input').value; if (!v) return toast('Pick a date and time', true);
+      try { await rpc('pred_admin_set_close', { p_pin: pin, p_comp: COMP, p_season: settings.season, p_closes_at: new Date(v).toISOString() }); toast('Close time saved'); viewAdmin(); } catch (err) { toast(err.message, true); }
+    };
+    const clr = closeCard.querySelector('[data-clear]');
+    if (clr) clr.onclick = async () => { try { await rpc('pred_admin_set_close', { p_pin: pin, p_comp: COMP, p_season: settings.season, p_closes_at: null }); toast('Close time removed'); viewAdmin(); } catch (err) { toast(err.message, true); } };
     lock.querySelector('[data-lock]').onclick = async () => {
       if (!settings.locked && !(await askConfirm(`Close predictions? No new entries after this, and all ${entries.length} entries become public.`, 'Close predictions'))) return;
       try { await rpc('pred_admin_set_lock', { p_pin: pin, p_comp: COMP, p_season: settings.season, p_locked: !settings.locked }); toast(settings.locked ? 'Re-opened' : 'Locked'); viewAdmin(); } catch (err) { toast(err.message, true); }
@@ -567,6 +590,7 @@
       try { await rpc('pred_admin_new_season', { p_pin: pin, p_comp: COMP, p_season: season.trim(), p_title: title.trim() }); toast('New season started'); viewAdmin(); } catch (err) { toast(err.message, true); }
     };
     w.appendChild(lock);
+    w.appendChild(closeCard);
 
     const list = h(`<div class="card"><label class="lbl">Entries (${entries.length})</label></div>`);
     entries.forEach((e) => {
