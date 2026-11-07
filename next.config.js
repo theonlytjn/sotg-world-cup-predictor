@@ -6,5 +6,9 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.football-data.org' },
     ],
   },
+  // Premier League season predictor (static app in public/pl)
+  async rewrites() {
+    return [{ source: '/pl', destination: '/pl/index.html' }];
+  },
 };
 module.exports = nextConfig;
