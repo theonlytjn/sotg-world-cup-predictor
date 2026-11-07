@@ -9,10 +9,10 @@ export default function NotFound() {
         That page doesn&apos;t exist — you may have followed a stale link.
       </p>
       <Link
-        href="/predict"
+        href="/"
         className="mt-8 rounded-xl bg-lime px-6 py-3 font-body font-bold text-base uppercase tracking-wide text-pitch-950 transition hover:brightness-110"
       >
-        Back to predict
+        Back to the hub
       </Link>
     </main>
   );

@@ -52,3 +52,14 @@ extending it, not rebuilding it.
 
 Always: extend the schema additively (new tables/policies), run `npm run build`, then a
 small focused commit per slice. Update the `leaderboard` view to sum new point sources.
+
+## Site structure (Nov 2026)
+- `/` — hub / game selector (`app/page.tsx`). Add new games to the `GAMES` array.
+- `/wc` — the World Cup 2026 game (moved from the root; `app/wc/**`). Old root paths
+  (`/predict`, `/leagues/...`, etc.) redirect via `next.config.js`. `/auth/callback` and `/api/*`
+  stay at the root so Supabase auth redirect URLs and the results cron are unchanged.
+- `/pl` — Premier League season predictor. Static app in `public/pl` (no build step), config from
+  `app/pl/config.js/route.ts`. Data in `pred_seasons` / `pred_entries` via `pred_*` RPCs
+  (`supabase-predictors-schema.sql`), keyed by competition + season. Yearly reset = admin page
+  (`/pl#admin`) → "Start new season"; update `public/pl/data.js` (teams/players/cup lists) too.
+- Future `/ucl` etc.: reuse the `pred_*` tables with a new `comp` value and its own question set.

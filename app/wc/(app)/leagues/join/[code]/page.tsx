@@ -21,7 +21,7 @@ export default function JoinLeaguePage() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) {
         // Not logged in — redirect to login, which will bounce back here after auth
-        router.push(`/login?next=/leagues/join/${code}`);
+        router.push(`/wc/login?next=/wc/leagues/join/${code}`);
         return;
       }
 
@@ -45,7 +45,7 @@ export default function JoinLeaguePage() {
 
       if (existing) {
         // Already in — go straight to the league
-        router.replace(`/leagues/${lg.id}`);
+        router.replace(`/wc/leagues/${lg.id}`);
         return;
       }
 
@@ -59,7 +59,7 @@ export default function JoinLeaguePage() {
 
       setStatus('joined');
       // Brief "joined" flash then redirect
-      setTimeout(() => router.replace(`/leagues/${lg.id}`), 1200);
+      setTimeout(() => router.replace(`/wc/leagues/${lg.id}`), 1200);
     })();
   }, [supabase, code, router]);
 
@@ -94,7 +94,7 @@ export default function JoinLeaguePage() {
       <div className="py-20 text-center">
         <p className="font-display text-2xl uppercase text-chalk">Invalid invite link</p>
         <p className="mt-2 text-base text-chalk">This league doesn&apos;t exist or the link has expired.</p>
-        <Link href="/leagues" className="mt-4 inline-block font-mono text-sm text-lime hover:underline">
+        <Link href="/wc/leagues" className="mt-4 inline-block font-mono text-sm text-lime hover:underline">
           Back to leagues
         </Link>
       </div>
@@ -106,7 +106,7 @@ export default function JoinLeaguePage() {
     <div className="py-20 text-center">
       <p className="font-display text-2xl uppercase text-chalk">Something went wrong</p>
       <p className="mt-2 text-base text-chalk">Couldn&apos;t join the league — try the link again.</p>
-      <Link href="/leagues" className="mt-4 inline-block font-mono text-sm text-lime hover:underline">
+      <Link href="/wc/leagues" className="mt-4 inline-block font-mono text-sm text-lime hover:underline">
         Back to leagues
       </Link>
     </div>

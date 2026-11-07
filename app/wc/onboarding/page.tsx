@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 function OnboardingForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const destination = searchParams.get('next') ?? '/predict';
+  const destination = searchParams.get('next') ?? '/wc/predict';
   const [userId, setUserId] = useState<string | null>(null);
   const [nickname, setNickname] = useState('');
   const [checking, setChecking] = useState(false);
@@ -24,7 +24,7 @@ function OnboardingForm() {
     const supabase = createClient();
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.replace('/login'); return; }
+      if (!user) { router.replace('/wc/login'); return; }
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -32,7 +32,7 @@ function OnboardingForm() {
         .eq('id', user.id)
         .single();
 
-      if (profile?.nickname_set) { router.replace('/predict'); return; }
+      if (profile?.nickname_set) { router.replace('/wc/predict'); return; }
 
       setUserId(user.id);
       setReady(true);

@@ -10,7 +10,7 @@ type Mode = 'signin' | 'signup' | 'sent';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') ?? '/predict';
+  const next = searchParams.get('next') ?? '/wc/predict';
 
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
@@ -71,9 +71,9 @@ function LoginForm() {
     setLoading(false);
     if (error) { setError(error.message); return; }
     // New users go through onboarding, carrying the next destination forward
-    const onboardingUrl = next !== '/predict'
-      ? `/onboarding?next=${encodeURIComponent(next)}`
-      : '/onboarding';
+    const onboardingUrl = next !== '/wc/predict'
+      ? `/wc/onboarding?next=${encodeURIComponent(next)}`
+      : '/wc/onboarding';
     router.push(onboardingUrl);
     router.refresh();
   }

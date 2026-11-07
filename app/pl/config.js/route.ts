@@ -5,6 +5,7 @@ export const dynamic = 'force-static';
 
 export function GET() {
   const config = {
+    comp: 'pl',
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
     supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
   };

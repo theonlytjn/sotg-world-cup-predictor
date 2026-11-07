@@ -23,14 +23,14 @@ import {
 const ADMIN_EMAIL = 'tony@theonlytjn.com';
 
 const tabs = [
-  { href: '/predict',     label: 'Predict',    icon: DartIcon },
-  { href: '/awards',      label: 'Awards',     icon: AwardIcon },
-  { href: '/tournament',  label: 'World Cup',  icon: FootballIcon },
-  { href: '/fixtures',    label: 'Fixtures',   icon: Calendar1Icon },
-  { href: '/leaderboard', label: 'Table',      icon: BarChartIcon },
-  { href: '/leagues',     label: 'Leagues',    icon: Medal01Icon },
-  { href: '/rules',       label: 'Rules',      icon: BookOpenIcon },
-  { href: '/me',          label: 'Me',         icon: UserIcon },
+  { href: '/wc/predict',     label: 'Predict',    icon: DartIcon },
+  { href: '/wc/awards',      label: 'Awards',     icon: AwardIcon },
+  { href: '/wc/tournament',  label: 'World Cup',  icon: FootballIcon },
+  { href: '/wc/fixtures',    label: 'Fixtures',   icon: Calendar1Icon },
+  { href: '/wc/leaderboard', label: 'Table',      icon: BarChartIcon },
+  { href: '/wc/leagues',     label: 'Leagues',    icon: Medal01Icon },
+  { href: '/wc/rules',       label: 'Rules',      icon: BookOpenIcon },
+  { href: '/wc/me',          label: 'Me',         icon: UserIcon },
 ];
 
 export default function Nav({ userEmail }: { userEmail: string }) {
@@ -43,7 +43,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
     const supabase = createClient();
     await supabase.auth.signOut();
     setMenuOpen(false);
-    router.push('/login');
+    router.push('/wc/login');
     router.refresh();
   }
 
@@ -54,7 +54,7 @@ export default function Nav({ userEmail }: { userEmail: string }) {
       <header className="sticky top-0 z-30 border-b border-white/10 bg-pitch-950/95 backdrop-blur">
         <div className="mx-auto flex h-[72px] sm:h-[100px] max-w-[1920px] items-center justify-between px-4 sm:px-8">
           {/* Logo */}
-          <Link href="/predict" className="shrink-0" onClick={closeMenu}>
+          <Link href="/wc/predict" className="shrink-0" onClick={closeMenu}>
             {!logoErr ? (
               <img
                 src="/logo.svg"
@@ -89,10 +89,10 @@ export default function Nav({ userEmail }: { userEmail: string }) {
             })}
             {userEmail === ADMIN_EMAIL && (
               <Link
-                href="/admin"
+                href="/wc/admin"
                 className={[
                   'flex items-center gap-2 px-3 py-2 font-display text-base uppercase transition',
-                  pathname === '/admin' || pathname.startsWith('/admin/')
+                  pathname === '/wc/admin' || pathname.startsWith('/wc/admin/')
                     ? 'text-flame'
                     : 'text-flame hover:text-flame',
                 ].join(' ')}
@@ -151,11 +151,11 @@ export default function Nav({ userEmail }: { userEmail: string }) {
 
             {userEmail === ADMIN_EMAIL && (
               <Link
-                href="/admin"
+                href="/wc/admin"
                 onClick={closeMenu}
                 className={[
                   'flex w-full items-center gap-4 rounded-2xl px-5 py-4 mb-2 font-display text-base uppercase tracking-wide transition',
-                  pathname === '/admin' || pathname.startsWith('/admin/')
+                  pathname === '/wc/admin' || pathname.startsWith('/wc/admin/')
                     ? 'text-flame'
                     : 'text-flame hover:text-flame',
                 ].join(' ')}

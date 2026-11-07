@@ -128,7 +128,7 @@ export default function LeaguesAdminPanel({
 
               <div className="shrink-0 flex items-center gap-2">
                 <Link
-                  href={`/leagues/${l.id}`}
+                  href={`/wc/leagues/${l.id}`}
                   className="rounded-lg border border-white/15 px-2.5 py-1 font-mono text-base text-chalk transition hover:border-white/40 hover:text-lime"
                 >
                   View →

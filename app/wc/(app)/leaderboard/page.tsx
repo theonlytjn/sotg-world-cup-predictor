@@ -196,7 +196,7 @@ export default function LeaderboardPage() {
 
       {/* Leagues promo */}
       <Link
-        href="/leagues"
+        href="/wc/leagues"
         className="mt-3 group flex items-center gap-4 rounded-2xl border-2 border-lime/20 bg-lime/5 px-5 py-4 transition hover:border-lime/40 hover:bg-lime/10"
       >
         <span className="shrink-0 text-lime">

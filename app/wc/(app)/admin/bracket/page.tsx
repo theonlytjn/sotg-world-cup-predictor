@@ -42,7 +42,7 @@ export default async function BracketPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  if (!adminEmail || user?.email !== adminEmail) redirect('/predict');
+  if (!adminEmail || user?.email !== adminEmail) redirect('/wc/predict');
 
   const db = createAdminClient();
 
@@ -118,7 +118,7 @@ export default async function BracketPage() {
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
-        <Link href="/admin" className="font-mono text-base uppercase tracking-widest text-chalk hover:text-chalk transition">
+        <Link href="/wc/admin" className="font-mono text-base uppercase tracking-widest text-chalk hover:text-chalk transition">
           ← Admin
         </Link>
       </div>

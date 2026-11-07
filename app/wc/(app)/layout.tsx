@@ -5,7 +5,7 @@ import Nav from '@/components/Nav';
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/wc/login');
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -13,7 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('id', user.id)
     .single();
 
-  if (!profile?.nickname_set) redirect('/onboarding');
+  if (!profile?.nickname_set) redirect('/wc/onboarding');
 
   return (
     <div className="min-h-dvh">

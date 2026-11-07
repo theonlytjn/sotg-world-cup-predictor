@@ -14,7 +14,7 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  if (!adminEmail || user?.email !== adminEmail) redirect('/predict');
+  if (!adminEmail || user?.email !== adminEmail) redirect('/wc/predict');
 
   const db = createAdminClient();
 
@@ -98,7 +98,7 @@ export default async function AdminPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            href="/admin/bracket"
+            href="/wc/admin/bracket"
             className="rounded-full border border-white/15 px-3 py-1 font-mono text-base uppercase tracking-widest text-chalk transition hover:border-white/40 hover:text-lime"
           >
             Bracket →

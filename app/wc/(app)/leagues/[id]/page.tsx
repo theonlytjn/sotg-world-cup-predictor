@@ -285,7 +285,7 @@ export default function LeaguePage() {
       .delete()
       .eq('league_id', league.id)
       .eq('user_id', userId);
-    router.push('/leagues');
+    router.push('/wc/leagues');
   }
 
   if (loading) {
@@ -297,7 +297,7 @@ export default function LeaguePage() {
       <div className="py-20 text-center">
         <p className="font-display text-2xl uppercase text-chalk">League not found</p>
         <p className="mt-2 text-base text-chalk">You may not be a member or the league was deleted.</p>
-        <Link href="/leagues" className="mt-4 inline-block font-mono text-sm text-lime hover:underline">
+        <Link href="/wc/leagues" className="mt-4 inline-block font-mono text-sm text-lime hover:underline">
           ← Back to leagues
         </Link>
       </div>
@@ -313,7 +313,7 @@ export default function LeaguePage() {
   return (
     <div>
       <div className="mb-1 flex items-center gap-2">
-        <Link href="/leagues" className="font-mono text-sm uppercase tracking-widest text-chalk hover:text-chalk transition">
+        <Link href="/wc/leagues" className="font-mono text-sm uppercase tracking-widest text-chalk hover:text-chalk transition">
           ← Leagues
         </Link>
       </div>

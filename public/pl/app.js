@@ -4,8 +4,9 @@
   const D = window.PL_DATA;
   const CFG = window.PL_CONFIG;
   const app = document.getElementById('app');
-  const LS_ME = 'sotg-pl-me';       // { name, token }
-  const LS_DRAFT = 'sotg-pl-draft'; // { name, answers }
+  const COMP = (CFG && CFG.comp) || 'pl';
+  const LS_ME = `sotg-${COMP}-me`;       // { season, name, token }
+  const LS_DRAFT = `sotg-${COMP}-draft`; // { season, name, answers }
   const SS_PIN = 'sotg-pl-pin';
 
   // ── Helpers ────────────────────────────────────────────────────────────
@@ -184,17 +185,18 @@
       const mine = (n, t) => db.entries.find((e) => norm(e.name) === norm(n) && e.tok === t);
       const pinOk = () => { if (!a.p_pin) throw new Error('Preview: type any PIN'); };
       switch (fn) {
-        case 'pl_state': return { season: '2026/27', locked: db.locked, results: db.results, count: db.entries.length };
-        case 'pl_entries_list': { const see = db.locked || (a.p_name && mine(a.p_name, a.p_token)); return db.entries.map((e) => ({ id: e.id, name: e.name, created_at: e.created_at, updated_at: e.updated_at, answers: see ? e.answers : null })); }
-        case 'pl_submit':
+        case 'pred_state': return { comp: COMP, season: '2026/27', title: 'Premier League 2026/27', is_current: true, locked: db.locked, results: db.results, count: db.entries.length, seasons: [{ season: '2026/27', title: 'Premier League 2026/27', is_current: true }] };
+        case 'pred_entries_list': { const see = db.locked || (a.p_name && mine(a.p_name, a.p_token)); return db.entries.map((e) => ({ id: e.id, name: e.name, created_at: e.created_at, updated_at: e.updated_at, answers: see ? e.answers : null })); }
+        case 'pred_submit':
           if (db.locked) throw new Error('Predictions are closed');
           if (db.entries.some((e) => norm(e.name) === norm(a.p_name))) throw new Error('That name has already locked in.');
           db.entries.push({ id: 'e' + Date.now(), name: a.p_name, answers: a.p_answers, tok: a.p_token, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }); saveDb(db); return { id: 'x' };
-        case 'pl_admin_get': pinOk(); return { settings: { season: '2026/27', locked: db.locked, results: db.results }, entries: db.entries };
-        case 'pl_admin_set_lock': pinOk(); db.locked = a.p_locked; saveDb(db); return null;
-        case 'pl_admin_set_results': pinOk(); db.results = a.p_results; saveDb(db); return null;
-        case 'pl_admin_delete_entry': pinOk(); db.entries = db.entries.filter((e) => e.id !== a.p_id); saveDb(db); return null;
-        case 'pl_admin_rename_entry': pinOk(); db.entries.find((e) => e.id === a.p_id).name = a.p_name; saveDb(db); return null;
+        case 'pred_admin_get': pinOk(); return { settings: { comp: COMP, season: '2026/27', title: 'Premier League 2026/27', is_current: true, locked: db.locked, results: db.results }, entries: db.entries };
+        case 'pred_admin_set_lock': pinOk(); db.locked = a.p_locked; saveDb(db); return null;
+        case 'pred_admin_set_results': pinOk(); db.results = a.p_results; saveDb(db); return null;
+        case 'pred_admin_delete_entry': pinOk(); db.entries = db.entries.filter((e) => e.id !== a.p_id); saveDb(db); return null;
+        case 'pred_admin_new_season': pinOk(); throw new Error('Preview: new seasons need the real database');
+        case 'pred_admin_rename_entry': pinOk(); db.entries.find((e) => e.id === a.p_id).name = a.p_name; saveDb(db); return null;
       }
       return null;
     };
@@ -327,12 +329,15 @@
 
   // ── State ──────────────────────────────────────────────────────────────
   let STATE = null; // { season, locked, results, count }
-  async function loadState() { STATE = await rpc('pl_state'); return STATE; }
+  async function loadState(season = null) { STATE = await rpc('pred_state', { p_comp: COMP, p_season: season }); return STATE; }
+  // This device's entry/draft only count for the season they were made in
+  const myEntry = () => { const m = store.get(LS_ME); return m && STATE && m.season === STATE.season ? m : null; };
+  const myDraft = () => { const d = store.get(LS_DRAFT); return d && STATE && d.season === STATE.season ? d : null; };
 
   // ── Views ──────────────────────────────────────────────────────────────
   async function viewHome() {
     await loadState();
-    const me = store.get(LS_ME); const draft = store.get(LS_DRAFT);
+    const me = myEntry(); const draft = myDraft();
     if (STATE.locked) {
       app.innerHTML = '';
       app.appendChild(h(`<div class="wrap"><section class="hero">
@@ -343,7 +348,7 @@
       return;
     }
     const w = h(`<div class="wrap"><section class="hero">
-      <span class="pill"><span class="dot"></span>Premier League ${esc(STATE.season)} · open</span>
+      <span class="pill"><span class="dot"></span>${esc(STATE.title)} · open</span>
       <h1>Ten games in.<br/><span class="lime">Time to call it.</span></h1>
       <p>Champions, top seven, the drop, the cups, the awards and your Team of the Season. Lock it in now and we settle it in May.</p>
     </section>
@@ -366,11 +371,11 @@
         e.preventDefault(); const name = nm.value.trim().replace(/\s+/g, ' ');
         if (!name) return;
         try {
-          const list = await rpc('pl_entries_list', {});
+          const list = await rpc('pred_entries_list', { p_comp: COMP, p_season: STATE.season });
           if (list.some((x) => norm(x.name) === norm(name))) { toast('That name’s already in. Add a surname or initial — or ask Tony to reset yours.', true); return; }
         } catch {}
         const answers = (draft && draft.answers) || {};
-        store.set(LS_DRAFT, { name, answers }); location.hash = '#predict-0';
+        store.set(LS_DRAFT, { season: STATE.season, name, answers }); location.hash = '#predict-0';
       };
     }
     app.innerHTML = ''; app.appendChild(w);
@@ -378,9 +383,10 @@
 
   async function viewPredict(stepIdx) {
     if (!STATE) await loadState();
+    if (!STATE || !STATE.is_current) await loadState();
     if (STATE.locked) { location.hash = '#home'; return; }
-    if (store.get(LS_ME)) { location.hash = '#ledger'; return; }
-    const draft = store.get(LS_DRAFT);
+    if (myEntry()) { location.hash = '#ledger'; return; }
+    const draft = myDraft();
     if (!draft || !draft.name) { location.hash = '#home'; return; }
     const ans = draft.answers || (draft.answers = {});
     const total = SECTIONS.length + 1; // + review
@@ -433,8 +439,8 @@
         submit.disabled = true; submit.textContent = 'Saving…';
         const tok = token();
         try {
-          const r = await rpc('pl_submit', { p_name: draft.name, p_answers: ans, p_token: tok });
-          store.set(LS_ME, { name: draft.name, token: tok }); store.del(LS_DRAFT);
+          const r = await rpc('pred_submit', { p_comp: COMP, p_season: STATE.season, p_name: draft.name, p_answers: ans, p_token: tok });
+          store.set(LS_ME, { season: STATE.season, name: draft.name, token: tok }); store.del(LS_DRAFT);
           void r; location.hash = '#done';
         } catch (err) { toast(err.message, true); submit.disabled = false; submit.textContent = 'Lock it in ✓'; }
       };
@@ -456,13 +462,21 @@
   }
 
   // Ledger: before lock = who's in; after lock = everyone's picks + table
+  let LEDGER_SEASON = null; // null = current season
   async function viewLedger() {
-    await loadState();
-    const me = store.get(LS_ME);
-    const entries = await rpc('pl_entries_list', me ? { p_name: me.name, p_token: me.token } : {});
+    await loadState(LEDGER_SEASON);
+    const me = myEntry();
+    const entries = await rpc('pred_entries_list', { p_comp: COMP, p_season: STATE.season, ...(me ? { p_name: me.name, p_token: me.token } : {}) });
     const canSee = entries.length > 0 && entries.every((e) => e.answers);
-    const w = h(`<div class="wrap"><section class="hero"><span class="pill"><span class="dot"></span>The ledger · ${esc(STATE.season)}</span>
+    const w = h(`<div class="wrap"><section class="hero"><span class="pill"><span class="dot"></span>The ledger · ${esc(STATE.title)}</span>
       <h1>${canSee ? 'Receipts.' : 'Who’s in.'}</h1></section></div>`);
+    if ((STATE.seasons || []).length > 1) {
+      const pick = h(`<div class="row mb"><label class="lbl" style="margin:0">Season</label><select class="input" style="width:auto;padding:8px 12px"></select></div>`);
+      const sel = pick.querySelector('select');
+      STATE.seasons.forEach((x) => { const o = document.createElement('option'); o.value = x.season; o.textContent = x.title + (x.is_current ? ' (current)' : ''); o.selected = x.season === STATE.season; sel.appendChild(o); });
+      sel.onchange = () => { const x = STATE.seasons.find((y) => y.season === sel.value); LEDGER_SEASON = x && x.is_current ? null : sel.value; viewLedger(); };
+      w.appendChild(pick);
+    }
     if (!canSee) {
       const c = h(`<div class="card"><p class="muted" style="margin-top:0">${STATE.locked ? 'Predictions are closed.' : 'No copying homework — you only see everyone’s picks once you’ve locked in your own.'} ${entries.length} in so far:</p><div></div>
         ${!STATE.locked && !me ? '<a class="btn btn-primary mt" href="#home">Make my predictions →</a>' : ''}</div>`);
@@ -523,25 +537,35 @@
       const f = h(`<form class="card"><label class="lbl" for="pin">Admin PIN</label><input id="pin" class="input" type="password" inputmode="numeric" autocomplete="off" /><button class="btn btn-primary mt">Enter</button></form>`);
       f.onsubmit = async (e) => {
         e.preventDefault(); const p = f.querySelector('#pin').value.trim();
-        try { await rpc('pl_admin_get', { p_pin: p }); sessionStorage.setItem(SS_PIN, p); viewAdmin(); } catch (err) { toast(err.message, true); }
+        try { await rpc('pred_admin_get', { p_pin: p, p_comp: COMP }); sessionStorage.setItem(SS_PIN, p); viewAdmin(); } catch (err) { toast(err.message, true); }
       };
       w.appendChild(f); app.innerHTML = ''; app.appendChild(w); return;
     }
     let data;
-    try { data = await rpc('pl_admin_get', { p_pin: pin }); } catch (err) { sessionStorage.removeItem(SS_PIN); toast(err.message, true); return viewAdmin(); }
+    try { data = await rpc('pred_admin_get', { p_pin: pin, p_comp: COMP }); } catch (err) { sessionStorage.removeItem(SS_PIN); toast(err.message, true); return viewAdmin(); }
     const { settings, entries } = data;
     const results = settings.results || {};
 
-    const lock = h(`<div class="card"><label class="lbl">Status</label>
+    const lock = h(`<div class="card"><label class="lbl">${esc(settings.title)} · status</label>
       <p style="margin:0 0 12px;font-size:20px;font-weight:800">${settings.locked ? '🔒 Closed — no new entries, picks are public' : '🟢 Open — taking predictions'}</p>
       <div class="row"><button class="btn ${settings.locked ? 'btn-ghost' : 'btn-primary'}" data-lock>${settings.locked ? 'Re-open predictions' : 'Close predictions'}</button>
-      <button class="btn btn-ghost btn-sm" data-csv>Download CSV</button><button class="btn btn-ghost btn-sm" data-out>Log out</button></div></div>`);
+      <button class="btn btn-ghost btn-sm" data-csv>Download CSV</button><button class="btn btn-ghost btn-sm" data-out>Log out</button></div>
+      <p class="muted small mt">Season over and results entered? Start the next one — this season stays viewable as an archive on the ledger.</p>
+      <button class="btn btn-ghost btn-sm" data-new>Start new season</button></div>`);
     lock.querySelector('[data-lock]').onclick = async () => {
       if (!settings.locked && !(await askConfirm(`Close predictions? No new entries after this, and all ${entries.length} entries become public.`, 'Close predictions'))) return;
-      try { await rpc('pl_admin_set_lock', { p_pin: pin, p_locked: !settings.locked }); toast(settings.locked ? 'Re-opened' : 'Locked'); viewAdmin(); } catch (err) { toast(err.message, true); }
+      try { await rpc('pred_admin_set_lock', { p_pin: pin, p_comp: COMP, p_season: settings.season, p_locked: !settings.locked }); toast(settings.locked ? 'Re-opened' : 'Locked'); viewAdmin(); } catch (err) { toast(err.message, true); }
     };
     lock.querySelector('[data-csv]').onclick = () => downloadCsv(entries, results);
     lock.querySelector('[data-out]').onclick = () => { sessionStorage.removeItem(SS_PIN); location.hash = '#home'; };
+    lock.querySelector('[data-new]').onclick = async () => {
+      const season = await askText('New season label (e.g. 2027/28)', '');
+      if (!season || !season.trim()) return;
+      const title = await askText('Title shown to everyone', `${settings.title.replace(/\s*\S+$/, '')} ${season.trim()}`);
+      if (!title || !title.trim()) return;
+      if (!(await askConfirm(`Start "${title.trim()}"? ${settings.title} will be closed and archived.`, 'Start season'))) return;
+      try { await rpc('pred_admin_new_season', { p_pin: pin, p_comp: COMP, p_season: season.trim(), p_title: title.trim() }); toast('New season started'); viewAdmin(); } catch (err) { toast(err.message, true); }
+    };
     w.appendChild(lock);
 
     const list = h(`<div class="card"><label class="lbl">Entries (${entries.length})</label></div>`);
@@ -551,11 +575,11 @@
         <span class="row"><button class="btn btn-ghost btn-sm" data-ren>Rename</button><button class="btn btn-danger btn-sm" data-del>Delete</button></span></div>`);
       row.querySelector('[data-del]').onclick = async () => {
         if (!(await askConfirm(`Delete ${e.name}'s entry? They can then submit again under that name.`, 'Delete'))) return;
-        try { await rpc('pl_admin_delete_entry', { p_pin: pin, p_id: e.id }); viewAdmin(); } catch (err) { toast(err.message, true); }
+        try { await rpc('pred_admin_delete_entry', { p_pin: pin, p_id: e.id }); viewAdmin(); } catch (err) { toast(err.message, true); }
       };
       row.querySelector('[data-ren]').onclick = async () => {
         const n = await askText('New name', e.name); if (!n || !n.trim()) return;
-        try { await rpc('pl_admin_rename_entry', { p_pin: pin, p_id: e.id, p_name: n.trim() }); viewAdmin(); } catch (err) { toast(err.message, true); }
+        try { await rpc('pred_admin_rename_entry', { p_pin: pin, p_id: e.id, p_name: n.trim() }); viewAdmin(); } catch (err) { toast(err.message, true); }
       };
       list.appendChild(row);
     });
@@ -568,7 +592,7 @@
     const saveBtn = h(`<button class="btn btn-primary">Save results</button>`);
     saveBtn.onclick = async () => {
       saveBtn.disabled = true;
-      try { await rpc('pl_admin_set_results', { p_pin: pin, p_results: results }); dirty = false; toast('Results saved'); renderPreview(); } catch (err) { toast(err.message, true); }
+      try { await rpc('pred_admin_set_results', { p_pin: pin, p_comp: COMP, p_season: settings.season, p_results: results }); dirty = false; toast('Results saved'); renderPreview(); } catch (err) { toast(err.message, true); }
       saveBtn.disabled = false;
     };
     const resBody = h(`<div></div>`);

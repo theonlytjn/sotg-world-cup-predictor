@@ -224,7 +224,7 @@ export default function LeaguesPage() {
           {leagues.map((league) => (
             <Link
               key={league.id}
-              href={`/leagues/${league.id}`}
+              href={`/wc/leagues/${league.id}`}
               className="group flex flex-col rounded-2xl border-2 border-white/10 bg-pitch-900/60 p-6 transition hover:border-white/30 hover:bg-pitch-800/60"
             >
               <div className="flex items-start justify-between gap-3">
@@ -256,7 +256,7 @@ export default function LeaguesPage() {
       )}
 
       <Link
-        href="/leaderboard"
+        href="/wc/leaderboard"
         className="mt-6 flex items-center justify-between rounded-2xl border border-white/10 bg-pitch-900/40 px-6 py-4 transition hover:border-white/20 hover:bg-pitch-900/60"
       >
         <div className="flex items-center gap-3">

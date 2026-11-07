@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "SOTG '26",
     description:
       'Pick the scoreline for every World Cup group game, earn points, and top the table.',
-    start_url: '/predict',
+    start_url: '/',
     display: 'standalone',
     background_color: '#070b08',
     theme_color: '#070b08',
