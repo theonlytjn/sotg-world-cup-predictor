@@ -98,7 +98,7 @@
   // ── Questions ──────────────────────────────────────────────────────────
   const T = (id, label, extra = {}) => ({ id, label, type: 'team', pool: 'teams', score: 'exact', pts: 5, ...extra });
   const NO_PLAYERS = PLAYERS.length === 0; // squad feed unavailable → let people type names
-  const P = (id, label, extra = {}) => ({ id, label, type: 'player', pool: 'all', score: 'exact', pts: 5, ...(NO_PLAYERS ? { other: true } : {}), ...extra });
+  const P = (id, label, extra = {}) => ({ id, label, type: 'player', pool: 'all', score: 'exact', pts: 5, ...(NO_PLAYERS || COMP === 'ucl' ? { other: true } : {}), ...extra });
   const PL_SECTIONS = [
     { id: 'table', title: 'The Table', short: 'Table',
       blurb: 'Call the top seven in order. Once a team is picked it drops out of the other slots.',
