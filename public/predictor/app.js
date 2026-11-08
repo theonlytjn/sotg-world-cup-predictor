@@ -80,8 +80,10 @@
   const POOLS = {
     teams: PL,
     teamsOrOther: PL,
-    carabao: toOpts(D.carabao),
-    ucl: toOpts(D.ucl), uel: toOpts(D.uel), uecl: toOpts(D.uecl),
+    carabao: toOpts(D.carabao || []),
+    ucl: toOpts(D.ucl || []), uel: toOpts(D.uel || []), uecl: toOpts(D.uecl || []),
+    english: toOpts(D.english || []),
+    darkhorse: toOpts(D.darkhorse || []),
     promoted: toOpts(['Coventry City', 'Hull City', 'Ipswich Town']),
     all: PLAYERS,
     outfield: playersWhere((p) => p.pos !== 'GK'),
@@ -95,8 +97,9 @@
 
   // ── Questions ──────────────────────────────────────────────────────────
   const T = (id, label, extra = {}) => ({ id, label, type: 'team', pool: 'teams', score: 'exact', pts: 5, ...extra });
-  const P = (id, label, extra = {}) => ({ id, label, type: 'player', pool: 'all', score: 'exact', pts: 5, ...extra });
-  const SECTIONS = [
+  const NO_PLAYERS = PLAYERS.length === 0; // squad feed unavailable → let people type names
+  const P = (id, label, extra = {}) => ({ id, label, type: 'player', pool: 'all', score: 'exact', pts: 5, ...(NO_PLAYERS ? { other: true } : {}), ...extra });
+  const PL_SECTIONS = [
     { id: 'table', title: 'The Table', short: 'Table',
       blurb: 'Call the top seven in order. Once a team is picked it drops out of the other slots.',
       qs: [
@@ -159,6 +162,68 @@
         { id: 'hot', label: 'Your hottest take for the season', type: 'text', score: 'none', optional: true, hint: 'Optional. Gets read out in May.' },
       ] },
   ];
+  // ── Champions League question set ──────────────────────────────────────
+  const UCL_SECTIONS = [
+    { id: 'final', title: 'The Final', short: 'Final',
+      blurb: 'Madrid, 5 June. Who lifts it, who loses it, and who else makes the last four. Each team can only appear once.',
+      qs: [
+        T('win', 'Champions League winners', { pool: 'ucl', pts: 10, group: 'final', rank: 1 }),
+        T('ru', 'Runners-up', { pool: 'ucl', pts: 5, group: 'final', rank: 2 }),
+        T('sf1', 'Semi-finalist', { pool: 'ucl', score: 'set', set: 'semis', pts: 3, group: 'final' }),
+        T('sf2', 'Semi-finalist', { pool: 'ucl', score: 'set', set: 'semis', pts: 3, group: 'final' }),
+      ] },
+    { id: 'league', title: 'League Phase', short: 'League',
+      blurb: 'The top eight go straight through to the round of 16. Pick the table-topper, then the other seven.',
+      qs: [
+        T('lp1', 'League phase winner', { pool: 'ucl', score: 'table', set: 'top8', pts: 5, group: 'lp', rank: 1, hint: '5 pts if they top it, 1 pt if they still make the top 8.' }),
+        ...[2, 3, 4, 5, 6, 7, 8].map((n) => T('lp' + n, 'Top 8 qualifier', { pool: 'ucl', score: 'set', set: 'top8', pts: 2, group: 'lp' })),
+        T('ko', 'Biggest club knocked out in the league phase', { pool: 'ucl', score: 'set', set: 'out', pts: 3, hint: 'Scores if they finish 25th or lower.' }),
+      ] },
+    { id: 'eng', title: 'The English Clubs', short: 'English',
+      blurb: 'Arsenal, Liverpool, Man City, Aston Villa and Man United. How do they get on?',
+      qs: [
+        T('engbest', 'Which English club goes furthest?', { pool: 'english', pts: 3 }),
+        { id: 'engqf', label: 'How many English clubs reach the quarter-finals?', type: 'number', score: 'exact', pts: 3, min: 0, max: 5 },
+      ] },
+    { id: 'stats', title: 'Golden Boot & Co', short: 'Stats',
+      qs: [
+        P('boot', 'Top scorer', { pool: 'outfield' }),
+        P('assist', 'Most assists', { pool: 'outfield' }),
+      ] },
+    { id: 'tots', title: 'Team of the Season', short: 'TOTS', layout: 'pitch',
+      blurb: 'Your 4-3-3. Scored against UEFA’s Team of the Season — 2 pts for every player who makes it, whatever slot you put them in.',
+      qs: PL_SECTIONS.find((x) => x.id === 'tots').qs },
+    { id: 'awards', title: 'Awards', short: 'Awards',
+      qs: [
+        P('pots', 'Player of the Season'),
+        P('ypots', 'Young Player of the Season', { pool: 'young', hint: NO_PLAYERS ? '21 or under at the start of the season.' : 'Only players 21 or under at the start of the season are listed.' }),
+      ] },
+    { id: 'wild', title: 'Wildcards', short: 'Wildcards',
+      blurb: 'Flop team and flop player are settled by the group at the end of the season.',
+      qs: [
+        T('dark', 'Dark horse — which Pot 3 or 4 side goes furthest?', { pool: 'darkhorse', pts: 3 }),
+        T('flopteam', 'Flop team of the tournament', { pool: 'ucl', pts: 3 }),
+        P('flop', 'Flop player of the tournament', { pts: 3 }),
+      ] },
+    { id: 'tb', title: 'Tiebreakers', short: 'Tiebreak',
+      blurb: 'No points — these only split ties. Closest wins.',
+      qs: [
+        { id: 'tb_pts', label: 'Total goals in the final (after extra time, not penalties)', type: 'number', score: 'none', min: 0, max: 12 },
+        { id: 'tb_goals', label: 'How many goals will the top scorer finish on?', type: 'number', score: 'none', min: 5, max: 25 },
+        { id: 'hot', label: 'Your hottest take for the tournament', type: 'text', score: 'none', optional: true, hint: 'Optional. Gets read out in June.' },
+      ] },
+    // Results-only (admin page): needed to score the "knocked out" question
+    { id: 'out', title: 'Knocked out in the league phase (25th–36th)', short: 'Out', adminOnly: true,
+      qs: Array.from({ length: 12 }, (_, k) => T('out' + (k + 1), 'Eliminated #' + (k + 1), { pool: 'ucl', score: 'none', set: 'out', group: 'out' })) },
+  ];
+
+  const COPY = {
+    pl: { top: 'Ten games in.', bottom: 'Time to call it.', blurb: 'Champions, top seven, the drop, the cups, the awards and your Team of the Season. Lock it in now and we settle it in May.', tb1: 'the champions’ points total', file: 'sotg-pl' },
+    ucl: { top: 'Road to Madrid.', bottom: 'Call it now.', blurb: 'The league phase, the English clubs, the final, the awards and your Team of the Season. Lock it in now and we settle it on 5 June.', tb1: 'goals in the final', file: 'sotg-ucl' },
+  }[COMP] || {};
+  const SECTIONS_ALL = COMP === 'ucl' ? UCL_SECTIONS : PL_SECTIONS;
+  const SECTIONS = SECTIONS_ALL.filter((x) => !x.adminOnly);
+  const RESULT_QS = SECTIONS_ALL.flatMap((x) => x.qs);
   const ALL_QS = SECTIONS.flatMap((s) => s.qs.map((q) => ({ ...q, section: s.id })));
   const Q_BY = Object.fromEntries(ALL_QS.map((q) => [q.id, q]));
   const MAX_PTS = ALL_QS.reduce((a, q) => a + (q.pts && q.score !== 'none' ? q.pts : 0), 0);
@@ -218,7 +283,7 @@
   // ── Scoring ────────────────────────────────────────────────────────────
   function scoreEntry(ans, res) {
     const sets = {};
-    for (const q of ALL_QS) if (q.set && res[q.id]) (sets[q.set] ||= new Set()).add(norm(res[q.id]));
+    for (const q of RESULT_QS) if (q.set && res[q.id]) (sets[q.set] ||= new Set()).add(norm(res[q.id]));
     let pts = 0, hits = 0; const per = {};
     for (const q of ALL_QS) {
       if (q.score === 'none' || !ans[q.id]) { per[q.id] = null; continue; }
@@ -226,7 +291,7 @@
       if (q.score === 'exact') { if (res[q.id] && a === norm(res[q.id])) p = q.pts; else if (!res[q.id]) { per[q.id] = null; continue; } }
       else if (q.score === 'table') {
         if (!res[q.id]) { per[q.id] = null; continue; }
-        if (a === norm(res[q.id])) p = q.pts; else if (sets.table && sets.table.has(a)) p = 1;
+        if (a === norm(res[q.id])) p = q.pts; else if (sets[q.set] && sets[q.set].has(a)) p = 1;
       } else if (q.score === 'set') {
         if (!sets[q.set]) { per[q.id] = null; continue; }
         if (sets[q.set].has(a)) p = q.pts;
@@ -340,6 +405,7 @@
   let STATE = null; // { season, locked, results, count }
   async function loadState(season = null) { STATE = await rpc('pred_state', { p_comp: COMP, p_season: season }); return STATE; }
   // This device's entry/draft only count for the season they were made in
+  const notOpenYet = () => !!(STATE && STATE.opens_at && new Date(STATE.opens_at).getTime() > Date.now());
   const myEntry = () => { const m = store.get(LS_ME); return m && STATE && m.season === STATE.season ? m : null; };
   const myDraft = () => { const d = store.get(LS_DRAFT); return d && STATE && d.season === STATE.season ? d : null; };
 
@@ -356,10 +422,23 @@
         <div class="row mt"><a class="btn btn-primary" href="#ledger">Open the ledger →</a></div></section></div>`));
       return;
     }
+    if (notOpenYet()) {
+      app.innerHTML = '';
+      const pre = h(`<div class="wrap"><section class="hero">
+        <span class="pill"><span class="dot"></span>${esc(STATE.title)} · coming soon</span>
+        <h1>${esc(COPY.top)}<br/><span class="lime">Voting opens ${esc(fmtClose(STATE.opens_at))}.</span></h1>
+        <p>${esc(COPY.blurb)}</p>
+        <p class="lime" style="font-weight:800;margin-top:14px">⏱ Opens in <span data-open>${esc(timeLeft(STATE.opens_at).replace(' left', ''))}</span>${STATE.closes_at ? ` · picks lock ${esc(fmtClose(STATE.closes_at))}` : ''}</p>
+        <div class="row mt"><a class="btn btn-ghost" href="/">← All SOTG games</a></div></section></div>`);
+      app.appendChild(pre);
+      const el = pre.querySelector('[data-open]');
+      const t = setInterval(() => { if (!document.body.contains(el)) return clearInterval(t); if (!notOpenYet()) { clearInterval(t); return viewHome(); } el.textContent = timeLeft(STATE.opens_at).replace(' left', ''); }, 30000);
+      return;
+    }
     const w = h(`<div class="wrap"><section class="hero">
       <span class="pill"><span class="dot"></span>${esc(STATE.title)} · open</span>
-      <h1>Ten games in.<br/><span class="lime">Time to call it.</span></h1>
-      <p>Champions, top seven, the drop, the cups, the awards and your Team of the Season. Lock it in now and we settle it in May.</p>
+      <h1>${esc(COPY.top)}<br/><span class="lime">${esc(COPY.bottom)}</span></h1>
+      <p>${esc(COPY.blurb)}</p>
       ${STATE.closes_at ? `<p class="lime" style="font-weight:800;margin-top:14px">⏱ Picks lock ${esc(fmtClose(STATE.closes_at))} · <span data-left>${esc(timeLeft(STATE.closes_at))}</span></p>` : ''}
     </section>
     <div class="card mt" id="start"></div>
@@ -396,7 +475,7 @@
   async function viewPredict(stepIdx) {
     if (!STATE) await loadState();
     if (!STATE || !STATE.is_current) await loadState();
-    if (STATE.locked) { location.hash = '#home'; return; }
+    if (STATE.locked || notOpenYet()) { location.hash = '#home'; return; }
     if (myEntry()) { location.hash = '#ledger'; return; }
     const draft = myDraft();
     if (!draft || !draft.name) { location.hash = '#home'; return; }
@@ -506,7 +585,7 @@
     const anyResult = Object.values(res).some((v) => v !== '' && v != null);
     const ranked = rankEntries(entries, res);
     const table = h(`<div class="card"><label class="lbl">${anyResult ? 'Standings' : 'Entries'}</label>
-      <p class="muted small" style="margin-top:0">${anyResult ? `Points so far out of ${MAX_PTS}. Ties split by the champions’ points total, then Golden Boot goals.` : 'Scores appear here as results are confirmed through the season.'}</p>
+      <p class="muted small" style="margin-top:0">${anyResult ? `Points so far out of ${MAX_PTS}. Ties split by ${COPY.tb1}, then the top scorer’s goals.` : 'Scores appear here as results are confirmed through the season.'}</p>
       <table class="table"><thead><tr><th>#</th><th>Name</th><th class="num">Hits</th><th class="num">Pts</th></tr></thead><tbody></tbody></table></div>`);
     const tb = table.querySelector('tbody');
     ranked.forEach((e, k) => tb.appendChild(h(`<tr><td>${k + 1}</td><td><strong>${esc(e.name)}</strong></td><td class="num">${anyResult ? e.s.hits : '—'}</td><td class="num"><strong>${anyResult ? e.s.pts : '—'}</strong></td></tr>`)));
@@ -579,7 +658,7 @@
       if (!settings.locked && !(await askConfirm(`Close predictions? No new entries after this, and all ${entries.length} entries become public.`, 'Close predictions'))) return;
       try { await rpc('pred_admin_set_lock', { p_pin: pin, p_comp: COMP, p_season: settings.season, p_locked: !settings.locked }); toast(settings.locked ? 'Re-opened' : 'Locked'); viewAdmin(); } catch (err) { toast(err.message, true); }
     };
-    lock.querySelector('[data-csv]').onclick = () => downloadCsv(entries, results);
+    lock.querySelector('[data-csv]').onclick = () => downloadCsv(entries, results, settings.season);
     lock.querySelector('[data-out]').onclick = () => { sessionStorage.removeItem(SS_PIN); location.hash = '#home'; };
     lock.querySelector('[data-new]').onclick = async () => {
       const season = await askText('New season label (e.g. 2027/28)', '');
@@ -622,7 +701,7 @@
     const resBody = h(`<div></div>`);
     const drawResults = () => {
       resBody.innerHTML = '';
-      SECTIONS.forEach((s) => {
+      SECTIONS_ALL.forEach((s) => {
         if (s.id === 'tb') { // tiebreak numbers only; no hot-take result
           const box = h(`<div class="mt"><label class="lbl">${esc(s.title)}</label></div>`);
           s.qs.filter((q) => q.type === 'number').forEach((q) => box.appendChild(questionEl(q, results, () => { dirty = true; }, { showPts: false })));
@@ -646,7 +725,7 @@
     app.innerHTML = ''; app.appendChild(w);
   }
 
-  function downloadCsv(entries, results) {
+  function downloadCsv(entries, results, season) {
     const cols = ALL_QS;
     const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const head = ['Name', 'Submitted', ...cols.map((q) => (q.slot ? 'TOTS ' + q.slot + ' (' + q.id + ')' : q.label))];
@@ -654,7 +733,7 @@
     rows.push(['ACTUAL RESULT', '', ...cols.map((q) => displayValue(q, results[q.id]))].map(cell).join(','));
     entries.forEach((e) => rows.push([e.name, e.updated_at, ...cols.map((q) => displayValue(q, (e.answers || {})[q.id]))].map(cell).join(',')));
     const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sotg-pl-predictions-2026-27.csv'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${COPY.file}-predictions-${String(season || '').replace('/', '-')}.csv`; a.click();
   }
 
   // ── Router ─────────────────────────────────────────────────────────────

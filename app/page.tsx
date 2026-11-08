@@ -1,5 +1,8 @@
 import Link from 'next/link';
 
+// Re-check every 5 minutes so 'opens at' cards flip to open on time
+export const revalidate = 300;
+
 // The SOTG hub. Add a new game by adding an entry here (and its app under its own path).
 type Game = {
   href: string;
@@ -7,6 +10,11 @@ type Game = {
   season: string;
   blurb: string;
   status: 'live' | 'finished' | 'soon';
+  /** Optional: card shows 'Voting opens …' until this time, then switches to live */
+  opensAt?: string;
+  opensLabel?: string;
+  /** Optional: after this time the card shows 'Picks locked' */
+  closesAt?: string;
 };
 
 const GAMES: Game[] = [
@@ -16,6 +24,7 @@ const GAMES: Game[] = [
     season: '2026/27',
     blurb: 'Champions, top seven, the drop, the cups, the awards and your Team of the Season. Locked in after ten games.',
     status: 'live',
+    closesAt: '2026-11-11T18:00:00Z',
   },
   {
     href: '/wc',
@@ -28,8 +37,10 @@ const GAMES: Game[] = [
     href: '/ucl',
     title: 'Champions League Predictor',
     season: '2026/27',
-    blurb: 'Winners, finalists, top scorer and the rest. Coming once the knockout picture takes shape.',
-    status: 'soon',
+    blurb: 'The top eight, the English clubs, the final in Madrid, the awards and your Team of the Season.',
+    status: 'live',
+    opensAt: '2026-11-11T18:00:00Z',
+    opensLabel: 'Voting opens Wed 6pm',
   },
 ];
 
@@ -59,7 +70,13 @@ export default function Hub() {
 
       <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
         {GAMES.map((g) => {
-          const s = STATUS[g.status];
+          const upcoming = !!g.opensAt && Date.now() < new Date(g.opensAt).getTime();
+          const closed = !!g.closesAt && Date.now() >= new Date(g.closesAt).getTime();
+          const s = upcoming
+            ? { label: g.opensLabel ?? 'Coming soon', cls: 'text-flame border-flame/40 bg-flame/10' }
+            : closed
+              ? { label: 'Picks locked', cls: 'text-chalk/70 border-white/15 bg-white/5' }
+              : STATUS[g.status];
           const inner = (
             <>
               <div className="flex items-center justify-between gap-3">
@@ -70,7 +87,7 @@ export default function Hub() {
               <p className="mt-2 text-base text-chalk/70">{g.blurb}</p>
               {g.status !== 'soon' && (
                 <span className="mt-6 inline-flex items-center gap-2 font-display text-sm uppercase tracking-wide text-lime">
-                  {g.status === 'live' ? 'Make your picks' : 'See the receipts'} <span>→</span>
+                  {upcoming ? 'Take a look' : g.status === 'live' && !closed ? 'Make your picks' : 'See the receipts'} <span>→</span>
                 </span>
               )}
             </>

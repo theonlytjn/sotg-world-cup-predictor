@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b08" />
+  <title>SOTG Champions League Predictor 2026/27</title>
+  <meta name="description" content="The Students of the Game Champions League predictor. Call the league phase, the knockouts and the final in Madrid." />
+  <meta property="og:title" content="SOTG Champions League Predictor 2026/27" />
+  <meta property="og:description" content="Top 8, the English clubs, the final in Madrid, the awards and your Team of the Season. Get your picks in." />
+  <meta property="og:url" content="https://sotg.app/ucl" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SOTG Predictor" />
+  <meta property="og:image" content="https://sotg.app/og-sotg.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SOTG Champions League Predictor 2026/27" />
+  <meta name="twitter:description" content="Top 8, the English clubs, the final in Madrid, the awards and your Team of the Season. Get your picks in." />
+  <meta name="twitter:image" content="https://sotg.app/og-sotg.png" />
+  <link rel="icon" href="/logo.svg" />
+  <link rel="preload" href="/fonts/Boldonse.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/predictor/styles.css" />
+  <script>try{if(localStorage.getItem('sotg-theme')==='light')document.documentElement.classList.add('light')}catch(e){}</script>
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" title="All SOTG games"><img class="logo" id="logo" src="/logo.svg" alt="SOTG" /></a>
+    <nav>
+      <a class="navlink" data-route="home" href="#home">Predict</a>
+      <a class="navlink" data-route="ledger" href="#ledger">Ledger</a>
+      <button class="icon-btn" id="theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </nav>
+  </header>
+  <main id="app"><div class="spinner"></div></main>
+  <script src="/ucl/config.js"></script>
+  <script src="/ucl/data.js"></script>
+  <script src="/ucl/players.js"></script>
+  <script src="/predictor/app.js"></script>
+</body>
+</html>

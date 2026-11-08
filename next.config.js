@@ -8,7 +8,10 @@ const nextConfig = {
   },
   // Premier League season predictor (static app in public/pl)
   async rewrites() {
-    return [{ source: '/pl', destination: '/pl/index.html' }];
+    return [
+      { source: '/pl', destination: '/pl/index.html' },
+      { source: '/ucl', destination: '/ucl/index.html' },
+    ];
   },
   // The World Cup game moved from the site root to /wc — keep old links (and shared league invites) working
   async redirects() {
