@@ -472,17 +472,24 @@
     if (left) { const t = setInterval(() => { if (!document.body.contains(left)) return clearInterval(t); left.textContent = timeLeft(STATE.closes_at); }, 30000); }
   }
 
-  async function viewPredict(stepIdx) {
+  async function viewPredict(stepIdx, preview = false) {
     if (!STATE) await loadState();
     if (!STATE || !STATE.is_current) await loadState();
-    if (STATE.locked || notOpenYet()) { location.hash = '#home'; return; }
-    if (myEntry()) { location.hash = '#ledger'; return; }
-    const draft = myDraft();
-    if (!draft || !draft.name) { location.hash = '#home'; return; }
+    // Preview mode: walk through every question at any time; nothing can be submitted
+    const STEP = preview ? '#preview-' : '#predict-';
+    let draft;
+    if (preview) {
+      draft = store.get(`sotg-${COMP}-preview`) || { name: 'Preview', answers: {} };
+    } else {
+      if (STATE.locked || notOpenYet()) { location.hash = '#home'; return; }
+      if (myEntry()) { location.hash = '#ledger'; return; }
+      draft = myDraft();
+      if (!draft || !draft.name) { location.hash = '#home'; return; }
+    }
     const ans = draft.answers || (draft.answers = {});
     const total = SECTIONS.length + 1; // + review
     const i = Math.max(0, Math.min(total - 1, stepIdx | 0));
-    const save = () => store.set(LS_DRAFT, draft);
+    const save = () => store.set(preview ? `sotg-${COMP}-preview` : LS_DRAFT, draft);
     const w = h(`<div class="wrap"></div>`);
     const prog = h(`<div class="progress"><div class="bar"><i style="width:${((i + 1) / total) * 100}%"></i></div><div class="steps"></div></div>`);
     const chips = prog.querySelector('.steps');
@@ -490,24 +497,25 @@
       const sec = SECTIONS[k];
       const done = sec ? sec.qs.every((q) => q.optional || ans[q.id]) : false;
       const c = h(`<button class="step-chip ${k === i ? 'on' : ''} ${done ? 'done' : ''}">${done && k !== i ? '✓ ' : ''}${esc(label)}</button>`);
-      c.onclick = () => { location.hash = '#predict-' + k; };
+      c.onclick = () => { location.hash = STEP + k; };
       chips.appendChild(c);
     });
     w.appendChild(prog);
+    if (preview) w.appendChild(h(`<div class="card mb" style="border-color:rgb(var(--flame) / .5)"><strong>Preview mode</strong> <span class="muted">— click through every question. Nothing is saved to the game and you can’t submit from here.</span></div>`));
 
     const nav = h(`<div class="footer-nav"><div class="in"></div></div>`); const navIn = nav.firstElementChild;
     const back = h(`<button class="btn btn-ghost">← Back</button>`);
-    back.onclick = () => { location.hash = i === 0 ? '#home' : '#predict-' + (i - 1); };
+    back.onclick = () => { location.hash = i === 0 ? (preview ? '#admin' : '#home') : STEP + (i - 1); };
     navIn.appendChild(back);
 
     if (i < SECTIONS.length) {
       const s = SECTIONS[i];
       const card = h(`<div class="card"><p class="muted small" style="margin:0">Step ${i + 1} of ${total} · ${esc(draft.name)}</p>
         <h2 class="section-title">${esc(s.title)}</h2>${s.blurb ? `<p class="muted" style="margin-top:0">${esc(s.blurb)}</p>` : ''}</div>`);
-      const body = sectionBody(s, ans, (rerender) => { save(); if (rerender) viewPredict(i); });
+      const body = sectionBody(s, ans, (rerender) => { save(); if (rerender) viewPredict(i, preview); });
       card.appendChild(body); w.appendChild(card);
       const next = h(`<button class="btn btn-primary">${i === SECTIONS.length - 1 ? 'Review →' : 'Next →'}</button>`);
-      next.onclick = () => { location.hash = '#predict-' + (i + 1); };
+      next.onclick = () => { location.hash = STEP + (i + 1); };
       navIn.appendChild(next);
     } else {
       const miss = missing(ans);
@@ -518,13 +526,13 @@
         s.qs.forEach((q) => {
           const v = ans[q.id];
           const row = h(`<div class="kv"><span class="k">${esc(q.slot || q.label)}</span><span class="v ${v ? '' : 'missing'}">${v ? esc(displayValue(q, v)) : (q.optional ? '—' : 'Missing')}</span></div>`);
-          if (!v) { row.style.cursor = 'pointer'; row.onclick = () => { location.hash = '#predict-' + k; }; }
+          if (!v) { row.style.cursor = 'pointer'; row.onclick = () => { location.hash = STEP + k; }; }
           box.appendChild(row);
         });
         card.appendChild(box);
       });
       w.appendChild(card);
-      const submit = h(`<button class="btn btn-primary" ${miss.length ? 'disabled' : ''}>Lock it in ✓</button>`);
+      const submit = h(preview ? `<button class="btn btn-primary" disabled>Preview only</button>` : `<button class="btn btn-primary" ${miss.length ? 'disabled' : ''}>Lock it in ✓</button>`);
       submit.onclick = async () => {
         if (!(await askConfirm('Lock in your predictions? You can’t change them after this.', 'Lock it in'))) return;
         submit.disabled = true; submit.textContent = 'Saving…';
@@ -642,7 +650,7 @@
       <div class="row"><button class="btn ${settings.locked ? 'btn-ghost' : 'btn-primary'}" data-lock>${settings.locked ? 'Re-open predictions' : 'Close predictions'}</button>
       <button class="btn btn-ghost btn-sm" data-csv>Download CSV</button><button class="btn btn-ghost btn-sm" data-out>Log out</button></div>
       <p class="muted small mt">Season over and results entered? Start the next one — this season stays viewable as an archive on the ledger.</p>
-      <button class="btn btn-ghost btn-sm" data-new>Start new season</button></div>`);
+      <button class="btn btn-ghost btn-sm" data-new>Start new season</button> <a class="btn btn-ghost btn-sm" href="#preview-0">Preview the questions</a></div>`);
     const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
     const closeCard = h(`<div class="card"><label class="lbl">Auto-close</label>
       <p style="margin:0 0 12px">${settings.closes_at ? `Picks lock automatically <strong>${esc(fmtClose(settings.closes_at))}</strong> (UK time)` : 'No close time set — close it manually above.'}</p>
@@ -744,6 +752,7 @@
     document.querySelectorAll('.navlink').forEach((a) => a.classList.toggle('active', a.dataset.route === (path.startsWith('ledger') ? 'ledger' : 'home')));
     try {
       if (path.startsWith('predict-')) await viewPredict(parseInt(path.split('-')[1], 10));
+      else if (path === 'preview' || path.startsWith('preview-')) await viewPredict(parseInt(path.split('-')[1] || '0', 10), true);
       else if (path.startsWith('done')) viewDone();
       else if (path.startsWith('ledger')) await viewLedger();
       else if (path.startsWith('admin')) await viewAdmin();
