@@ -53,8 +53,9 @@ const STATUS: Record<Game['status'], { label: string; cls: string }> = {
 export default function Hub() {
   return (
     <main className="mx-auto max-w-[1100px] px-5 pb-24 pt-28 md:flex md:min-h-dvh md:flex-col md:justify-center md:py-16">
-      <img src="/logo.svg" alt="SOTG — Students of the Game" className="mb-8 h-14 w-auto object-contain" />
+      <img src="/logo.svg" alt="SOTG — Students of the Game" className="mx-auto mb-8 h-14 w-auto object-contain" />
 
+      <div className="text-center">
       <span className="inline-flex items-center gap-2.5 rounded-full border border-lime/25 bg-lime/5 px-3.5 py-1.5 font-display text-sm uppercase tracking-[0.28em] text-lime">
         <span className="h-1.5 w-1.5 rounded-full bg-flame live-ping" />
         Pick your game
@@ -64,9 +65,10 @@ export default function Hub() {
         Talk is cheap.<br />
         <span className="text-lime">Get it on record.</span>
       </h1>
-      <p className="mt-3 max-w-[40ch] text-chalk/80">
+      <p className="mx-auto mt-3 max-w-[40ch] text-chalk/80">
         Every SOTG prediction game in one place. Make your calls, lock them in, and let the receipts do the talking.
       </p>
+      </div>
 
       <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
         {GAMES.map((g) => {

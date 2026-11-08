@@ -171,3 +171,16 @@ details.acc summary::-webkit-details-marker { display: none; }
 @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } .shirt { width: 40px; height: 40px; } .slot .nm { font-size: 11px; } }
 .spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgb(var(--chalk) / .15); border-top-color: rgb(var(--lime)); animation: spin .8s linear infinite; margin: 40px auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Centred layout: headlines, intro text, actions and section headers */
+.hero { text-align: center; }
+.hero p { margin-left: auto; margin-right: auto; }
+.hero .row { justify-content: center; }
+.hero .pill { max-width: 100%; }
+#start { max-width: 560px; margin-left: auto; margin-right: auto; text-align: center; }
+#start .input { text-align: center; }
+.wrap > .muted.center { text-align: center; }
+.card > .muted.small:first-child, .card > .section-title, .card > .section-title + .muted { text-align: center; }
+.card > .lbl:first-child { text-align: center; }
+.wrap > .row.mb { justify-content: center; }
+@media (min-width: 900px) { .steps { justify-content: center; } }
