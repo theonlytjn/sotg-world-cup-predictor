@@ -13,6 +13,13 @@ const nextConfig = {
       { source: '/ucl', destination: '/ucl/index.html' },
     ];
   },
+  // Predictor static files: always re-check so updates show straight away
+  async headers() {
+    return ['/predictor/:path*', '/pl/:path*', '/ucl/:path*'].map((source) => ({
+      source,
+      headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
+    }));
+  },
   // The World Cup game moved from the site root to /wc — keep old links (and shared league invites) working
   async redirects() {
     const moved = ['predict', 'awards', 'tournament', 'fixtures', 'leaderboard', 'leagues', 'rules', 'me', 'poll', 'admin', 'login', 'onboarding'];
