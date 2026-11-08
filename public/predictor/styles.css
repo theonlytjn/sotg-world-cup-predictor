@@ -184,3 +184,10 @@ details.acc summary::-webkit-details-marker { display: none; }
 .card > .lbl:first-child { text-align: center; }
 .wrap > .row.mb { justify-content: center; }
 @media (min-width: 900px) { .steps { justify-content: center; } }
+
+/* Desktop: sit short pages in the middle of the screen (long pages just flow) */
+@media (min-width: 900px) {
+  #app { min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: center; }
+  #app > .wrap { width: 100%; }
+  #app > .wrap:not(:has(.footer-nav)) { padding-bottom: 72px; }
+}
