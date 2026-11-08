@@ -41,7 +41,7 @@ const STATUS: Record<Game['status'], { label: string; cls: string }> = {
 
 export default function Hub() {
   return (
-    <main className="mx-auto max-w-[1100px] px-5 pb-24 pt-28">
+    <main className="mx-auto max-w-[1100px] px-5 pb-24 pt-28 md:flex md:min-h-dvh md:flex-col md:justify-center md:py-16">
       <img src="/logo.svg" alt="SOTG — Students of the Game" className="mb-8 h-14 w-auto object-contain" />
 
       <span className="inline-flex items-center gap-2.5 rounded-full border border-lime/25 bg-lime/5 px-3.5 py-1.5 font-display text-sm uppercase tracking-[0.28em] text-lime">
